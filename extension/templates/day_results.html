@@ -1,8 +1,10 @@
 <ol class='history'>
   {{#history}}
-    <li class='interval' data-id='{{id}}'>
+    <li class='interval highlightable' data-id='{{id}}' draggable='true'>
       <header>
-        <h4 class='title'>{{time}}</h4>
+        <!-- <div> -->
+        <!-- <h4 class='title'>{{time}}</h4> -->
+        <a class='title' title='Drag to tag this interval' style='font-size:150%;'>{{time}}</a>
         <a class='delete_interval delete' href='#' title='{{i18n_prompt_delete_button}}'>
           {{i18n_prompt_delete_button}}
         </a>

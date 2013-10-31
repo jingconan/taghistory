@@ -115,9 +115,83 @@ function buildHistoryData(divName) {
         var html = Mustache.to_html(template, data);
         //
         document.getElementById(divName).innerHTML = html;
+
+        dragAndTag();
     }
 
     chrome.history.search(searchQuery, doneSearchQuery)
 }
 
+function dragAndTag() {
+    function handleDragStart(ev) {
+        console.log("handleDragStart executed!")
+        _this = this;
+        var $el, availableTagsView, collection, count, data, history, interval, intervalId, sites, summaryEl, visit;
+        ev.stopPropagation();
+        $el = $(ev.currentTarget);
+        $el.addClass('dragging');
+        $('.navigation').addClass('dropzone');
+        data = {
+            sites: []
+        };
+        // intervalId = $el.parents('.interval').data('id');
+        // interval = _this.model.get('history').get(intervalId);
+        // visit = interval.findVisitById($el.data('id'));
+        // count = 1;
+        // data.sites.push({
+        //     url: visit.get('url'),
+        //     title: visit.get('title'),
+        //     id: visit.get('id')
+        // });
+
+        // Add drag ghost
+        if (!(summaryEl = document.getElementsByClassName('drag_ghost')[0])) {
+            summaryEl = document.createElement('div');
+            summaryEl.className = 'drag_ghost';
+            $('body').append(summaryEl);
+        }
+        var count = 1;
+        summaryEl.innerHTML = 'number_of_visits' + count.toString();
+
+        ev.dataTransfer.setDragImage(summaryEl, -15, -10);
+        ev.dataTransfer.setData('application/json', JSON.stringify(data));
+
+        // collection = new BH.Collections.Tags([]);
+        // availableTagsView = new BH.Views.AvailableTagsView({
+        //     collection: collection,
+        //     draggedSites: data.sites,
+        //     el: '.available_tags',
+        //     excludedTag: (_this.excludeTag ? _this.model.get('name') : void 0)
+        // });
+        // return collection.fetch();
+    //
+    //
+    };
+    function handleDragEnd(ev) {
+        console.log("handleDragEnd executed!")
+
+    }
+
+    console.log('start to add handler');
+    process_visit = function(i, visit) {
+        // console.log('process item ' + i.toString() + ' \n');
+        visit.addEventListener('dragstart', handleDragStart, false);
+        visit.addEventListener('dragend', handleDragEnd, false);
+    };
+    // $('.visit').each(process_visit);
+    $('.history').each(process_visit);
+    // $.each($('.visit'), process_visit);
+
+}
+
 buildHistoryData("history_items");
+// console.log("finish buildHIstoryData");
+// dragAndTag();
+
+// visitItems = $('.visit');
+// console.log("visitItems.length: " + visitItems.length);
+// for(var i = 0; i < visitItems.length; ++i) {
+//     console.log('run it');
+//     process_visit(i, visitItems[i]);
+// }
+

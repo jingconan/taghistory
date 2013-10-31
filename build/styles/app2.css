@@ -216,6 +216,23 @@ body.new_tags .menu .tags.pulse .new {
   margin-top: 0;
 }
 
+.interval header:hover {
+  display: block;
+  background-color: #F0F6FE;
+}
+.interval .tag_tip {
+  background: #EEE;
+  color: #888;
+  padding: 1px 2px;
+  border-radius: 3px;
+  -webkit-margin-end: 2px;
+  display: inline-block;
+}
+.interval .tag_tip:hover {
+  color: #15C;
+}
+
+
 .interval .title {
   margin: 0 0 7px 17px;
 }
