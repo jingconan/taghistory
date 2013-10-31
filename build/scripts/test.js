@@ -51,7 +51,8 @@ function test_day() {
     template = BH.Templates['day_results'];
     html = Mustache.to_html(template, data);
     // document.write(html);
-    print(html);
+    // print(html);
+    document.getElementById("history_items").innerHTML = html;
 
 }
 test_day();

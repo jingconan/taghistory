@@ -1,0 +1,21 @@
+{
+    "background": {
+        "page": "background.html",
+        "persitent": false
+    },
+   "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com https://www.google.com; object-src 'self'",
+    "name": "Tag History",
+    "version": "1.2",
+    "description": "Tag your history in an easy way",
+    "permissions": [
+        "chrome://favicon/",
+        "history", 
+        "tabs"
+
+    ],
+    "browser_action": {
+        "default_icon": "clock.png"
+    },
+    "manifest_version": 2
+}
+    // "default_popup": "popup.html",
