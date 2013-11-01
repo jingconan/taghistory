@@ -8,7 +8,6 @@
 <style>
   body {min-width: 250px;}
 </style>
-
 </head>
 <body class="chrome-bootstrap new_tags">
 <div class="app">
@@ -30,7 +29,6 @@
             </header>
             <div class="content">
                 <div id="history_items">            
-                    <!-- <script type="text/javascript" src='scripts/test.js'></script> -->
                 </div>
             </div>        
         </div>
@@ -42,9 +40,11 @@
         <ul class="menu">      
             <li class="">        <a class="tags" href="#tags">          Tags          </a>      </li>    
         </ul>    
-        <div class="menu menu_view disappearable">
+        <div class="menu menu_view disappearable" id="tags_menus">
             <ul class="menu">      
-                <li class="week selected" data-week-id="10-21-13">      <a href="#weeks/10-21-13"> Research </a>    </li>      
+                <li class="week selected" data-week-id="10-21-13">      
+                <div id="tag1" class="tags">Research</div>
+                </li>      
             </ul>
         </div>    
         <ul class="menu disappearable">      <li class="">        <a
@@ -56,9 +56,9 @@
 <div id="coverup"></div>
 </div>
 
-<!-- <script src="scripts/frameworks/jquery-1.10.2.js"></script> -->
+<script src="scripts/frameworks/jquery-1.10.2.js"></script>
 <!-- <script type="text/javascript" src='scripts/pretty.js'></script> -->
-<script type="text/javascript" src='scripts/frameworks/zepto.js'></script>
+<!-- <script type="text/javascript" src='scripts/frameworks/zepto.js'></script> -->
 <script type="text/javascript" src='scripts/namespace.js'></script>
 <script type="text/javascript" src="scripts/mustache.js"></script>  
 <script type="text/javascript" src='scripts/templates.js'></script>

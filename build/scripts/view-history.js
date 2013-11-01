@@ -62,16 +62,25 @@ function massage(historyItems, groups) {
 
         }
 
-
         var firstTimeInGroup = historyItems[group[0]].lastVisitTime;
         groupDate = new Date(firstTimeInGroup);
         history.push({
-            time: groupDate.toISOString(),
-            id: 'id',
-            visits: visits
+            timeStamp: firstTimeInGroup,
+            time: groupDate.toLocaleString(),
+            id: 'i-' + i.toString(),
+            visits: visits,
+            interval_id:'i-' + i.toString(),
         });
+        // console.log(firstTimeInGroup);
 
     }
+
+    console.log('----------------');
+    history.sort(function (a, b){return b.timeStamp - a.timeStamp;});
+    // for(var i = 0; i < history.length; ++i) {
+    //     console.log(history[i].timeStamp);
+    // }
+    // console.log('history sort run here');
 
     return history;
 }
@@ -123,75 +132,39 @@ function buildHistoryData(divName) {
 }
 
 function dragAndTag() {
-    function handleDragStart(ev) {
-        console.log("handleDragStart executed!")
-        _this = this;
-        var $el, availableTagsView, collection, count, data, history, interval, intervalId, sites, summaryEl, visit;
-        ev.stopPropagation();
-        $el = $(ev.currentTarget);
-        $el.addClass('dragging');
-        $('.navigation').addClass('dropzone');
-        data = {
-            sites: []
-        };
-        // intervalId = $el.parents('.interval').data('id');
-        // interval = _this.model.get('history').get(intervalId);
-        // visit = interval.findVisitById($el.data('id'));
-        // count = 1;
-        // data.sites.push({
-        //     url: visit.get('url'),
-        //     title: visit.get('title'),
-        //     id: visit.get('id')
-        // });
 
-        // Add drag ghost
-        if (!(summaryEl = document.getElementsByClassName('drag_ghost')[0])) {
-            summaryEl = document.createElement('div');
-            summaryEl.className = 'drag_ghost';
-            $('body').append(summaryEl);
-        }
-        var count = 1;
-        summaryEl.innerHTML = 'number_of_visits' + count.toString();
-
-        ev.dataTransfer.setDragImage(summaryEl, -15, -10);
-        ev.dataTransfer.setData('application/json', JSON.stringify(data));
-
-        // collection = new BH.Collections.Tags([]);
-        // availableTagsView = new BH.Views.AvailableTagsView({
-        //     collection: collection,
-        //     draggedSites: data.sites,
-        //     el: '.available_tags',
-        //     excludedTag: (_this.excludeTag ? _this.model.get('name') : void 0)
-        // });
-        // return collection.fetch();
-    //
-    //
-    };
-    function handleDragEnd(ev) {
-        console.log("handleDragEnd executed!")
-
-    }
+    // function handleDragEnd(ev) {
+    //     console.log("handleDragEnd executed!")
+    // }
 
     console.log('start to add handler');
-    process_visit = function(i, visit) {
-        // console.log('process item ' + i.toString() + ' \n');
-        visit.addEventListener('dragstart', handleDragStart, false);
-        visit.addEventListener('dragend', handleDragEnd, false);
+    function process_visit(i, visit) {
+        visit.addEventListener('dragstart', 
+                               function(ev) {ev.dataTransfer.setData("Text", ev.target.dataset.id);}, 
+                               false);
+        // visit.addEventListener('dragend', handleDragEnd, false);
     };
-    // $('.visit').each(process_visit);
+
     $('.history').each(process_visit);
-    // $.each($('.visit'), process_visit);
+
+
+    function handleDrop(ev) {
+        ev.preventDefault();
+        var data=ev.dataTransfer.getData("Text");
+        console.log("data: " + data);
+        var orig_style = ev.target.style;
+        ev.target.setAttribute('style', 'background: #15C; color: white;');
+        // console.log("data: " + ev.target.style.background);
+        window.setInterval(function (){ev.target.setAttribute('style', orig_style);}, 2000);
+    }
+
+    function addTagEventListener(idx, tag) {
+        tag.addEventListener('dragover', function (ev) {ev.preventDefault();}, false);
+        tag.addEventListener('drop', handleDrop, false);
+    }
+    
+    $('.navigation #tags_menus #tag1').each(addTagEventListener);
 
 }
 
 buildHistoryData("history_items");
-// console.log("finish buildHIstoryData");
-// dragAndTag();
-
-// visitItems = $('.visit');
-// console.log("visitItems.length: " + visitItems.length);
-// for(var i = 0; i < visitItems.length; ++i) {
-//     console.log('run it');
-//     process_visit(i, visitItems[i]);
-// }
-
