@@ -16,7 +16,7 @@
 //
 // idToPos : array of array
 //      map id to position of the records.
-function massage(historyItems, groups) {
+function massage(historyItems, groups, storedTags) {
 
     var group, history = [];
     var urlInfo;
@@ -27,7 +27,7 @@ function massage(historyItems, groups) {
     var groupDate;
 
     var idToPos = {};
-    var visitId, groupID;
+    var visitId, groupID, visitTime, tag;
 
     for(i = 0; i < groups.length; ++i) {
         group = groups[i];
@@ -37,6 +37,12 @@ function massage(historyItems, groups) {
             item = historyItems[idx];
             urlInfo = parseURL(item.url);
             visitId = 'c' + i.toString() + '-' + j.toString();
+            visitTime = (new Date(item.lastVisitTime)).toLocaleString();
+            if (storedTags[visitTime] === undefined) {
+                tag = [];
+            } else {
+                tag = storedTags[visitTime];
+            }
             
             visits.push({
                 isGrouped: false,
@@ -46,8 +52,8 @@ function massage(historyItems, groups) {
                 host: urlInfo.host,
                 path: urlInfo.path,
                 id: visitId,
-                tag: [],
-                time: (new Date(item.lastVisitTime)).toLocaleString()
+                tag: tag,
+                time: visitTime
             });
             idToPos[visitId] = [i, j];
         }
@@ -93,7 +99,10 @@ function dragAndTag(info) {
             visit.tag.push({tag_name: tag});
             // info.history[i].visits[j].tag.push({tag_name: tag});
             // FIXME Synchronize it into chrome storage.
-            chrome.storage.sync.set(visit.time, visit.tag);
+            // debugger;
+            obj = {};
+            obj[visit.time] = visit.tag;
+            chrome.storage.sync.set(obj);
         }
 
         var j;
@@ -137,20 +146,28 @@ function dragAndTag(info) {
 
 }
 
-function getTimeStamps(historyItems) {
+function getTimeStamps(historyItems, type) {
     // Get Time information About Each Visit
     // FIXME now only the last visit time for each history Item
+    tformat = function(t, type) {
+        if (type === 0) {
+            return t;
+        } else {
+            return (new Date(t)).toLocaleString();
+        }
+    }
+
     var timeStamps = [];
     var i;
     for(i = 0; i < historyItems.length; ++i) {
-        timeStamps.push(historyItems[i].lastVisitTime);
+        timeStamps.push(tformat(historyItems[i].lastVisitTime, type));
     }
     return timeStamps;
 }
 
-function display(historyItems, template, data, divName, storedTags, timeStamps) {
-    var groups = groupItems(timeStamps, 100000);
-    var massageInfo = massage(historyItems, groups);
+function display(historyItems, template, data, divName, storedTags) {
+    var groups = groupItems(getTimeStamps(historyItems, 0), 100000);
+    var massageInfo = massage(historyItems, groups, storedTags);
     data.history = massageInfo.history;
     var html = Mustache.to_html(template, data);
     document.getElementById(divName).innerHTML = html;
@@ -165,11 +182,11 @@ function buildHistoryData(divName, searchQuery) {
         i18n_prompt_delete_button: 'prompt_delete',
     };
 
-    chrome.history.search(searchQuery, function(history_items) {
-        var timeStamps = getTimeStamps(history_items);
-        chrome.storage.sync.get(timeStamps, function(storedTags) {
+    chrome.history.search(searchQuery, function(historyItems) {
+        console.log("chrome history test");
+        chrome.storage.sync.get(getTimeStamps(historyItems, 1), function(storedTags) {
             display(historyItems, BH.Templates.day_results, data, divName, 
-                    storedTags, timeStamps);
+                    storedTags);
         });
     });
 }
