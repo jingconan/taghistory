@@ -23,7 +23,8 @@
                     <div class="controls">    
                         <a class="text back_to_week" href="#weeks/10-21-13">      ← Back to Week    </a>    
                         <div class="spacer"></div>    
-                        <button class="delete_day">      Delete...    </button>  
+                        <!-- <button class="delete_day">      Delete...    </button>   -->
+                        <button id="refresh_display">Refresh Display </button>  
                     </div>
                 </header>
                 <div class="content">
@@ -41,7 +42,7 @@
             </ul>    
             <div class="menu menu_view disappearable" id="tags_menus">
                 <ul class="menu">      
-                    <li class="week selected" data-week-id="10-21-13">      
+                    <li>      
                     <div id="tag1" class="tags">Research</div>
                     </li>      
                 </ul>
@@ -62,6 +63,7 @@
     <script type="text/javascript" src='scripts/namespace.js'></script>
     <script type="text/javascript" src="scripts/mustache.js"></script>  
     <script type="text/javascript" src='scripts/templates.js'></script>
+    <script type="text/javascript" src='scripts/util.js'></script>
     <script type="text/javascript" src='scripts/view-history.js'></script>
     </body>
     </html>
