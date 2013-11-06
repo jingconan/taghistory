@@ -152,6 +152,16 @@ function dragAndTag() {
         ev.preventDefault();
         var data=ev.dataTransfer.getData("Text");
         console.log("data: " + data);
+        // Create Animation
+        var rect = ev.target.getBoundingClientRect();
+        $("p.speech").css("left", rect.right);
+        $("p.speech").css("top", rect.bottom);
+        // $("p.speech").text("Tagged as " + ev.target.textContent);
+
+        $("p.speech").animate({top:"+=30px", opacity:"1"});
+        $("p.speech").animate({top:"-=30px", opacity:"0"});
+        console.log("set animation");
+
         var orig_style = ev.target.style;
         ev.target.setAttribute('style', 'background: #15C; color: white;');
         // console.log("data: " + ev.target.style.background);

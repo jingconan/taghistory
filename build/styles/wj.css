@@ -1,0 +1,22 @@
+body {min-width: 251px;}
+p.speech{
+    opacity:0.0;
+    /* position: relative; */
+    position: fixed;
+    left: 100px;
+    width: 100px;
+    height: 50px;
+    text-align: center;
+    font-size: 150%;
+    color: #E18484;
+    line-height: 50px;
+    background-color: #FAFAFA;
+    border: 8px solid #666;
+    /* -webkit-border-radius: 30px; */
+    /* -moz-border-radius: 30px; */
+    border-radius: 10px;
+    /* -webkit-box-shadow: 2px 2px 4px #888; */
+    /* -moz-box-shadow: 2px 2px 4px #888; */
+    /* box-shadow: 2px 2px 4px #888; */
+}
+
