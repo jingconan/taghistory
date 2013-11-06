@@ -10,8 +10,8 @@
     "permissions": [
         "chrome://favicon/",
         "history", 
-        "tabs"
-
+        "tabs",
+        "storage"
     ],
     "browser_action": {
         "default_icon": "clock.png"

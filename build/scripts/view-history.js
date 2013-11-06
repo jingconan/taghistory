@@ -37,6 +37,7 @@ function massage(historyItems, groups) {
             item = historyItems[idx];
             urlInfo = parseURL(item.url);
             visitId = 'c' + i.toString() + '-' + j.toString();
+            
             visits.push({
                 isGrouped: false,
                 url: item.url,
@@ -88,9 +89,11 @@ function dragAndTag(info) {
         console.log("run addTags");
         addTag = function (i, j, tag) {
             console.log("Add (" + i + ", " + j + ")");
-            info.history[i].visits[j].tag.push({tag_name: tag});
+            var visit = info.history[i].visits[j];
+            visit.tag.push({tag_name: tag});
+            // info.history[i].visits[j].tag.push({tag_name: tag});
             // FIXME Synchronize it into chrome storage.
-            // chrome.storage.sync.set({info.history[i].visits[j]: })
+            chrome.storage.sync.set(visit.time, visit.tag);
         }
 
         var j;
@@ -145,8 +148,8 @@ function getTimeStamps(historyItems) {
     return timeStamps;
 }
 
-function display(historyItems, template, data, divName) {
-    var groups = groupItems(getTimeStamps(historyItems), 100000);
+function display(historyItems, template, data, divName, storedTags, timeStamps) {
+    var groups = groupItems(timeStamps, 100000);
     var massageInfo = massage(historyItems, groups);
     data.history = massageInfo.history;
     var html = Mustache.to_html(template, data);
@@ -162,10 +165,13 @@ function buildHistoryData(divName, searchQuery) {
         i18n_prompt_delete_button: 'prompt_delete',
     };
 
-    function doneSearchQuery(historyItems) {
-        return display(historyItems, BH.Templates.day_results, data, divName);
-    }
-    chrome.history.search(searchQuery, doneSearchQuery);
+    chrome.history.search(searchQuery, function(history_items) {
+        var timeStamps = getTimeStamps(history_items);
+        chrome.storage.sync.get(timeStamps, function(storedTags) {
+            display(historyItems, BH.Templates.day_results, data, divName, 
+                    storedTags, timeStamps);
+        });
+    });
 }
 
 var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
