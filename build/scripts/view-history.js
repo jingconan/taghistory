@@ -84,16 +84,32 @@ function massage(historyItems, groups, storedTags) {
 }
 
 
-// search dataset.id recursively. At most 3 levels.
+// search dataset.id recursively. At most 2 levels.
 function searchDatasetID(target, i) {
     var id = target.dataset.id;
-    if ((id === undefined) && (i <= 3)) {
+    if ((id === undefined) && (i <= 2)) {
         return searchDatasetID(target.parentElement, i+1);
     }
     console.log("id: " + id);
     return id;
 }
-function dragAndTag(info) {
+
+function updateTags(info, divName) {
+    console.log("divName: " + divName);
+    var data = {
+        i18n_expand_button: 'button',
+        i18n_collapse_button: 'collapse',
+        i18n_search_by_domain: 'More for this site',
+        i18n_prompt_delete_button: 'prompt_delete',
+        i18n_tag_delete_button: ''
+    };
+    data.history = info.history;
+    var html = Mustache.to_html(BH.Templates.day_results, data);
+    document.getElementById(divName).innerHTML = html;
+    dragAndTag(info, divName);
+}
+
+function dragAndTag(info, divName) {
     console.log('run dragAndTag');
     function process_visit(i, visit) {
         visit.addEventListener('dragstart', 
@@ -101,12 +117,12 @@ function dragAndTag(info) {
                                    ev.dataTransfer.setData("itemID", searchDatasetID(ev.target, 0));
                                    console.log("dragstart run");
                                },
-                               true);
+                               false);
                                visit.addEventListener('dragend', 
                                                       function (ev) {
                                                           console.log("drag ends");
                                                       },
-                                                      true);
+                                                      false);
     }
 
     $('.history').each(process_visit);
@@ -124,30 +140,32 @@ function dragAndTag(info) {
             return false;
         }
 
-        function addTag(item, tag, num) {
+        function addTag(visit, tag, num) {
             console.log("Add (" + item.time + ")");
             // if (! tagExist(tag, item.tag)) {
-            //     item.tag.push({tag_name: tag});
+            //     visit.tag.push({tag_name: tag});
             // }
-            item.tag = {tag_name:tag}; // Only allow one tag for each item
+            visit.tag = {tag_name:tag}; // Only allow one tag for each visit
 
             obj = {};
-            obj[item.time] = item.tag;
+            obj[visit.time] = visit.tag;
             chrome.storage.sync.set(obj, function() {
-                --itemNum;
-                if (itemNum === 0) {
+                --visitNum;
+                if (visitNum === 0) {
                     // refresh();
                     var chk = document.getElementById("auto_refresh");
                     if (chk.checked === true) {
-                        chrome.tabs.reload();
+                        // chrome.tabs.reload();
+                        updateTags(info, divName);
+                        console.log("updated tags");
                     }
                 }
             });
-            ++itemNum;
+            ++visitNum;
         }
 
         var j;
-        itemNum = 0 // global variable, indicator or unfinished callbacks
+        visitNum = 0 // global variable, indicator or unfinished callbacks
         if (item.visits === undefined) { // visit item
             addTag(item, tag)
             // console.log("run here");
@@ -182,7 +200,7 @@ function dragAndTag(info) {
             if (item === undefined) { debugger; alert("you dragged the wrong place");}
             var tag = ev.target.textContent;
             addTags(item, tag);
-            tagAnimate(ev.target);
+            // tagAnimate(ev.target);
 
         }, false);
     }
@@ -212,10 +230,11 @@ function getTimeStamps(historyItems, type) {
 function display(historyItems, template, data, divName, storedTags) {
     var groups = groupItems(getTimeStamps(historyItems, 0), 100000);
     var massageInfo = massage(historyItems, groups, storedTags);
-    data.history = massageInfo.history;
-    var html = Mustache.to_html(template, data);
-    document.getElementById(divName).innerHTML = html;
-    dragAndTag(massageInfo);
+    updateTags(massageInfo, divName);
+    // data.history = massageInfo.history;
+    // var html = Mustache.to_html(template, data);
+    // document.getElementById(divName).innerHTML = html;
+    // dragAndTag(massageInfo);
 }
 
 function buildHistoryData(divName, searchQuery) {
