@@ -32,6 +32,13 @@
             <dl class='description' style='background-image: url(chrome://favicon/{{url}})'>
                 <dt>
                 <div class='active_tags'></div>
+                    <div class='active_tags_view'>
+                        <ul class='tags'>      
+                            {{#tag}}
+                            <li>{{tag_name}}</li>
+                            {{/tag}}
+                        </ul>
+                    </div>
                 {{{title}}}
                 </dt>
                 <dd class='time'>{{time}}</dd>

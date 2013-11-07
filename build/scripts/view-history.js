@@ -26,8 +26,9 @@ function massage(historyItems, groups, storedTags) {
     var firstTimeInGroup;
     var groupDate;
 
-    var idToPos = {};
+    var IDMap = {};
     var visitId, groupID, visitTime, tag;
+    var visitItem;
 
     for(i = 0; i < groups.length; ++i) {
         group = groups[i];
@@ -42,9 +43,11 @@ function massage(historyItems, groups, storedTags) {
                 tag = [];
             } else {
                 tag = storedTags[visitTime];
+                console.log('there is stored Tags for: ' + visitTime + ': ' + tag);
+                // debugger;
             }
-            
-            visits.push({
+            // tag = [{tag_name:"test"}];
+            visitItem = {
                 isGrouped: false,
                 url: item.url,
                 domain: urlInfo.host,
@@ -54,27 +57,29 @@ function massage(historyItems, groups, storedTags) {
                 id: visitId,
                 tag: tag,
                 time: visitTime
-            });
-            idToPos[visitId] = [i, j];
+            };
+            visits.push(visitItem);
+            IDMap[visitId] = visitItem;
         }
 
         firstTimeInGroup = historyItems[group[0]].lastVisitTime;
         groupDate = new Date(firstTimeInGroup);
         groupID = 'i-' + i.toString();
-        history.push({
+        groupItem = {
             timeStamp: firstTimeInGroup,
             time: groupDate.toLocaleString(),
             id: 'i-' + i.toString(),
             visits: visits,
             interval_id: groupID,
-        });
-        idToPos[groupID] = [i];
+        };
+        history.push(groupItem);
+        IDMap[groupID] = groupItem;
     }
 
 
     history.sort(function (a, b){return b.timeStamp - a.timeStamp;});
     return {history: history, 
-        idToPos: idToPos};
+        IDMap: IDMap};
 }
 
 
@@ -91,28 +96,38 @@ function dragAndTag(info) {
 
     $('.history').each(process_visit);
 
-    function addTags(itemPos, tag) {
+    function addTags(item, tag) {
         console.log("run addTags");
-        addTag = function (i, j, tag) {
-            console.log("Add (" + i + ", " + j + ")");
-            var visit = info.history[i].visits[j];
-            visit.tag.push({tag_name: tag});
+
+        function tagExist(tag, tags) {
+            var i; 
+            for(i = 0; i < tags.length; ++i) {
+                if (tag === tags[i].tag_name) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function addTag(item, tag) {
+            console.log("Add (" + item.time + ")");
+            if (! tagExist(tag, item.tag)) {
+                item.tag.push({tag_name: tag});
+            }
             // info.history[i].visits[j].tag.push({tag_name: tag});
             // FIXME Synchronize it into chrome storage.
-            // debugger;
             obj = {};
-            obj[visit.time] = visit.tag;
+            obj[item.time] = item.tag;
             chrome.storage.sync.set(obj);
         }
 
         var j;
-        if (itemPos.length === 1) { // group item
-            groupItem = info.history[itemPos[0]];
-            for (j = 0; j < groupItem.visits.length; ++j) {
-                addTag(itemPos[0], j, tag);
+        if (item.visits === undefined) { // visit item
+            addTag(item, tag)
+        } else { // group item
+            for (j = 0; j < item.visits.length; ++j) {
+                addTag(item.visits[j], tag);
             }
-        } else if (itemPos.length === 2) { // visit item
-            addTag(itemPos[0], itemPos[1], tag);
         }
     }
 
@@ -134,10 +149,10 @@ function dragAndTag(info) {
         tag.addEventListener('drop', function (ev) {
             ev.preventDefault();
             var itemID = ev.dataTransfer.getData("itemID");
-            var itemPos = info.idToPos[itemID];
-            if (itemPos === undefined) { debugger;}
+            var item = info.IDMap[itemID];
+            if (item === undefined) { debugger;}
             var tag = ev.target.textContent;
-            addTags(itemPos, tag);
+            addTags(item, tag);
             tagAnimate(ev.target);
 
         }, false);
@@ -185,6 +200,8 @@ function buildHistoryData(divName, searchQuery) {
     chrome.history.search(searchQuery, function(historyItems) {
         console.log("chrome history test");
         chrome.storage.sync.get(getTimeStamps(historyItems, 1), function(storedTags) {
+            console.log("storedTags: " + storedTags);
+            // debugger;
             display(historyItems, BH.Templates.day_results, data, divName, 
                     storedTags);
         });
