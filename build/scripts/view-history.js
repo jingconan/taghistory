@@ -43,7 +43,7 @@ function massage(historyItems, groups, storedTags) {
                 tag = [];
             } else {
                 tag = storedTags[visitTime];
-                console.log('there is stored Tags for: ' + visitTime + ': ' + tag);
+                // console.log('there is stored Tags for: ' + visitTime + ': ' + tag);
                 // debugger;
             }
             // tag = [{tag_name:"test"}];
@@ -83,17 +83,21 @@ function massage(historyItems, groups, storedTags) {
 }
 
 
+// search dataset.id recursively. At most 3 levels.
+function searchDatasetID(target, i) {
+    var id = target.dataset.id;
+    if ((id === undefined) && (i <= 3)) {
+        return searchDatasetID(target.parentElement, i+1);
+    }
+    console.log("id: " + id);
+    return id;
+}
 function dragAndTag(info) {
     console.log('run dragAndTag');
     function process_visit(i, visit) {
         visit.addEventListener('dragstart', 
                                function (ev) {
-                                   var id = ev.target.dataset.id;
-                                   if (id === undefined) {
-                                       id = ev.target.parentElement.dataset.id;
-                                   }
-                                   console.log("id: " + id);
-                                   ev.dataTransfer.setData("itemID", id);
+                                   ev.dataTransfer.setData("itemID", searchDatasetID(ev.target, 0));
                                    console.log("dragstart run");
                                },
                                true);
@@ -162,7 +166,7 @@ function dragAndTag(info) {
         $("p.speech").animate({top:"-=30px", opacity:"0"});
 
         var orig_style = target.style;
-        target.setAttribute('style', 'background: #15C; color: white;');
+        target.setAttribute('style', 'background: #8AAAED; color: white;');
         var showTime = 200;
         window.setInterval(function (){target.setAttribute('style', orig_style);}, showTime);
     }
