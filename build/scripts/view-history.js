@@ -83,15 +83,25 @@ function massage(historyItems, groups, storedTags) {
 }
 
 
-function dragAndTag(info, refresh) {
+function dragAndTag(info) {
     console.log('run dragAndTag');
     function process_visit(i, visit) {
         visit.addEventListener('dragstart', 
                                function (ev) {
-                                   ev.dataTransfer.setData("itemID", ev.target.dataset.id);
+                                   var id = ev.target.dataset.id;
+                                   if (id === undefined) {
+                                       id = ev.target.parentElement.dataset.id;
+                                   }
+                                   console.log("id: " + id);
+                                   ev.dataTransfer.setData("itemID", id);
                                    console.log("dragstart run");
                                },
-                               false);
+                               true);
+                               visit.addEventListener('dragend', 
+                                                      function (ev) {
+                                                          console.log("drag ends");
+                                                      },
+                                                      true);
     }
 
     $('.history').each(process_visit);
@@ -119,11 +129,12 @@ function dragAndTag(info, refresh) {
             obj = {};
             obj[item.time] = item.tag;
             chrome.storage.sync.set(obj, function() {
-                                            --itemNum;
-                                            if (itemNum === 0) {
-                                                refresh();
-                                            }
-                                        });
+                --itemNum;
+                if (itemNum === 0) {
+                    // refresh();
+                    chrome.tabs.reload();
+                }
+            });
             ++itemNum;
         }
 
@@ -131,9 +142,11 @@ function dragAndTag(info, refresh) {
         itemNum = 0 // global variable, indicator or unfinished callbacks
         if (item.visits === undefined) { // visit item
             addTag(item, tag)
+            // console.log("run here");
         } else { // group item
             for (j = 0; j < item.visits.length; ++j) {
                 addTag(item.visits[j], tag);
+                // console.log("j: ", j);
             }
         }
     }
@@ -156,8 +169,9 @@ function dragAndTag(info, refresh) {
         tag.addEventListener('drop', function (ev) {
             ev.preventDefault();
             var itemID = ev.dataTransfer.getData("itemID");
+            console.log("itemID: " + itemID);
             var item = info.IDMap[itemID];
-            if (item === undefined) { alert("you dragged the wrong place");}
+            if (item === undefined) { debugger; alert("you dragged the wrong place");}
             var tag = ev.target.textContent;
             addTags(item, tag);
             tagAnimate(ev.target);
@@ -191,13 +205,9 @@ function display(historyItems, template, data, divName, storedTags) {
     var groups = groupItems(getTimeStamps(historyItems, 0), 100000);
     var massageInfo = massage(historyItems, groups, storedTags);
     data.history = massageInfo.history;
-
-    refresh = function() { // closure to refresh the webpage
-        var html = Mustache.to_html(template, data);
-        document.getElementById(divName).innerHTML = html;
-    };
-    refresh();
-    dragAndTag(massageInfo, refresh);
+    var html = Mustache.to_html(template, data);
+    document.getElementById(divName).innerHTML = html;
+    dragAndTag(massageInfo);
 }
 
 function buildHistoryData(divName, searchQuery) {
