@@ -249,3 +249,17 @@ document.getElementById("refresh_display").onclick = function() {
         });
     });
 }
+
+function buildTagsMenu(divName) {
+    var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
+    chrome.storage.sync.set({'tagList': vd});
+
+    chrome.storage.sync.get('tagList', function(storedTagList) {
+        var html = Mustache.to_html(BH.Templates.tags, storedTagList);
+        document.getElementById(divName).innerHTML = html;
+    });
+
+
+}
+
+buildTagsMenu('tags_menu');
