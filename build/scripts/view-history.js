@@ -181,7 +181,7 @@ function dragAndTag(info) {
 
         }, false);
     }
-    $('.navigation #tags_menus .tags').each(addTagEventListener);
+    $('.navigation #tags_menu .tags').each(addTagEventListener);
 
 }
 
