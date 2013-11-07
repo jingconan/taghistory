@@ -83,7 +83,7 @@ function massage(historyItems, groups, storedTags) {
 }
 
 
-function dragAndTag(info) {
+function dragAndTag(info, refresh) {
     console.log('run dragAndTag');
     function process_visit(i, visit) {
         visit.addEventListener('dragstart', 
@@ -109,7 +109,7 @@ function dragAndTag(info) {
             return false;
         }
 
-        function addTag(item, tag) {
+        function addTag(item, tag, num) {
             console.log("Add (" + item.time + ")");
             // if (! tagExist(tag, item.tag)) {
             //     item.tag.push({tag_name: tag});
@@ -118,10 +118,17 @@ function dragAndTag(info) {
 
             obj = {};
             obj[item.time] = item.tag;
-            chrome.storage.sync.set(obj);
+            chrome.storage.sync.set(obj, function() {
+                                            --itemNum;
+                                            if (itemNum === 0) {
+                                                refresh();
+                                            }
+                                        });
+            ++itemNum;
         }
 
         var j;
+        itemNum = 0 // global variable, indicator or unfinished callbacks
         if (item.visits === undefined) { // visit item
             addTag(item, tag)
         } else { // group item
@@ -150,7 +157,7 @@ function dragAndTag(info) {
             ev.preventDefault();
             var itemID = ev.dataTransfer.getData("itemID");
             var item = info.IDMap[itemID];
-            if (item === undefined) { debugger;}
+            if (item === undefined) { alert("you dragged the wrong place");}
             var tag = ev.target.textContent;
             addTags(item, tag);
             tagAnimate(ev.target);
@@ -184,9 +191,13 @@ function display(historyItems, template, data, divName, storedTags) {
     var groups = groupItems(getTimeStamps(historyItems, 0), 100000);
     var massageInfo = massage(historyItems, groups, storedTags);
     data.history = massageInfo.history;
-    var html = Mustache.to_html(template, data);
-    document.getElementById(divName).innerHTML = html;
-    dragAndTag(massageInfo);
+
+    refresh = function() { // closure to refresh the webpage
+        var html = Mustache.to_html(template, data);
+        document.getElementById(divName).innerHTML = html;
+    };
+    refresh();
+    dragAndTag(massageInfo, refresh);
 }
 
 function buildHistoryData(divName, searchQuery) {
