@@ -132,7 +132,10 @@ function dragAndTag(info) {
                 --itemNum;
                 if (itemNum === 0) {
                     // refresh();
-                    chrome.tabs.reload();
+                    var chk = document.getElementById("auto_refresh");
+                    if (chk.checked === true) {
+                        chrome.tabs.reload();
+                    }
                 }
             });
             ++itemNum;
@@ -239,5 +242,10 @@ var searchQuery = {
 
 buildHistoryData("history_items", searchQuery);
 document.getElementById("refresh_display").onclick = function() {
-    alert('refresh');
+    // alert('refresh');
+    chrome.tabs.getCurrent(function(tab) {
+        chrome.tabs.reload(tab.id, {bypassCache:false}, function () {
+            document.getElementById("auto_refresh").checked=false;
+        });
+    });
 }
