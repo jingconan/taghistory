@@ -111,11 +111,11 @@ function dragAndTag(info) {
 
         function addTag(item, tag) {
             console.log("Add (" + item.time + ")");
-            if (! tagExist(tag, item.tag)) {
-                item.tag.push({tag_name: tag});
-            }
-            // info.history[i].visits[j].tag.push({tag_name: tag});
-            // FIXME Synchronize it into chrome storage.
+            // if (! tagExist(tag, item.tag)) {
+            //     item.tag.push({tag_name: tag});
+            // }
+            item.tag = {tag_name:tag}; // Only allow one tag for each item
+
             obj = {};
             obj[item.time] = item.tag;
             chrome.storage.sync.set(obj);
@@ -157,7 +157,7 @@ function dragAndTag(info) {
 
         }, false);
     }
-    $('.navigation #tags_menus #tag1').each(addTagEventListener);
+    $('.navigation #tags_menus .tags').each(addTagEventListener);
 
 }
 
@@ -195,6 +195,7 @@ function buildHistoryData(divName, searchQuery) {
         i18n_collapse_button: 'collapse',
         i18n_search_by_domain: 'More for this site',
         i18n_prompt_delete_button: 'prompt_delete',
+        i18n_tag_delete_button: ''
     };
 
     chrome.history.search(searchQuery, function(historyItems) {
