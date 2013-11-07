@@ -1,3 +1,4 @@
+
 // Massage the history data into format required by Mustache
 // Parameters
 // ---------------
@@ -16,8 +17,8 @@
 //
 // idToPos : array of array
 //      map id to position of the records.
+//
 function massage(historyItems, groups, storedTags) {
-
     var group, history = [];
     var urlInfo;
     var i, j;
@@ -51,7 +52,7 @@ function massage(historyItems, groups, storedTags) {
                 isGrouped: false,
                 url: item.url,
                 domain: urlInfo.host,
-                title: item.title,
+                title: truncStr(item.title, 80),
                 host: urlInfo.host,
                 path: urlInfo.path,
                 id: visitId,
