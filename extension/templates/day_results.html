@@ -40,7 +40,13 @@
                             {{/tag}}
                         </ul>
                     </div>
-                {{{title}}}
+                <!-- {{{title}}} -->
+                {{#title}}
+                    {{{title}}}
+                {{/title}}
+                {{^title}}
+                No Title
+                {{/title}}
                 </dt>
                 <dd class='time'>{{time}}</dd>
                 <dd class='location'>{{host}}{{path}}</dd>
