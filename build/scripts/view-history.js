@@ -112,17 +112,17 @@ function updateTags(info, divName) {
 
 function addHistoryDragStartTrigger() {
     function process_visit(i, visit) {
-        visit.addEventListener('dragstart', 
-                               function (ev) {
-                                   ev.dataTransfer.setData("itemID", searchDatasetID(ev.target, 0));
-                                   console.log("dragstart run");
-                               },
-                               false);
-                               visit.addEventListener('dragend', 
-                                                      function (ev) {
-                                                          console.log("drag ends");
-                                                      },
-                                                      false);
+        function onDragStart(ev) {
+            ev.dataTransfer.setData("itemID", searchDatasetID(ev.target, 0));
+            console.log("dragstart run");
+        }
+
+        visit.addEventListener('dragstart', onDragStart, false);
+                           // visit.addEventListener('dragend', 
+                           //                        function (ev) {
+                           //                            console.log("drag ends");
+                           //                        },
+                                                  // false);
     }
 
     $('.history').each(process_visit);
@@ -167,8 +167,8 @@ function dragAndTag(info, divName) {
                     // dragAndTag(info, divName);
                     // var chk = document.getElementById("auto_refresh");
                     // if (chk.checked === true) {
-                        // chrome.tabs.reload();
-                        // console.log("updated tags");
+                    // chrome.tabs.reload();
+                    // console.log("updated tags");
                     // }
                 }
             });
@@ -201,22 +201,23 @@ function dragAndTag(info, divName) {
         window.setInterval(function (){target.setAttribute('style', orig_style);}, showTime);
     }
 
+    function dropEventListener(ev) {
+        ev.preventDefault();
+        var itemID = ev.dataTransfer.getData("itemID");
+        console.log("itemID: " + itemID);
+        var item = info.IDMap[itemID];
+        if (item === undefined) { debugger; alert("you dragged the wrong place");}
+        var tag = ev.target.textContent;
+        addTags(item, tag);
+        tagAnimate(ev.target);
+
+    }
+
     function addTagEventListener(idx, tag) {
         tag.addEventListener('dragover', function (ev) {ev.preventDefault();}, false);
-        tag.addEventListener('drop', function (ev) {
-            ev.preventDefault();
-            var itemID = ev.dataTransfer.getData("itemID");
-            console.log("itemID: " + itemID);
-            var item = info.IDMap[itemID];
-            if (item === undefined) { debugger; alert("you dragged the wrong place");}
-            var tag = ev.target.textContent;
-            addTags(item, tag);
-            tagAnimate(ev.target);
-
-        }, false);
+        tag.addEventListener('drop', dropEventListener, false);
     }
-    $('.navigation #tags_menu .tags').each(addTagEventListener);
-
+    $('.navigation #tags_menu .tags:not(#create_new_tag)').each(addTagEventListener);
 }
 
 function getTimeStamps(historyItems, type) {
@@ -244,6 +245,36 @@ function display(historyItems, template, data, divName, storedTags) {
     updateTags(massageInfo, divName);
 
     dragAndTag(massageInfo, divName);
+    function test(ev) {
+        alert('drop here');
+    }
+    document.getElementById('create_new_tag').addEventListener('dragover',
+                                                               function (ev) {
+                                                                   ev.preventDefault();
+                                                               });
+    document.getElementById('create_new_tag').addEventListener('drop', test);
+
+
+
+    // document.getElementById('create_new_tag').addEventListener('drop', function(ev) {
+    //     console.log("run2");
+    //     ev.preventDefault();
+    //     alert('drop here');
+    // });
+    // $("#create_new_tag").droppable({
+    //   drop: function( event, ui ) {
+    //       alert('hello');
+    //   $( this )
+    //     .addClass( "ui-state-highlight" )
+    //     .find( "p" )
+    //       .html( "Dropped!" );
+    // }
+    // });
+    // debugger;
+
+    // $('#create_new_tag').unbind('drop');
+
+
     // data.history = massageInfo.history;
     // var html = Mustache.to_html(template, data);
     // document.getElementById(divName).innerHTML = html;
