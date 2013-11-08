@@ -106,11 +106,11 @@ function updateTags(info, divName) {
     data.history = info.history;
     var html = Mustache.to_html(BH.Templates.day_results, data);
     document.getElementById(divName).innerHTML = html;
-    dragAndTag(info, divName);
+    // dragAndTag(info, divName);
 }
 
-function dragAndTag(info, divName) {
-    console.log('run dragAndTag');
+
+function addHistoryDragStartTrigger() {
     function process_visit(i, visit) {
         visit.addEventListener('dragstart', 
                                function (ev) {
@@ -126,6 +126,12 @@ function dragAndTag(info, divName) {
     }
 
     $('.history').each(process_visit);
+
+}
+
+function dragAndTag(info, divName) {
+    console.log('run dragAndTag');
+    addHistoryDragStartTrigger();
 
     function addTags(item, tag) {
         console.log("run addTags");
@@ -153,12 +159,17 @@ function dragAndTag(info, divName) {
                 --visitNum;
                 if (visitNum === 0) {
                     // refresh();
-                    var chk = document.getElementById("auto_refresh");
-                    if (chk.checked === true) {
+                    //
+                    updateTags(info, divName);
+                    addHistoryDragStartTrigger();
+                    console.log("tag updated");
+
+                    // dragAndTag(info, divName);
+                    // var chk = document.getElementById("auto_refresh");
+                    // if (chk.checked === true) {
                         // chrome.tabs.reload();
-                        updateTags(info, divName);
-                        console.log("updated tags");
-                    }
+                        // console.log("updated tags");
+                    // }
                 }
             });
             ++visitNum;
@@ -200,7 +211,7 @@ function dragAndTag(info, divName) {
             if (item === undefined) { debugger; alert("you dragged the wrong place");}
             var tag = ev.target.textContent;
             addTags(item, tag);
-            // tagAnimate(ev.target);
+            tagAnimate(ev.target);
 
         }, false);
     }
@@ -231,6 +242,8 @@ function display(historyItems, template, data, divName, storedTags) {
     var groups = groupItems(getTimeStamps(historyItems, 0), 100000);
     var massageInfo = massage(historyItems, groups, storedTags);
     updateTags(massageInfo, divName);
+
+    dragAndTag(massageInfo, divName);
     // data.history = massageInfo.history;
     // var html = Mustache.to_html(template, data);
     // document.getElementById(divName).innerHTML = html;
