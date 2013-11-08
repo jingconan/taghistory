@@ -129,6 +129,16 @@ function addHistoryDragStartTrigger() {
 
 }
 
+function msgAnimate(left, top, msg, width, height) {
+    $("p.speech").text(msg)
+    $("p.speech").css("left", left);
+    $("p.speech").css("top", top);
+    $("p.speech").css("width", width);
+    $("p.speech").css("height", height);
+    $("p.speech").animate({top:"+=30px", opacity:"1"});
+    $("p.speech").animate({top:"-=30px", opacity:"0"});
+}
+
 function dragAndTag(info, divName) {
     console.log('run dragAndTag');
     addHistoryDragStartTrigger();
@@ -190,10 +200,11 @@ function dragAndTag(info, divName) {
 
     function tagAnimate(target, left, top) {
         var rect = target.getBoundingClientRect();
-        $("p.speech").css("left", rect.right);
-        $("p.speech").css("top", rect.bottom);
-        $("p.speech").animate({top:"+=30px", opacity:"1"});
-        $("p.speech").animate({top:"-=30px", opacity:"0"});
+        msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
+        // $("p.speech").css("left", rect.right);
+        // $("p.speech").css("top", rect.bottom);
+        // $("p.speech").animate({top:"+=30px", opacity:"1"});
+        // $("p.speech").animate({top:"-=30px", opacity:"0"});
 
         var orig_style = target.style;
         target.setAttribute('style', 'background: #8AAAED; color: white;');
@@ -239,40 +250,31 @@ function getTimeStamps(historyItems, type) {
     return timeStamps;
 }
 
+
+function createNewTag(ev) {
+    var newTagName = window.prompt("New tag name","");
+    chrome.storage.sync.get('tagList', function(storedTags) {
+        storedTags.tagList.push({tag_name:newTagName});
+        chrome.storage.sync.set(storedTags, function() {
+            // alert("system updated");
+            msgAnimate("40%", "40%", "system updated", "10%", "10%");
+            buildTagsMenu('tags_menu');
+        });
+    })
+}
+
 function display(historyItems, template, data, divName, storedTags) {
     var groups = groupItems(getTimeStamps(historyItems, 0), 100000);
     var massageInfo = massage(historyItems, groups, storedTags);
     updateTags(massageInfo, divName);
 
     dragAndTag(massageInfo, divName);
-    function test(ev) {
-        alert('drop here');
-    }
+
     document.getElementById('create_new_tag').addEventListener('dragover',
                                                                function (ev) {
                                                                    ev.preventDefault();
                                                                });
-    document.getElementById('create_new_tag').addEventListener('drop', test);
-
-
-
-    // document.getElementById('create_new_tag').addEventListener('drop', function(ev) {
-    //     console.log("run2");
-    //     ev.preventDefault();
-    //     alert('drop here');
-    // });
-    // $("#create_new_tag").droppable({
-    //   drop: function( event, ui ) {
-    //       alert('hello');
-    //   $( this )
-    //     .addClass( "ui-state-highlight" )
-    //     .find( "p" )
-    //       .html( "Dropped!" );
-    // }
-    // });
-    // debugger;
-
-    // $('#create_new_tag').unbind('drop');
+    document.getElementById('create_new_tag').addEventListener('drop', createNewTag);
 
 
     // data.history = massageInfo.history;
@@ -319,8 +321,8 @@ document.getElementById("refresh_display").onclick = function() {
 }
 
 function buildTagsMenu(divName) {
-    var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
-    chrome.storage.sync.set({'tagList': vd});
+    // var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
+    // chrome.storage.sync.set({'tagList': vd});
 
     chrome.storage.sync.get('tagList', function(storedTagList) {
         var html = Mustache.to_html(BH.Templates.tags, storedTagList);
