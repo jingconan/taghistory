@@ -63,3 +63,12 @@ function getTimeStamps(historyItems, type) {
     }
     return timeStamps;
 }
+
+
+
+function tag_animate() {
+    var orig_style = target.style;
+    target.setAttribute('style', 'background: #8AAAED; color: white;');
+    var showTime = 200;
+    window.setInterval(function (){target.setAttribute('style', orig_style);}, showTime);
+}
