@@ -94,40 +94,12 @@ function searchDatasetID(target, i) {
     return id;
 }
 
-function updateTags(info, divName) {
-    console.log("divName: " + divName);
-    var data = {
-        i18n_expand_button: 'button',
-        i18n_collapse_button: 'collapse',
-        i18n_search_by_domain: 'More for this site',
-        i18n_prompt_delete_button: 'prompt_delete',
-        i18n_tag_delete_button: ''
-    };
-    data.history = info.history;
-    var html = Mustache.to_html(BH.Templates.day_results, data);
+function updateTags(divName, massageInfo, template, data) {
+    data.history = massageInfo.history;
+    var html = Mustache.to_html(template, data);
     document.getElementById(divName).innerHTML = html;
-    // dragAndTag(info, divName);
 }
 
-
-function addHistoryDragStartTrigger() {
-    function process_visit(i, visit) {
-        function onDragStart(ev) {
-            ev.dataTransfer.setData("itemID", searchDatasetID(ev.target, 0));
-            console.log("dragstart run");
-        }
-
-        visit.addEventListener('dragstart', onDragStart, false);
-                           // visit.addEventListener('dragend', 
-                           //                        function (ev) {
-                           //                            console.log("drag ends");
-                           //                        },
-                                                  // false);
-    }
-
-    $('.history').each(process_visit);
-
-}
 
 function msgAnimate(left, top, msg, width, height) {
     $("p.speech").text(msg)
@@ -139,72 +111,35 @@ function msgAnimate(left, top, msg, width, height) {
     $("p.speech").animate({top:"-=30px", opacity:"0"});
 }
 
-function dragAndTag(info, divName) {
-    console.log('run dragAndTag');
-    addHistoryDragStartTrigger();
 
-    function addTags(item, tag) {
-        console.log("run addTags");
 
-        function tagExist(tag, tags) {
-            var i; 
-            for(i = 0; i < tags.length; ++i) {
-                if (tag === tags[i].tag_name) {
-                    return true;
-                }
-            }
-            return false;
+function buildHistory(divName, massageInfo, template, data) {
+    updateTags(divName, massageInfo, template, data);
+
+    // Add EventListeners
+    function process_visit(i, visit) {
+        function onDragStart(ev) {
+            ev.dataTransfer.setData("itemID", searchDatasetID(ev.target, 0));
+            console.log("dragstart run");
         }
 
-        function addTag(visit, tag, num) {
-            console.log("Add (" + item.time + ")");
-            // if (! tagExist(tag, item.tag)) {
-            //     visit.tag.push({tag_name: tag});
-            // }
-            visit.tag = {tag_name:tag}; // Only allow one tag for each visit
-
-            obj = {};
-            obj[visit.time] = visit.tag;
-            chrome.storage.sync.set(obj, function() {
-                --visitNum;
-                if (visitNum === 0) {
-                    // refresh();
-                    //
-                    updateTags(info, divName);
-                    addHistoryDragStartTrigger();
-                    console.log("tag updated");
-
-                    // dragAndTag(info, divName);
-                    // var chk = document.getElementById("auto_refresh");
-                    // if (chk.checked === true) {
-                    // chrome.tabs.reload();
-                    // console.log("updated tags");
-                    // }
-                }
-            });
-            ++visitNum;
-        }
-
-        var j;
-        visitNum = 0 // global variable, indicator or unfinished callbacks
-        if (item.visits === undefined) { // visit item
-            addTag(item, tag)
-            // console.log("run here");
-        } else { // group item
-            for (j = 0; j < item.visits.length; ++j) {
-                addTag(item.visits[j], tag);
-                // console.log("j: ", j);
-            }
-        }
+        visit.addEventListener('dragstart', onDragStart, false);
     }
 
+    $('.history').each(process_visit);
+
+
+}
+
+
+function buildTagsMenu(selector, massageInfo, template, tagList, paras) {
+    // var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
+    // chrome.storage.sync.set({'tagList': vd});
+    //
+    //
     function tagAnimate(target, left, top) {
         var rect = target.getBoundingClientRect();
         msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
-        // $("p.speech").css("left", rect.right);
-        // $("p.speech").css("top", rect.bottom);
-        // $("p.speech").animate({top:"+=30px", opacity:"1"});
-        // $("p.speech").animate({top:"-=30px", opacity:"0"});
 
         var orig_style = target.style;
         target.setAttribute('style', 'background: #8AAAED; color: white;');
@@ -212,124 +147,120 @@ function dragAndTag(info, divName) {
         window.setInterval(function (){target.setAttribute('style', orig_style);}, showTime);
     }
 
-    function dropEventListener(ev) {
+
+
+    function addTag(visit, tag) {
+        console.log("visit: " + visit);
+        console.log("Add (" + visit.time + ")");
+        visit.tag = {tag_name:tag}; // Only allow one tag for each visit
+
+        obj = {};
+        obj[visit.time] = visit.tag;
+        chrome.storage.sync.set(obj, function() {
+            --addTag.prototype.visitNum;
+            if (addTag.prototype.visitNum === 0) {
+                // $(selector).trigger({
+                //     type: "tagsStored",
+                //     message: "Hello World!",
+                //     time: new Date()
+                // });
+                // #
+                // updateTags(info, divName);
+                buildHistory("history_items", massageInfo, paras.BH.Templates.day_results, paras.data);
+
+                // addHistoryDragStartTrigger();
+            }
+        });
+        ++addTag.prototype.visitNum;
+    }
+
+
+    function onDrop(ev) {
         ev.preventDefault();
         var itemID = ev.dataTransfer.getData("itemID");
-        console.log("itemID: " + itemID);
-        var item = info.IDMap[itemID];
-        if (item === undefined) { debugger; alert("you dragged the wrong place");}
+        var item = massageInfo.IDMap[itemID];
+        // if (item === undefined) { debugger; alert("you dragged the wrong place");}
         var tag = ev.target.textContent;
-        addTags(item, tag);
-        tagAnimate(ev.target);
 
-    }
-
-    function addTagEventListener(idx, tag) {
-        tag.addEventListener('dragover', function (ev) {ev.preventDefault();}, false);
-        tag.addEventListener('drop', dropEventListener, false);
-    }
-    $('.navigation #tags_menu .tags:not(#create_new_tag)').each(addTagEventListener);
-}
-
-function getTimeStamps(historyItems, type) {
-    // Get Time information About Each Visit
-    // FIXME now only the last visit time for each history Item
-    tformat = function(t, type) {
-        if (type === 0) {
-            return t;
-        } else {
-            return (new Date(t)).toLocaleString();
+        addTag.prototype.visitNum = 0 // global variable, indicator or unfinished callbacks
+        // tagCnt = new addTag();
+        if (item.visits === undefined) { // visit item
+            addTag(item, tag)
+        } else { // group item
+            for (var j = 0; j < item.visits.length; ++j) {
+                addTag(item.visits[j], tag);
+            }
         }
+        tagAnimate(ev.target);
+        
+
     }
 
-    var timeStamps = [];
-    var i;
-    for(i = 0; i < historyItems.length; ++i) {
-        timeStamps.push(tformat(historyItems[i].lastVisitTime, type));
-    }
-    return timeStamps;
-}
-
-
-function createNewTag(ev) {
-    var newTagName = window.prompt("New tag name","");
-    chrome.storage.sync.get('tagList', function(storedTags) {
-        storedTags.tagList.push({tag_name:newTagName});
-        chrome.storage.sync.set(storedTags, function() {
-            // alert("system updated");
+    function createNewTag(ev) {
+        var newTagName = window.prompt("New tag name","");
+        tagList.tagList.push({tag_name:newTagName});
+        chrome.storage.sync.set(tagList, function() {
             msgAnimate("40%", "40%", "system updated", "10%", "10%");
-            buildTagsMenu('tags_menu');
+            buildTagsMenu(selector, massageInfo, template, tagList, paras);
         });
-    })
+    }
+
+    $(selector).html(Mustache.to_html(template, tagList))
+    $(selector + ' .tags:not(#create_new_tag)').each(function(idx, tag) {
+        tag.addEventListener('dragover', function (ev) {ev.preventDefault();}, false);
+        tag.addEventListener('drop', onDrop, false);
+    });
+    $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault();});
+    $(selector + ' #create_new_tag').on('drop', createNewTag);
 }
 
-function display(historyItems, template, data, divName, storedTags) {
-    var groups = groupItems(getTimeStamps(historyItems, 0), 100000);
-    var massageInfo = massage(historyItems, groups, storedTags);
-    updateTags(massageInfo, divName);
 
-    dragAndTag(massageInfo, divName);
-
-    document.getElementById('create_new_tag').addEventListener('dragover',
-                                                               function (ev) {
-                                                                   ev.preventDefault();
-                                                               });
-    document.getElementById('create_new_tag').addEventListener('drop', createNewTag);
-
-
-    // data.history = massageInfo.history;
-    // var html = Mustache.to_html(template, data);
-    // document.getElementById(divName).innerHTML = html;
-    // dragAndTag(massageInfo);
+function fetchAllData(searchQuery, callback, paras) {
+    chrome.history.search(searchQuery, function(historyItems) {
+        chrome.storage.sync.get(getTimeStamps(historyItems, 1), function(storedTags) {
+            chrome.storage.sync.get('tagList', function(tagList) {
+                callback({historyItems: historyItems, 
+                          storedTags: storedTags, 
+                          tagList: tagList}, paras);
+            });
+        });
+    });
 }
 
-function buildHistoryData(divName, searchQuery) {
-    var data = {
+
+function init() {
+    var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
+    var oneWeekAgo = (new Date()).getTime() - microsecondsPerWeek;
+    var searchQuery = {
+        'text': '',
+        'startTime': oneWeekAgo,
+    };
+    var paras = {}
+    paras.data = {
         i18n_expand_button: 'button',
         i18n_collapse_button: 'collapse',
         i18n_search_by_domain: 'More for this site',
         i18n_prompt_delete_button: 'prompt_delete',
         i18n_tag_delete_button: ''
     };
+    paras.BH = BH;
 
-    chrome.history.search(searchQuery, function(historyItems) {
-        console.log("chrome history test");
-        chrome.storage.sync.get(getTimeStamps(historyItems, 1), function(storedTags) {
-            console.log("storedTags: " + storedTags);
-            // debugger;
-            display(historyItems, BH.Templates.day_results, data, divName, 
-                    storedTags);
+    function build(storedInfo, paras) {
+        // buildHistory("history_items", searchQuery, BH.Templates.day_results, data);
+        var groups = groupItems(getTimeStamps(storedInfo.historyItems, 0), 100000);
+        var massageInfo = massage(storedInfo.historyItems, groups, storedInfo.storedTags);
+        buildHistory("history_items", massageInfo, paras.BH.Templates.day_results, paras.data);
+        buildTagsMenu('#tags_menu', massageInfo, BH.Templates.tags, storedInfo.tagList, paras);
+    }
+    fetchAllData(searchQuery, build, paras);
+
+    document.getElementById("refresh_display").onclick = function() {
+        chrome.tabs.getCurrent(function(tab) {
+            chrome.tabs.reload(tab.id, {bypassCache:false}, function () {
+                document.getElementById("auto_refresh").checked=false;
+            });
         });
-    });
+    }
 }
 
-var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
-var oneWeekAgo = (new Date()).getTime() - microsecondsPerWeek;
-var searchQuery = {
-    'text': '',
-    'startTime': oneWeekAgo,
-};
-
-buildHistoryData("history_items", searchQuery);
-document.getElementById("refresh_display").onclick = function() {
-    // alert('refresh');
-    chrome.tabs.getCurrent(function(tab) {
-        chrome.tabs.reload(tab.id, {bypassCache:false}, function () {
-            document.getElementById("auto_refresh").checked=false;
-        });
-    });
-}
-
-function buildTagsMenu(divName) {
-    // var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
-    // chrome.storage.sync.set({'tagList': vd});
-
-    chrome.storage.sync.get('tagList', function(storedTagList) {
-        var html = Mustache.to_html(BH.Templates.tags, storedTagList);
-        document.getElementById(divName).innerHTML = html;
-    });
-
-
-}
-
-buildTagsMenu('tags_menu');
+init();

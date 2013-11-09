@@ -44,3 +44,22 @@ function truncStr(s, len) {
 }
 
 
+
+function getTimeStamps(historyItems, type) {
+    // Get Time information About Each Visit
+    // FIXME now only the last visit time for each history Item
+    tformat = function(t, type) {
+        if (type === 0) {
+            return t;
+        } else {
+            return (new Date(t)).toLocaleString();
+        }
+    }
+
+    var timeStamps = [];
+    var i;
+    for(i = 0; i < historyItems.length; ++i) {
+        timeStamps.push(tformat(historyItems[i].lastVisitTime, type));
+    }
+    return timeStamps;
+}
