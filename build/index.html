@@ -3,6 +3,9 @@
 <head>
 <link rel='stylesheet' type='text/css' href='styles/chrome-bootstrap.css'/>
 <link rel='stylesheet' type='text/css' href='styles/app2.css'/>
+<link rel="stylesheet" href="scripts/frameworks/jquery-ui-1.10.3/themes/base/jquery-ui.css" />
+<script src="scripts/frameworks/jquery-1.10.2.js"></script>
+<script src="scripts/frameworks/jquery-ui-1.10.3/ui/jquery-ui.js"></script>
 <meta charset="UTF-8">
 <title>Tag History</title>
 <link rel='stylesheet' type='text/css' href='styles/wj.css'>
@@ -24,7 +27,7 @@
                         <a class="text back_to_week" href="#weeks/10-21-13">      ← Back to Week    </a>    
                         <div class="spacer"></div>    
                         <!-- <button class="delete_day">      Delete...    </button>   -->
-                        <button id="refresh_display">Refresh Display </button>  
+                        <button id="refresh_display">Refresh</button>  
                         <!-- <div><input type="checkbox" name="auto_refresh" value="Bike" id="auto_refresh" checked>Auto Refresh</div> -->
                     </div>
                 </header>
@@ -57,8 +60,14 @@
                 <p class="speech">Tagged !</p>
                 <ul class="menu disappearable"><li class="">        <a
                         class="setting" href="#settings">          Settings        </a>
+                    <div>
+                    <div>Interval</div> 
+                    <div id="interval_slider"></div>
+                    <div id='interval_value'></div>
+                    </div>
                 </li></ul>  
             </div>
+
 
 
             <!-- <div id="coverup"></div> -->
@@ -66,7 +75,6 @@
     </div>
 </div>
 
-<script src="scripts/frameworks/jquery-1.10.2.js"></script>
 <!-- <script type="text/javascript" src='scripts/pretty.js'></script> -->
 <!-- <script type="text/javascript" src='scripts/frameworks/zepto.js'></script> -->
 <script type="text/javascript" src='scripts/namespace.js'></script>

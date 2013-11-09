@@ -122,8 +122,8 @@ function buildHistory(selector, massageInfo, template, data) {
 
 
 function buildTagsMenu(selector, massageInfo, template, tagList, callback) {
-    // var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
-    // chrome.storage.sync.set({'tagList': vd});
+    var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
+    chrome.storage.sync.set({'tagList': vd});
     function onDrop(ev) {
         var j;
 
@@ -222,3 +222,18 @@ function init(TH) {
 }
 
 init(TH);
+
+$(TH.Views.interval_slider).slider({
+    value:40,
+    min: 0,
+    max: 80,
+    step: 10,
+    slide: function( event, ui ) {
+        console.log('moved'); // Run code if slider value changes
+        $('#interval_value').text(ui.value);
+        $('#interval_value').css('margin-left', ui.value + '%');
+    },
+    stop: function(event, ui) {
+        console.log('released handle: ' + ui.value);
+    }
+});

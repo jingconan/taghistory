@@ -2,6 +2,7 @@ TH = {
     Views: {
         history: '#history_items',
         tag: '#tags_menu',
+        interval_slider: '#interval_slider',
     },
     Templates: {},
     Trackers: {},
