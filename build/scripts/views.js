@@ -112,4 +112,12 @@ TH.Views.RefreshButton = function() {
     });
 };
 
+TH.Views.intervalValue = function() {
+    // the unit of returned interval is milliseconds.
+    return parseInt($(TH.Selectors.interval_value).text(), 10) * 1000;
+};
 
+TH.Views.updateInterval = function (val) {
+    $(TH.Selectors.interval_value).text(val);
+    $(TH.Selectors.interval_value).css('margin-left', val / TH.Para.Interval.max * 100 + '%');
+};

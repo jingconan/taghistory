@@ -139,8 +139,8 @@ TH.Models.init = function(TH) {
 
 
     TH.Models.fetchAllData(searchQuery, function (storedInfo) {
-        console.log('runhere');
-        var interval = 100000;
+        var interval = TH.Views.intervalValue();
+        console.log("interval: " + interval);
         var massageInfo = TH.Models.divideData(storedInfo, interval);
 
         TH.Views.renderHistory(massageInfo);

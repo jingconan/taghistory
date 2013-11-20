@@ -3,9 +3,18 @@ TH = {
         history: '#history_items',
         tag: '#tags_menu',
         interval_slider: '#interval_slider',
+        interval_value: '#interval_value'
     },
     Views: {},
     Models: {},
+    Para: {
+        Interval: {
+            init: 100,
+            min: 0,
+            max: 500,
+            step: 10,
+        }
+    },
     Templates: {},
     Trackers: {},
     Prompts: {
