@@ -11,9 +11,10 @@ TH = {
         Interval: {
             init: 100,
             min: 0,
-            max: 5000,
+            max: 3600,
             step: 10,
         },
+        query_time: 1000 * 60 * 60 * 24 * 7
     },
     Templates: {},
     Trackers: {},

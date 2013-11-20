@@ -126,12 +126,12 @@ TH.Models.divideData = function(storedInfo, interval) {
     return TH.Models.massage(storedInfo.historyItems, 
                              groups, 
                              storedInfo.storedTags);
-}
+};
 
 // function init(TH) {
 TH.Models.init = function(TH) {
-    var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
-    var oneWeekAgo = (new Date()).getTime() - microsecondsPerWeek;
+    // var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
+    var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
     var searchQuery = {
         'text': '',
         'startTime': oneWeekAgo,

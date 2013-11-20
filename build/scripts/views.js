@@ -118,6 +118,6 @@ TH.Views.intervalValue = function() {
 };
 
 TH.Views.updateInterval = function (val) {
-    $(TH.Selectors.interval_value).text(val);
+    $(TH.Selectors.interval_value).text(val + ' s');
     $(TH.Selectors.interval_value).css('margin-left', val / TH.Para.Interval.max * 100 + '%');
 };
