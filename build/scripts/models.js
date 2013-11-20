@@ -142,6 +142,7 @@ TH.Models.init = function(TH) {
         var interval = TH.Views.intervalValue();
         console.log("interval: " + interval);
         var massageInfo = TH.Models.divideData(storedInfo, interval);
+        TH.Store.storedInfo = storedInfo;
 
         TH.Views.renderHistory(massageInfo);
         TH.Views.renderTagsMenu(massageInfo, storedInfo.tagList, 

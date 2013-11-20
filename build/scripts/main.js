@@ -22,6 +22,10 @@ $(TH.Selectors.interval_slider).slider({
     },
     stop: function(event, ui) {
         console.log('released handle: ' + ui.value);
+        var interval = TH.Views.intervalValue();
+        // console.log("interval: " + interval);
+        var massageInfo = TH.Models.divideData(TH.Store.storedInfo, interval);
+        TH.Views.renderHistory(massageInfo);
     }
 });
 /*jslint unparam: false*/

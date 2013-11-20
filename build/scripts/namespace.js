@@ -11,9 +11,9 @@ TH = {
         Interval: {
             init: 100,
             min: 0,
-            max: 500,
+            max: 5000,
             step: 10,
-        }
+        },
     },
     Templates: {},
     Trackers: {},
@@ -23,7 +23,7 @@ TH = {
             i18n_search_by_domain: 'More for this site',
             i18n_prompt_delete_button: 'prompt_delete',
             i18n_tag_delete_button: ''
-        }
-
+    },
+    Store: {}
 
 };
