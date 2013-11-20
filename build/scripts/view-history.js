@@ -135,23 +135,29 @@ function buildHistory(selector, massageInfo, template, data) {
 
 
 /*jslint unparam: true*/
-function buildTagsMenu(selector, massageInfo, template, tagList, callback) {
+function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle) {
     var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
     chrome.storage.sync.set({'tagList': vd});
-    function onDrop(ev) {
-        function addTag(visit, tag) {
-            visit.tag = {tag_name:tag}; // Only allow one tag for each visit
 
-            var obj = {};
-            obj[visit.time] = visit.tag;
-            chrome.storage.sync.set(obj, function() {
-                --addTag.prototype.visitNum;
-                if (addTag.prototype.visitNum === 0) {
-                    this.callback();
-                }
-            });
-            ++addTag.prototype.visitNum;
-        }
+    function addTag(visit, tag) {
+        visit.tag = {tag_name:tag}; // Only allow one tag for each visit
+
+        var obj = {};
+        obj[visit.time] = visit.tag;
+        ++addTag.prototype.visitNum;
+        chrome.storage.sync.set(obj, function() {
+            --addTag.prototype.visitNum;
+            console.log("addTag.prototype.visitNum: " + addTag.prototype.visitNum);
+            if (addTag.prototype.visitNum === 0) {
+                console.log("run callback");
+                callbackHandle();
+            }
+        });
+        console.log("addTag.prototype.visitNum: " + addTag.prototype.visitNum);
+    }
+
+
+    function onDrop(ev) {
 
 
         ev.preventDefault();
@@ -220,9 +226,11 @@ function init(TH) {
         var massageInfo = massage(storedInfo.historyItems, groups, storedInfo.storedTags);
         buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
         buildTagsMenu(TH.Views.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
+            console.log("run callback");
             buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
         });
     }
+    console.log('runhere');
     fetchAllData(searchQuery, build, TH);
 
     $('#refresh_display').on('click', function() {
