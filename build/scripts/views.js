@@ -1,9 +1,8 @@
-var util = util || {};
 var $ = $ || {};
 var Mustache = Mustache || {};
 var chrome = chrome || {};
 var window = window || {};
-var document = document || {}; 
+var util = util || {};
 var TH = TH || {};
 
 // function buildHistory(selector, massageInfo, template, data) {
@@ -96,6 +95,17 @@ TH.Views.msgAnimate = function(left, top, msg, width, height) {
     $("p.speech").css("height", height);
     $("p.speech").animate({top:"+=30px", opacity:"1"});
     $("p.speech").animate({top:"-=30px", opacity:"0"});
+};
+
+TH.Views.RefreshButton = function() {
+    $('#refresh_display').on('click', function() {
+        // reload current tab
+        chrome.tabs.getCurrent(function(tab) {
+            chrome.tabs.reload(tab.id, {bypassCache:false}, function () {
+                // document.getElementById("auto_refresh").checked = false;
+            });
+        });
+    });
 };
 
 

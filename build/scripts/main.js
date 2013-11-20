@@ -25,3 +25,5 @@ $(TH.Selectors.interval_slider).slider({
     }
 });
 /*jslint unparam: false*/
+
+TH.Views.RefreshButton();
