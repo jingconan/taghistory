@@ -120,6 +120,13 @@ TH.Models.fetchAllData = function(searchQuery, callback, paras) {
     });
 };
 
+TH.Models.divideData = function(storedInfo, interval) {
+    var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 
+                                 interval);
+    return TH.Models.massage(storedInfo.historyItems, 
+                             groups, 
+                             storedInfo.storedTags);
+}
 
 // function init(TH) {
 TH.Models.init = function(TH) {
@@ -130,20 +137,16 @@ TH.Models.init = function(TH) {
         'startTime': oneWeekAgo,
     };
 
-    function build(storedInfo, TH) {
-        var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 
-                                     100000);
-        var massageInfo = TH.Models.massage(storedInfo.historyItems, 
-                                            groups, 
-                                            storedInfo.storedTags);
+
+    TH.Models.fetchAllData(searchQuery, function (storedInfo) {
+        console.log('runhere');
+        var interval = 100000;
+        var massageInfo = TH.Models.divideData(storedInfo, interval);
+
         TH.Views.renderHistory(massageInfo);
-        TH.Views.renderTagsMenu(massageInfo, 
-                                storedInfo.tagList, 
-                                function() { 
-                                    TH.Views.renderHistory(massageInfo);
-                                });
-    }
-    TH.Models.fetchAllData(searchQuery, build, TH);
+        TH.Views.renderTagsMenu(massageInfo, storedInfo.tagList, 
+                                function() { TH.Views.renderHistory(massageInfo); });
+    });
 
 
 };
