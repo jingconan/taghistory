@@ -5,7 +5,6 @@ var chrome = chrome || {};
 var window = window || {};
 var document = document || {}; 
 var TH = TH || {};
-var view_history = view_history || {};
 
 // function buildHistory(selector, massageInfo, template, data) {
 TH.Views.renderHistory = function(selector, massageInfo, template, data) {
@@ -17,7 +16,7 @@ TH.Views.renderHistory = function(selector, massageInfo, template, data) {
     /*jslint unparam: true*/
     function onDragStart(i, visit) {
         visit.addEventListener('dragstart', function(ev) {
-            ev.dataTransfer.setData("itemID", view_history.searchDatasetID(ev.target, 0));
+            ev.dataTransfer.setData("itemID", TH.Models.searchDatasetID(ev.target, 0));
         }, false);
     }
     /*jslint unparam: false*/
@@ -66,14 +65,14 @@ TH.Views.renderTagsMenu = function(selector, massageInfo, template, tagList, cal
             });
         }
 
-        view_history.msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
+        TH.Models.msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
     }
 
     function createNewTag(ev) {
         var newTagName = window.prompt("New tag name","");
         tagList.tagList.push({tag_name:newTagName});
         chrome.storage.sync.set(tagList, function() {
-            view_history.msgAnimate("40%", "40%", "system updated", "10%", "10%");
+            TH.Models.msgAnimate("40%", "40%", "system updated", "10%", "10%");
             TH.Views.renderTagsMenu(this.selector, this.massageInfo,
                           this.template, this.tagList, this.paras);
         });

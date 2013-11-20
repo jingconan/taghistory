@@ -6,9 +6,7 @@ var window = window || {};
 var document = document || {}; 
 var TH = TH || {};
 
-var view_history = {};
-
-view_history.massage = function (historyItems, groups, storedTags) {
+TH.Models.massage = function (historyItems, groups, storedTags) {
 // function massage(historyItems, groups, storedTags) {
 // Massage the history data into format required by Mustache
 // Parameters
@@ -97,10 +95,10 @@ view_history.massage = function (historyItems, groups, storedTags) {
 
 // search dataset.id recursively. At most 2 levels.
 // function searchDatasetID(target, i) {
-view_history.searchDatasetID = function (target, i) {
+TH.Models.searchDatasetID = function (target, i) {
     var id = target.dataset.id;
     if ((id === undefined) && (i <= 2)) {
-        return view_history.searchDatasetID(target.parentElement, i+1);
+        return TH.Models.searchDatasetID(target.parentElement, i+1);
     }
     console.log("id: " + id);
     return id;
@@ -108,7 +106,7 @@ view_history.searchDatasetID = function (target, i) {
 
 
 // function msgAnimate(left, top, msg, width, height) {
-view_history.msgAnimate = function(left, top, msg, width, height) {
+TH.Models.msgAnimate = function(left, top, msg, width, height) {
     $("p.speech").text(msg);
     $("p.speech").css("left", left);
     $("p.speech").css("top", top);
@@ -124,7 +122,7 @@ view_history.msgAnimate = function(left, top, msg, width, height) {
 
 // fetchAllData Required
 // function fetchAllData(searchQuery, callback, paras) {
-view_history.fetchAllData = function(searchQuery, callback, paras) {
+TH.Models.fetchAllData = function(searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function(historyItems) {
         chrome.storage.sync.get(util.getTimeStamps(historyItems, 1), function(storedTags) {
             chrome.storage.sync.get('tagList', function(tagList) {
@@ -138,7 +136,7 @@ view_history.fetchAllData = function(searchQuery, callback, paras) {
 
 
 // function init(TH) {
-view_history.init = function(TH) {
+TH.Models.init = function(TH) {
     var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
     var oneWeekAgo = (new Date()).getTime() - microsecondsPerWeek;
     var searchQuery = {
@@ -148,14 +146,14 @@ view_history.init = function(TH) {
 
     function build(storedInfo, TH) {
         var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 100000);
-        var massageInfo = view_history.massage(storedInfo.historyItems, groups, storedInfo.storedTags);
+        var massageInfo = TH.Models.massage(storedInfo.historyItems, groups, storedInfo.storedTags);
         TH.Views.renderHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
         TH.Views.renderTagsMenu(TH.Selectors.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
             console.log("run callback");
             TH.Views.renderHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
         });
     }
-    view_history.fetchAllData(searchQuery, build, TH);
+    TH.Models.fetchAllData(searchQuery, build, TH);
 
     $('#refresh_display').on('click', function() {
         // reload current tab

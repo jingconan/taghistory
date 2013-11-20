@@ -5,6 +5,7 @@ TH = {
         interval_slider: '#interval_slider',
     },
     Views: {},
+    Models: {},
     Templates: {},
     Trackers: {},
     Prompts: {

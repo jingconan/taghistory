@@ -5,10 +5,9 @@ var chrome = chrome || {};
 var window = window || {};
 var document = document || {}; 
 var TH = TH || {};
-var view_history = view_history || {};
 
 
-view_history.init(TH);
+TH.Models.init(TH);
 
 /*jslint unparam: true*/
 $(TH.Selectors.interval_slider).slider({
