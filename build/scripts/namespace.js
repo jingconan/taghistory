@@ -1,5 +1,5 @@
 TH = {
-    Views: {
+    Selectors: {
         history: '#history_items',
         tag: '#tags_menu',
         interval_slider: '#interval_slider',

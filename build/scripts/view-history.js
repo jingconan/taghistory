@@ -230,10 +230,10 @@ view_history.init = function(TH) {
     function build(storedInfo, TH) {
         var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 100000);
         var massageInfo = view_history.massage(storedInfo.historyItems, groups, storedInfo.storedTags);
-        view_history.buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
-        view_history.buildTagsMenu(TH.Views.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
+        view_history.buildHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
+        view_history.buildTagsMenu(TH.Selectors.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
             console.log("run callback");
-            view_history.buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
+            view_history.buildHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
         });
     }
     view_history.fetchAllData(searchQuery, build, TH);
@@ -251,7 +251,7 @@ view_history.init = function(TH) {
 view_history.init(TH);
 
 /*jslint unparam: true*/
-$(TH.Views.interval_slider).slider({
+$(TH.Selectors.interval_slider).slider({
     value:40,
     min: 0,
     max: 80,
