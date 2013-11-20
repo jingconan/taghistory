@@ -6,10 +6,11 @@ var util = util || {};
 var TH = TH || {};
 
 // function buildHistory(selector, massageInfo, template, data) {
-TH.Views.renderHistory = function(selector, massageInfo, template, data) {
+TH.Views.renderHistory = function(massageInfo) {
+    var data = TH.Prompts;
     data.history = massageInfo.history;
-    var html = Mustache.to_html(template, data);
-    $(selector).html(html);
+    var html = Mustache.to_html(TH.Templates.day_results, data);
+    $(TH.Selectors.history).html(html);
 
     // Add EventListeners
     /*jslint unparam: true*/
@@ -26,9 +27,12 @@ TH.Views.renderHistory = function(selector, massageInfo, template, data) {
 
 /*jslint unparam: true*/
 // function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle) {
-TH.Views.renderTagsMenu = function(selector, massageInfo, template, tagList, callbackHandle) {
+TH.Views.renderTagsMenu = function(massageInfo, tagList, callbackHandle) {
     var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
     chrome.storage.sync.set({'tagList': vd});
+
+    var selector = TH.Selectors.tag;
+    var template = TH.Templates.tags;
 
     function addTag(visit, tag) {
         visit.tag = {tag_name:tag}; // Only allow one tag for each visit

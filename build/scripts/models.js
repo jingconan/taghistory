@@ -36,7 +36,8 @@ TH.Models.massage = function (historyItems, groups, storedTags) {
     var visitItem;
     var groupItem;
 
-    for(i = 0; i < groups.length; ++i) {
+    var gLen = groups.length;
+    for(i = 0; i < gLen; ++i) {
         group = groups[i];
         visits = [];
         for(j = 0; j < group.length; ++j) {
@@ -130,13 +131,17 @@ TH.Models.init = function(TH) {
     };
 
     function build(storedInfo, TH) {
-        var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 100000);
-        var massageInfo = TH.Models.massage(storedInfo.historyItems, groups, storedInfo.storedTags);
-        TH.Views.renderHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
-        TH.Views.renderTagsMenu(TH.Selectors.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
-            console.log("run callback");
-            TH.Views.renderHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
-        });
+        var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 
+                                     100000);
+        var massageInfo = TH.Models.massage(storedInfo.historyItems, 
+                                            groups, 
+                                            storedInfo.storedTags);
+        TH.Views.renderHistory(massageInfo);
+        TH.Views.renderTagsMenu(massageInfo, 
+                                storedInfo.tagList, 
+                                function() { 
+                                    TH.Views.renderHistory(massageInfo);
+                                });
     }
     TH.Models.fetchAllData(searchQuery, build, TH);
 
