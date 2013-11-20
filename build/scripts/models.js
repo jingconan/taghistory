@@ -105,17 +105,6 @@ TH.Models.searchDatasetID = function (target, i) {
 };
 
 
-// function msgAnimate(left, top, msg, width, height) {
-TH.Models.msgAnimate = function(left, top, msg, width, height) {
-    $("p.speech").text(msg);
-    $("p.speech").css("left", left);
-    $("p.speech").css("top", top);
-    $("p.speech").css("width", width);
-    $("p.speech").css("height", height);
-    $("p.speech").animate({top:"+=30px", opacity:"1"});
-    $("p.speech").animate({top:"-=30px", opacity:"0"});
-};
-
 
 
 /*jslint unparam: false*/

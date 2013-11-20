@@ -65,14 +65,14 @@ TH.Views.renderTagsMenu = function(selector, massageInfo, template, tagList, cal
             });
         }
 
-        TH.Models.msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
+        TH.Views.msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
     }
 
     function createNewTag(ev) {
         var newTagName = window.prompt("New tag name","");
         tagList.tagList.push({tag_name:newTagName});
         chrome.storage.sync.set(tagList, function() {
-            TH.Models.msgAnimate("40%", "40%", "system updated", "10%", "10%");
+            TH.Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
             TH.Views.renderTagsMenu(this.selector, this.massageInfo,
                           this.template, this.tagList, this.paras);
         });
@@ -85,6 +85,17 @@ TH.Views.renderTagsMenu = function(selector, massageInfo, template, tagList, cal
     });
     $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault();});
     $(selector + ' #create_new_tag').on('drop', createNewTag);
+};
+
+// function msgAnimate(left, top, msg, width, height) {
+TH.Views.msgAnimate = function(left, top, msg, width, height) {
+    $("p.speech").text(msg);
+    $("p.speech").css("left", left);
+    $("p.speech").css("top", top);
+    $("p.speech").css("width", width);
+    $("p.speech").css("height", height);
+    $("p.speech").animate({top:"+=30px", opacity:"1"});
+    $("p.speech").animate({top:"-=30px", opacity:"0"});
 };
 
 
