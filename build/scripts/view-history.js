@@ -1,3 +1,12 @@
+var util = util || {};
+var $ = $ || {};
+var Mustache = Mustache || {};
+var chrome = chrome || {};
+var window = window || {};
+var document = document || {}; 
+var TH = TH || {};
+
+
 // Massage the history data into format required by Mustache
 // Parameters
 // ---------------
@@ -29,6 +38,7 @@ function massage(historyItems, groups, storedTags) {
     var IDMap = {};
     var visitId, groupID, visitTime, tag;
     var visitItem;
+    var groupItem;
 
     for(i = 0; i < groups.length; ++i) {
         group = groups[i];
@@ -36,7 +46,7 @@ function massage(historyItems, groups, storedTags) {
         for(j = 0; j < group.length; ++j) {
             idx = group[j];
             item = historyItems[idx];
-            urlInfo = parseURL(item.url);
+            urlInfo = util.parseURL(item.url);
             visitId = 'c' + i.toString() + '-' + j.toString();
             visitTime = (new Date(item.lastVisitTime)).toLocaleString();
             if (storedTags[visitTime] === undefined) {
@@ -51,7 +61,7 @@ function massage(historyItems, groups, storedTags) {
                 isGrouped: false,
                 url: item.url,
                 domain: urlInfo.host,
-                title: truncStr(item.title, 80),
+                title: util.truncStr(item.title, 80),
                 host: urlInfo.host,
                 path: urlInfo.path,
                 id: visitId,
@@ -95,7 +105,7 @@ function searchDatasetID(target, i) {
 
 
 function msgAnimate(left, top, msg, width, height) {
-    $("p.speech").text(msg)
+    $("p.speech").text(msg);
     $("p.speech").css("left", left);
     $("p.speech").css("top", top);
     $("p.speech").css("width", width);
@@ -109,28 +119,30 @@ function msgAnimate(left, top, msg, width, height) {
 function buildHistory(selector, massageInfo, template, data) {
     data.history = massageInfo.history;
     var html = Mustache.to_html(template, data);
-    $(selector).html(html)
+    $(selector).html(html);
 
     // Add EventListeners
+    /*jslint unparam: true*/
     function onDragStart(i, visit) {
         visit.addEventListener('dragstart', function(ev) {
             ev.dataTransfer.setData("itemID", searchDatasetID(ev.target, 0));
         }, false);
     }
+    /*jslint unparam: false*/
     $('.interval').each(onDragStart);
+
 }
 
 
+/*jslint unparam: true*/
 function buildTagsMenu(selector, massageInfo, template, tagList, callback) {
     var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
     chrome.storage.sync.set({'tagList': vd});
     function onDrop(ev) {
-        var j;
-
         function addTag(visit, tag) {
             visit.tag = {tag_name:tag}; // Only allow one tag for each visit
 
-            obj = {};
+            var obj = {};
             obj[visit.time] = visit.tag;
             chrome.storage.sync.set(obj, function() {
                 --addTag.prototype.visitNum;
@@ -148,13 +160,13 @@ function buildTagsMenu(selector, massageInfo, template, tagList, callback) {
         var tag = ev.target.textContent;
         var rect = ev.target.getBoundingClientRect();
 
-        addTag.prototype.visitNum = 0 // indicator or unfinished callbacks
+        addTag.prototype.visitNum = 0; // indicator or unfinished callbacks
         if (item.visits === undefined) { // visit item
-            addTag(item, tag)
+            addTag(item, tag);
         } else { // group item
             $.each(item.visits, function(idx, value) {
                 addTag(value, tag);
-            })
+            });
         }
 
         msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
@@ -170,7 +182,7 @@ function buildTagsMenu(selector, massageInfo, template, tagList, callback) {
         });
     }
 
-    $(selector).html(Mustache.to_html(template, tagList))
+    $(selector).html(Mustache.to_html(template, tagList));
     $(selector + ' .tags:not(#create_new_tag)').each(function(idx, tag) {
         tag.addEventListener('dragover', function (ev) {ev.preventDefault();}, false);
         tag.addEventListener('drop', onDrop, false);
@@ -179,10 +191,12 @@ function buildTagsMenu(selector, massageInfo, template, tagList, callback) {
     $(selector + ' #create_new_tag').on('drop', createNewTag);
 }
 
+/*jslint unparam: false*/
 
+// fetchAllData Required
 function fetchAllData(searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function(historyItems) {
-        chrome.storage.sync.get(getTimeStamps(historyItems, 1), function(storedTags) {
+        chrome.storage.sync.get(util.getTimeStamps(historyItems, 1), function(storedTags) {
             chrome.storage.sync.get('tagList', function(tagList) {
                 callback({historyItems: historyItems, 
                          storedTags: storedTags, 
@@ -202,7 +216,7 @@ function init(TH) {
     };
 
     function build(storedInfo, TH) {
-        var groups = groupItems(getTimeStamps(storedInfo.historyItems, 0), 100000);
+        var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 100000);
         var massageInfo = massage(storedInfo.historyItems, groups, storedInfo.storedTags);
         buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
         buildTagsMenu(TH.Views.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
@@ -215,7 +229,7 @@ function init(TH) {
         // reload current tab
         chrome.tabs.getCurrent(function(tab) {
             chrome.tabs.reload(tab.id, {bypassCache:false}, function () {
-                document.getElementById("auto_refresh").checked=false;
+                document.getElementById("auto_refresh").checked = false;
             });
         });
     });
@@ -223,12 +237,13 @@ function init(TH) {
 
 init(TH);
 
+/*jslint unparam: true*/
 $(TH.Views.interval_slider).slider({
     value:40,
     min: 0,
     max: 80,
     step: 10,
-    slide: function( event, ui ) {
+    slide: function(event, ui ) {
         console.log('moved'); // Run code if slider value changes
         $('#interval_value').text(ui.value);
         $('#interval_value').css('margin-left', ui.value + '%');
@@ -237,3 +252,4 @@ $(TH.Views.interval_slider).slider({
         console.log('released handle: ' + ui.value);
     }
 });
+/*jslint unparam: false*/
