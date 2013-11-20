@@ -4,6 +4,7 @@ TH = {
         tag: '#tags_menu',
         interval_slider: '#interval_slider',
     },
+    Views: {},
     Templates: {},
     Trackers: {},
     Prompts: {

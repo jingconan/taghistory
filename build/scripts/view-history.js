@@ -121,7 +121,7 @@ view_history.msgAnimate = function(left, top, msg, width, height) {
 
 
 // function buildHistory(selector, massageInfo, template, data) {
-view_history.buildHistory = function(selector, massageInfo, template, data) {
+TH.Views.renderHistory = function(selector, massageInfo, template, data) {
     data.history = massageInfo.history;
     var html = Mustache.to_html(template, data);
     $(selector).html(html);
@@ -141,7 +141,7 @@ view_history.buildHistory = function(selector, massageInfo, template, data) {
 
 /*jslint unparam: true*/
 // function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle) {
-view_history.buildTagsMenu = function(selector, massageInfo, template, tagList, callbackHandle) {
+TH.Views.renderTagsMenu = function(selector, massageInfo, template, tagList, callbackHandle) {
     var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
     chrome.storage.sync.set({'tagList': vd});
 
@@ -187,7 +187,7 @@ view_history.buildTagsMenu = function(selector, massageInfo, template, tagList, 
         tagList.tagList.push({tag_name:newTagName});
         chrome.storage.sync.set(tagList, function() {
             view_history.msgAnimate("40%", "40%", "system updated", "10%", "10%");
-            view_history.buildTagsMenu(this.selector, this.massageInfo, 
+            TH.Views.renderTagsMenu(this.selector, this.massageInfo, 
                           this.template, this.tagList, this.paras);
         });
     }
@@ -230,10 +230,10 @@ view_history.init = function(TH) {
     function build(storedInfo, TH) {
         var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 100000);
         var massageInfo = view_history.massage(storedInfo.historyItems, groups, storedInfo.storedTags);
-        view_history.buildHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
-        view_history.buildTagsMenu(TH.Selectors.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
+        TH.Views.renderHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
+        TH.Views.renderTagsMenu(TH.Selectors.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
             console.log("run callback");
-            view_history.buildHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
+            TH.Views.renderHistory(TH.Selectors.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
         });
     }
     view_history.fetchAllData(searchQuery, build, TH);
