@@ -6,7 +6,10 @@ var window = window || {};
 var document = document || {}; 
 var TH = TH || {};
 
+var view_history = {};
 
+view_history.massage = function (historyItems, groups, storedTags) {
+// function massage(historyItems, groups, storedTags) {
 // Massage the history data into format required by Mustache
 // Parameters
 // ---------------
@@ -26,7 +29,6 @@ var TH = TH || {};
 // idToPos : array of array
 //      map id to position of the records.
 //
-function massage(historyItems, groups, storedTags) {
     var group, history = [];
     var urlInfo;
     var i, j;
@@ -90,21 +92,23 @@ function massage(historyItems, groups, storedTags) {
     history.sort(function (a, b){return b.timeStamp - a.timeStamp;});
     return {history: history, 
         IDMap: IDMap};
-}
+};
 
 
 // search dataset.id recursively. At most 2 levels.
-function searchDatasetID(target, i) {
+// function searchDatasetID(target, i) {
+view_history.searchDatasetID = function (target, i) {
     var id = target.dataset.id;
     if ((id === undefined) && (i <= 2)) {
-        return searchDatasetID(target.parentElement, i+1);
+        return view_history.searchDatasetID(target.parentElement, i+1);
     }
     console.log("id: " + id);
     return id;
-}
+};
 
 
-function msgAnimate(left, top, msg, width, height) {
+// function msgAnimate(left, top, msg, width, height) {
+view_history.msgAnimate = function(left, top, msg, width, height) {
     $("p.speech").text(msg);
     $("p.speech").css("left", left);
     $("p.speech").css("top", top);
@@ -112,11 +116,12 @@ function msgAnimate(left, top, msg, width, height) {
     $("p.speech").css("height", height);
     $("p.speech").animate({top:"+=30px", opacity:"1"});
     $("p.speech").animate({top:"-=30px", opacity:"0"});
-}
+};
 
 
 
-function buildHistory(selector, massageInfo, template, data) {
+// function buildHistory(selector, massageInfo, template, data) {
+view_history.buildHistory = function(selector, massageInfo, template, data) {
     data.history = massageInfo.history;
     var html = Mustache.to_html(template, data);
     $(selector).html(html);
@@ -125,17 +130,18 @@ function buildHistory(selector, massageInfo, template, data) {
     /*jslint unparam: true*/
     function onDragStart(i, visit) {
         visit.addEventListener('dragstart', function(ev) {
-            ev.dataTransfer.setData("itemID", searchDatasetID(ev.target, 0));
+            ev.dataTransfer.setData("itemID", view_history.searchDatasetID(ev.target, 0));
         }, false);
     }
     /*jslint unparam: false*/
     $('.interval').each(onDragStart);
 
-}
+};
 
 
 /*jslint unparam: true*/
-function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle) {
+// function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle) {
+view_history.buildTagsMenu = function(selector, massageInfo, template, tagList, callbackHandle) {
     var vd = [{tag_name:'Research'}, {tag_name:'Programming'}, {tag_name:'Music'}];
     chrome.storage.sync.set({'tagList': vd});
 
@@ -158,8 +164,6 @@ function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle)
 
 
     function onDrop(ev) {
-
-
         ev.preventDefault();
         var itemID = ev.dataTransfer.getData("itemID");
         var item = massageInfo.IDMap[itemID];
@@ -175,15 +179,15 @@ function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle)
             });
         }
 
-        msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
+        view_history.msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
     }
 
     function createNewTag(ev) {
         var newTagName = window.prompt("New tag name","");
         tagList.tagList.push({tag_name:newTagName});
         chrome.storage.sync.set(tagList, function() {
-            msgAnimate("40%", "40%", "system updated", "10%", "10%");
-            buildTagsMenu(this.selector, this.massageInfo, 
+            view_history.msgAnimate("40%", "40%", "system updated", "10%", "10%");
+            view_history.buildTagsMenu(this.selector, this.massageInfo, 
                           this.template, this.tagList, this.paras);
         });
     }
@@ -195,12 +199,13 @@ function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle)
     });
     $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault();});
     $(selector + ' #create_new_tag').on('drop', createNewTag);
-}
+};
 
 /*jslint unparam: false*/
 
 // fetchAllData Required
-function fetchAllData(searchQuery, callback, paras) {
+// function fetchAllData(searchQuery, callback, paras) {
+view_history.fetchAllData = function(searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function(historyItems) {
         chrome.storage.sync.get(util.getTimeStamps(historyItems, 1), function(storedTags) {
             chrome.storage.sync.get('tagList', function(tagList) {
@@ -210,10 +215,11 @@ function fetchAllData(searchQuery, callback, paras) {
             });
         });
     });
-}
+};
 
 
-function init(TH) {
+// function init(TH) {
+view_history.init = function(TH) {
     var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
     var oneWeekAgo = (new Date()).getTime() - microsecondsPerWeek;
     var searchQuery = {
@@ -223,15 +229,14 @@ function init(TH) {
 
     function build(storedInfo, TH) {
         var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 100000);
-        var massageInfo = massage(storedInfo.historyItems, groups, storedInfo.storedTags);
-        buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
-        buildTagsMenu(TH.Views.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
+        var massageInfo = view_history.massage(storedInfo.historyItems, groups, storedInfo.storedTags);
+        view_history.buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
+        view_history.buildTagsMenu(TH.Views.tag, massageInfo, TH.Templates.tags, storedInfo.tagList, function() {
             console.log("run callback");
-            buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
+            view_history.buildHistory(TH.Views.history, massageInfo, TH.Templates.day_results, TH.Prompts, TH);
         });
     }
-    console.log('runhere');
-    fetchAllData(searchQuery, build, TH);
+    view_history.fetchAllData(searchQuery, build, TH);
 
     $('#refresh_display').on('click', function() {
         // reload current tab
@@ -241,9 +246,9 @@ function init(TH) {
             });
         });
     });
-}
+};
 
-init(TH);
+view_history.init(TH);
 
 /*jslint unparam: true*/
 $(TH.Views.interval_slider).slider({
