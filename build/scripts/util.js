@@ -27,7 +27,7 @@ util.groupItems = function (timeStamps, delta) {
         lastTime = timeStamps[i];
 
     }
-    group[j] = group;
+    groups[j] = group;
     return groups;
 };
 
