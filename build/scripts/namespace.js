@@ -16,6 +16,12 @@ TH = {
         },
         query_time: 1000 * 60 * 60 * 24 * 7
     },
+    Services: {
+        Evernote: {
+            authenticationToken: 'S=s1:U=87f14:E=1492b56b806:C=141d3a58c0a:P=1cd:A=en-devtoken:V=2:H=cfb7ab84ff2f5a7a6a527657d51fb3f8',
+            noteStoreURL: 'https://sandbox.evernote.com/shard/s1/notestore'
+        }
+    },
     Templates: {},
     Trackers: {},
     Prompts: {
