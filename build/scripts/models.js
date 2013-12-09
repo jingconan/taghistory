@@ -16,6 +16,7 @@ Models.sortByTags = function(historyItems, storedTags, tags) {
     for (i = 0; i < N; ++i){
         item = historyItems[i];
         tstr = (new Date(item.lastVisitTime)).toLocaleString();
+        item.tstr = tstr;
         tg = storedTags[tstr];
         if (tg !== undefined) {
             tagsInfo[tg.tag_name].push(item);

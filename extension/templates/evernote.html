@@ -1,0 +1,27 @@
+<ul>      
+    {{#.}}
+    <li>      
+    <div>{{tag_name}}</div>
+    <ul>
+        {{#items}}
+        <li> 
+        <div>
+            <a href='{{url}}'>
+                <dl style='background-image: url(chrome://favicon/{{url}})'>
+                    {{#title}}
+                    {{{title}}}
+                    {{/title}}
+                    {{^title}}
+                    No Title
+                    {{/title}}
+                    <dt>{{tstr}}</dt>
+                </dl>
+
+            </a>
+        </div>
+        </li>
+        {{/items}}
+    </ul>
+    </li>     
+    {{/.}}
+</ul>

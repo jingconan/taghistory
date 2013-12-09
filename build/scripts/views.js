@@ -7,9 +7,10 @@ var Selectors = TH.Selectors;
 
 Views.renderEvernoteExport = function (everInfo) {
     var template = TH.Templates.evernote;
-    debugger;
-    return 'stub, good in renderEvernoteExport';
-    // return Mustache.to_html(template, everInfo);
+    var note = Mustache.to_html(template, everInfo);
+    return note;
+    // debugger;
+    // return 'stub, good in renderEvernoteExport';
 };
 
 // function buildHistory(selector, massageInfo, template, data) {
