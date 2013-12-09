@@ -1,21 +1,21 @@
-/*jslint browser: true, vars:true*/
+/*jslint browser: true, vars:true, plusplus:true*/
 /*global TH*/
 "use strict";
-var util = TH.Util;
+var Util = TH.Util;
 
 // function groupItems(timeStamps, delta) {
-util.groupItems = function (timeStamps, delta) {
+Util.groupItems = function (timeStamps, delta) {
 // group items according the timestamps for each item.
 // item (i) and (i+1) belongs to different groups if t[i+1]  - t[i] > delta
 // UNIT: the unit of delta is milliseconds
 // ASSUMPTION: timeStamps is in descending order
-    var lastTime = 0;
     var groups = [], group = [];
-    var j = 0;
-    var interval;
-    var i;
-    for (i = timeStamps.length; i >= 0; i -= 1) {
-        interval = timeStamps[i] - lastTime;
+    var interval = 0;
+    var i = 0, j = 0, N = timeStamps.length;
+    var lastTime = timeStamps[N-1];
+    // for (i = N; i >= 0; --i) {
+    for (i = 0; i < N; ++i) {
+        interval = lastTime - timeStamps[i];
         if (interval < delta) {
             group.push(i);
         } else if (group.length > 0) {
@@ -32,7 +32,7 @@ util.groupItems = function (timeStamps, delta) {
 };
 
 // function parseURL(url) {
-util.parseURL = function (url) {
+Util.parseURL = function (url) {
     var pathArray = url.split('/');
     var host = pathArray[2] + '/';
     var path = pathArray[3];
@@ -41,7 +41,7 @@ util.parseURL = function (url) {
 };
 
 // function truncStr(s, len) {
-util.truncStr = function (s, len) {
+Util.truncStr = function (s, len) {
     if (s.length > len) {
         return s.substring(0, len) + '...';
     }
@@ -51,7 +51,7 @@ util.truncStr = function (s, len) {
 
 
 // function getTimeStamps(historyItems, type) {
-util.getTimeStamps = function (historyItems, type) {
+Util.getTimeStamps = function (historyItems, type) {
     // Get Time information About Each Visit
     // FIXME now only the last visit time for each history Item
     var tformat = function (t, type) {
@@ -72,7 +72,7 @@ util.getTimeStamps = function (historyItems, type) {
 
 
 // function tag_animate() {
-util.tag_animate = function (target) {
+Util.tag_animate = function (target) {
     var orig_style = target.style;
     target.setAttribute('style', 'background: #8AAAED; color: white;');
     var showTime = 200;

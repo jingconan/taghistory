@@ -27,7 +27,7 @@ var main = function (TH) {
     /*jslint unparam: false*/
 
     TH_views.updateInterval(TH.Para.Interval.init);
-    TH_views.RefreshButton();
+    // TH_views.RefreshButton();
     $('#sync_to_evernote').on("click", TH.Services.Evernote.sync);
 };
 
