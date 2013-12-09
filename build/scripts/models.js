@@ -2,11 +2,9 @@
 /*global TH, chrome*/
 "use strict";
 var util = TH.Util;
-// var util = util || {};
-// var chrome = chrome || {};
-// var TH = TH || {};
+var Models = TH.MOdels;
 
-TH.Models.massage = function (historyItems, groups, storedTags) {
+Models.massage = function (historyItems, groups, storedTags) {
 // function massage(historyItems, groups, storedTags) {
 // Massage the history data into format required by Mustache
 // Parameters
@@ -98,10 +96,10 @@ TH.Models.massage = function (historyItems, groups, storedTags) {
 
 // search dataset.id recursively. At most 2 levels.
 // function searchDatasetID(target, i) {
-TH.Models.searchDatasetID = function (target, i) {
+Models.searchDatasetID = function (target, i) {
     var id = target.dataset.id;
     if ((id === undefined) && (i <= 2)) {
-        return TH.Models.searchDatasetID(target.parentElement, i + 1);
+        return Models.searchDatasetID(target.parentElement, i + 1);
     }
     console.log("id: " + id);
     return id;
@@ -114,7 +112,7 @@ TH.Models.searchDatasetID = function (target, i) {
 
 // fetchAllData Required
 // function fetchAllData(searchQuery, callback, paras) {
-TH.Models.fetchAllData = function (searchQuery, callback, paras) {
+Models.fetchAllData = function (searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function (historyItems) {
         chrome.storage.sync.get(util.getTimeStamps(historyItems, 1), function (storedTags) {
             chrome.storage.sync.get('tagList', function (tagList) {
@@ -126,16 +124,16 @@ TH.Models.fetchAllData = function (searchQuery, callback, paras) {
     });
 };
 
-TH.Models.divideData = function (storedInfo, interval) {
+Models.divideData = function (storedInfo, interval) {
     var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0),
                                  interval);
-    return TH.Models.massage(storedInfo.historyItems,
+    return Models.massage(storedInfo.historyItems,
                              groups,
                              storedInfo.storedTags);
 };
 
 // function init(TH) {
-TH.Models.init = function (TH) {
+Models.init = function (TH) {
     // var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
     var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
     var searchQuery = {

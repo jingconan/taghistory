@@ -1,3 +1,5 @@
+/*global TH:true*/
+
 TH = {
     Selectors: {
         history: '#history_items',
