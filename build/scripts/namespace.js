@@ -6,6 +6,7 @@ TH = {
         interval_value: '#interval_value'
     },
     Modules: {},
+    Util: {},
     Views: {},
     Models: {},
     Para: {

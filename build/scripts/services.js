@@ -2,7 +2,6 @@ var $ = $ || {};
 var Mustache = Mustache || {};
 var chrome = chrome || {};
 var window = window || {};
-var util = util || {};
 var TH = TH || {};
 var Thrift = Thrift || {};
 var NoteStoreClient = NoteStoreClient || {};

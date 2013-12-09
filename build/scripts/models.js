@@ -1,6 +1,10 @@
-var util = util || {};
-var chrome = chrome || {};
-var TH = TH || {};
+/*jslint browser: true, vars:true*/
+/*global TH, chrome*/
+"use strict";
+var util = TH.Util;
+// var util = util || {};
+// var chrome = chrome || {};
+// var TH = TH || {};
 
 TH.Models.massage = function (historyItems, groups, storedTags) {
 // function massage(historyItems, groups, storedTags) {
@@ -37,10 +41,10 @@ TH.Models.massage = function (historyItems, groups, storedTags) {
     var groupItem;
 
     var gLen = groups.length;
-    for(i = 0; i < gLen; ++i) {
+    for (i = 0; i < gLen; i += 1) {
         group = groups[i];
         visits = [];
-        for(j = 0; j < group.length; ++j) {
+        for (j = 0; j < group.length; j += 1) {
             idx = group[j];
             item = historyItems[idx];
             urlInfo = util.parseURL(item.url);
@@ -84,9 +88,11 @@ TH.Models.massage = function (historyItems, groups, storedTags) {
     }
 
 
-    history.sort(function (a, b){return b.timeStamp - a.timeStamp;});
-    return {history: history, 
-        IDMap: IDMap};
+    history.sort(function (a, b) {return b.timeStamp - a.timeStamp; });
+    return {
+        history: history,
+        IDMap: IDMap
+    };
 };
 
 
@@ -95,7 +101,7 @@ TH.Models.massage = function (historyItems, groups, storedTags) {
 TH.Models.searchDatasetID = function (target, i) {
     var id = target.dataset.id;
     if ((id === undefined) && (i <= 2)) {
-        return TH.Models.searchDatasetID(target.parentElement, i+1);
+        return TH.Models.searchDatasetID(target.parentElement, i + 1);
     }
     console.log("id: " + id);
     return id;
@@ -108,28 +114,28 @@ TH.Models.searchDatasetID = function (target, i) {
 
 // fetchAllData Required
 // function fetchAllData(searchQuery, callback, paras) {
-TH.Models.fetchAllData = function(searchQuery, callback, paras) {
-    chrome.history.search(searchQuery, function(historyItems) {
-        chrome.storage.sync.get(util.getTimeStamps(historyItems, 1), function(storedTags) {
-            chrome.storage.sync.get('tagList', function(tagList) {
-                callback({historyItems: historyItems, 
-                         storedTags: storedTags, 
+TH.Models.fetchAllData = function (searchQuery, callback, paras) {
+    chrome.history.search(searchQuery, function (historyItems) {
+        chrome.storage.sync.get(util.getTimeStamps(historyItems, 1), function (storedTags) {
+            chrome.storage.sync.get('tagList', function (tagList) {
+                callback({historyItems: historyItems,
+                         storedTags: storedTags,
                          tagList: tagList}, paras);
             });
         });
     });
 };
 
-TH.Models.divideData = function(storedInfo, interval) {
-    var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0), 
+TH.Models.divideData = function (storedInfo, interval) {
+    var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0),
                                  interval);
-    return TH.Models.massage(storedInfo.historyItems, 
-                             groups, 
+    return TH.Models.massage(storedInfo.historyItems,
+                             groups,
                              storedInfo.storedTags);
 };
 
 // function init(TH) {
-TH.Models.init = function(TH) {
+TH.Models.init = function (TH) {
     // var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
     var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
     var searchQuery = {
@@ -145,8 +151,8 @@ TH.Models.init = function(TH) {
         TH.Store.storedInfo = storedInfo;
 
         TH.Views.renderHistory(massageInfo);
-        TH.Views.renderTagsMenu(massageInfo, storedInfo.tagList, 
-                                function() { TH.Views.renderHistory(massageInfo); });
+        TH.Views.renderTagsMenu(massageInfo, storedInfo.tagList,
+                                function () { TH.Views.renderHistory(massageInfo); });
     });
 
 
