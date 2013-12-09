@@ -5,6 +5,7 @@ TH = {
         interval_slider: '#interval_slider',
         interval_value: '#interval_value'
     },
+    Modules: {},
     Views: {},
     Models: {},
     Para: {
