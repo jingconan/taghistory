@@ -4,6 +4,26 @@
 var Util = TH.Util;
 var Models = TH.Models;
 
+Models.sortByTags = function(historyItems, storedTags, tags) {
+    var i = 0, N, item, tstr;
+    var tg = '', tagsInfo = {};
+    N = tags.length;
+    for (i = 0; i < N; ++i) {
+        tagsInfo[tags[i]] = [];
+    }
+
+    N = historyItems.length;
+    for (i = 0; i < N; ++i){
+        item = historyItems[i];
+        tstr = (new Date(item.lastVisitTime)).toLocaleString();
+        tg = storedTags[tstr];
+        if (tg !== undefined) {
+            tagsInfo[tg.tag_name].push(item);
+        }
+    }
+    return tagsInfo;
+};
+
 Models.massage = function (historyItems, groups, storedTags) {
 // function massage(historyItems, groups, storedTags) {
 // Massage the history data into format required by Mustache
@@ -65,7 +85,8 @@ Models.massage = function (historyItems, groups, storedTags) {
                 path: urlInfo.path,
                 id: visitId,
                 tag: tag,
-                time: visitTime
+                time: visitTime,
+                seconds: item.lastVisitTime
             };
             visits.push(visitItem);
             IDMap[visitId] = visitItem;

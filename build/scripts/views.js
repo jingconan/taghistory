@@ -5,6 +5,13 @@ var Views = TH.Views;
 var Models = TH.Models;
 var Selectors = TH.Selectors;
 
+Views.renderEvernoteExport = function (everInfo) {
+    var template = TH.Templates.evernote;
+    debugger;
+    return 'stub, good in renderEvernoteExport';
+    // return Mustache.to_html(template, everInfo);
+};
+
 // function buildHistory(selector, massageInfo, template, data) {
 Views.renderHistory = function (massageInfo) {
     var data = TH.Prompts;
