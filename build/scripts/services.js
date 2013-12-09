@@ -1,12 +1,13 @@
 /*jslint browser: true, vars:true, plusplus:true*/
 /*global TH, Thrift, NoteStoreClient, Note*/
-"use strict"; 
+"use strict";
 
 var Services = TH.Services;
+// debugger;
 var Evernote = Services.Evernote;
 
 
-Evernote.init = function() {
+Evernote.init = function () {
     console.log('test');
     var noteStoreURL = Services.Evernote.noteStoreURL;
     var noteStoreTransport = new Thrift.BinaryHttpTransport(noteStoreURL);
@@ -18,12 +19,12 @@ Evernote.fmtItem = function (item, tag) {
     var head;
     if (tag === undefined) {
         return '';
-    } 
+    }
     head = tag.tag_name + '\t';
     return head + item.title + ' ' + item.visitCount + '<br/>\n';
 };
 
-Evernote.format = function(storedInfo) {
+Evernote.format = function (storedInfo) {
     // inptut is the info from the chrome storage
     // output is the formatted note string
     // FIXME this is a stub, need to be finished
@@ -39,12 +40,11 @@ Evernote.format = function(storedInfo) {
     }
     // get tagNameArray from tagList
     N = tagList.length;
-    var tagNameArray = []
+    var tagNameArray = [];
     for (i = 0; i < N; ++i) {
         tagNameArray.push(tagList[i].tag_name);
     }
-   
-    var tagsInfo = TH.Models.sortByTags(storedInfo.historyItems, 
+    var tagsInfo = TH.Models.sortByTags(storedInfo.historyItems,
                                         storedInfo.storedTags,
                                         tagNameArray);
     // change the format to be suitable for mustache
@@ -61,7 +61,7 @@ Evernote.format = function(storedInfo) {
     return out;
 };
 
-Evernote.sync = function() {
+Evernote.sync = function () {
     var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
     var searchQuery = {
         'text': '',
@@ -69,17 +69,19 @@ Evernote.sync = function() {
     };
 
 
-    TH.Models.fetchAllData(searchQuery, function(storedInfo) {
+    TH.Models.fetchAllData(searchQuery, function (storedInfo) {
         console.log("run here");
         var authenticationToken = Evernote.authenticationToken;
         var note = new Note();
-        
-        Evernote.noteStore.listNotebooks(authenticationToken, function (notebooks) {
-            console.log(notebooks);
-        },
-        function onerror(error) {
-            console.log(error);
-        });
+
+        Evernote.noteStore.listNotebooks(authenticationToken,
+            function (notebooks) {
+                console.log(notebooks);
+            },
+            function onerror(error) {
+                console.log(error);
+            }
+            );
 
         note.title = "Note Export Record";
         note.content = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -90,7 +92,7 @@ Evernote.sync = function() {
 
         // debugger;
 
-        Evernote.noteStore.createNote(authenticationToken, note, function(res) {
+        Evernote.noteStore.createNote(authenticationToken, note, function (res) {
             if (res.guid !== undefined) {
                 console.log("Creating a new note in the default notebook");
                 console.log("Successfully created a new note with GUID: " +
@@ -98,10 +100,20 @@ Evernote.sync = function() {
                 return;
             }
             console.log("Error");
-            console.log(err);
+            console.log(res);
         });
 
 
     });
+};
+
+Evernote.oauth = function (req, res) {
+  var client = new Evernote.Client({
+    consumerKey: config.API_CONSUMER_KEY,
+    consumerSecret: config.API_CONSUMER_SECRET,
+    sandbox: config.SANDBOX
+  });
+
+
 };
 
