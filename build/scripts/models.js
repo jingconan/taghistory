@@ -1,8 +1,8 @@
 /*jslint browser: true, vars:true*/
 /*global TH, chrome*/
 "use strict";
-var util = TH.Util;
-var Models = TH.MOdels;
+var Util = TH.Util;
+var Models = TH.Models;
 
 Models.massage = function (historyItems, groups, storedTags) {
 // function massage(historyItems, groups, storedTags) {
@@ -45,7 +45,7 @@ Models.massage = function (historyItems, groups, storedTags) {
         for (j = 0; j < group.length; j += 1) {
             idx = group[j];
             item = historyItems[idx];
-            urlInfo = util.parseURL(item.url);
+            urlInfo = Util.parseURL(item.url);
             visitId = 'c' + i.toString() + '-' + j.toString();
             visitTime = (new Date(item.lastVisitTime)).toLocaleString();
             if (storedTags[visitTime] === undefined) {
@@ -60,7 +60,7 @@ Models.massage = function (historyItems, groups, storedTags) {
                 isGrouped: false,
                 url: item.url,
                 domain: urlInfo.host,
-                title: util.truncStr(item.title, 80),
+                title: Util.truncStr(item.title, 80),
                 host: urlInfo.host,
                 path: urlInfo.path,
                 id: visitId,
@@ -114,7 +114,7 @@ Models.searchDatasetID = function (target, i) {
 // function fetchAllData(searchQuery, callback, paras) {
 Models.fetchAllData = function (searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function (historyItems) {
-        chrome.storage.sync.get(util.getTimeStamps(historyItems, 1), function (storedTags) {
+        chrome.storage.sync.get(Util.getTimeStamps(historyItems, 1), function (storedTags) {
             chrome.storage.sync.get('tagList', function (tagList) {
                 callback({historyItems: historyItems,
                          storedTags: storedTags,
@@ -125,7 +125,7 @@ Models.fetchAllData = function (searchQuery, callback, paras) {
 };
 
 Models.divideData = function (storedInfo, interval) {
-    var groups = util.groupItems(util.getTimeStamps(storedInfo.historyItems, 0),
+    var groups = Util.groupItems(Util.getTimeStamps(storedInfo.historyItems, 0),
                                  interval);
     return Models.massage(storedInfo.historyItems,
                              groups,
@@ -133,7 +133,7 @@ Models.divideData = function (storedInfo, interval) {
 };
 
 // function init(TH) {
-Models.init = function (TH) {
+Models.init = function () {
     // var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
     var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
     var searchQuery = {
@@ -142,7 +142,7 @@ Models.init = function (TH) {
     };
 
 
-    TH.Models.fetchAllData(searchQuery, function (storedInfo) {
+    Models.fetchAllData(searchQuery, function (storedInfo) {
         var interval = TH.Views.intervalValue();
         console.log("interval: " + interval);
         var massageInfo = TH.Models.divideData(storedInfo, interval);

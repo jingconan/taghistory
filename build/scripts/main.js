@@ -2,7 +2,7 @@
 /*global $, TH*/
 "use strict";
 var main = function (TH) {
-    TH.Models.init(TH);
+    TH.Models.init();
     var TH_interval = TH.Para.Interval;
     var TH_views = TH.Views;
     // var $ = TH.Modules.$;
@@ -31,15 +31,16 @@ var main = function (TH) {
     $('#sync_to_evernote').on("click", TH.Services.Evernote.sync);
 };
 
-var update = function (dst, src) {
-    var mks = Object.keys(src);
-    var i = 0, N = mks.length;
-    for (i = 0; i < N; i += 1) {
-        dst[mks[i]] = src[mks[i]];
-    }
-};
-
 main(TH);
+
+// var update = function (dst, src) {
+//     var mks = Object.keys(src);
+//     var i = 0, N = mks.length;
+//     for (i = 0; i < N; i += 1) {
+//         dst[mks[i]] = src[mks[i]];
+//     }
+// };
+
 
 // var loadModules = function (names, callback) {
 //     require(names, function () {
