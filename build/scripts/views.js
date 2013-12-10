@@ -36,10 +36,10 @@ Views.renderHistory = function (massageInfo) {
 /*jslint unparam: true*/
 // function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle) {
 Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
-    var vd = [{tag_name: 'Research'},
-        {tag_name: 'Programming'},
-        {tag_name: 'Music'}];
-    chrome.storage.sync.set({'tagList': vd});
+    // var vd = [{tag_name: 'Research'},
+    //     {tag_name: 'Programming'},
+    //     {tag_name: 'Music'}];
+    // chrome.storage.sync.set({'tagList': vd});
 
     var selector = Selectors.tag;
     var template = TH.Templates.tags;
@@ -89,6 +89,8 @@ Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
             Views.renderTagsMenu(this.selector, this.massageInfo,
                           this.template, this.tagList, this.paras);
         });
+        $(selector).html(Mustache.to_html(template, tagList));
+
     }
 
     $(selector).html(Mustache.to_html(template, tagList));
@@ -98,6 +100,8 @@ Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
     });
     $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault(); });
     $(selector + ' #create_new_tag').on('drop', createNewTag);
+    $(selector + ' #create_new_tag').on('click', createNewTag);
+
 };
 
 // function msgAnimate(left, top, msg, width, height) {
