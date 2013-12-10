@@ -1,0 +1,22 @@
+.option_item {
+    padding-bottom:5px;
+    display: inline-block;
+    font-weight: bold;
+    margin: 0 32px 0 0;
+    width: 160px;
+    vertical-align: top;
+    zoom: 1;
+    line-height: 24px;
+}
+
+.option_input_text {
+    width: 420px;
+    max-width: 420px;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+}

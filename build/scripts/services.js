@@ -6,9 +6,7 @@ var Services = TH.Services;
 var Evernote = Services.Evernote;
 
 
-Evernote.init = function () {
-    console.log('test');
-    var noteStoreURL = Services.Evernote.noteStoreURL;
+Evernote.init = function (noteStoreURL) {
     var noteStoreTransport = new Thrift.BinaryHttpTransport(noteStoreURL);
     var noteStoreProtocol = new Thrift.BinaryProtocol(noteStoreTransport);
     Evernote.noteStore = new NoteStoreClient(noteStoreProtocol);
@@ -61,40 +59,35 @@ Evernote.format = function (storedInfo) {
 };
 
 Evernote.getToken = function (callback) {
-    if (Evernote.authenticationToken !== undefined) {
-        callback(Evernote.authenticationToken);
+    if (Evernote.evernoteToken !== undefined) {
+        callback({'evernoteToken': Evernote.evernoteToken,
+                  'notestoreUrl': Evernote.notestoreUrl
+                 });
     }
-    chrome.storage.sync.get('evernoteToken', function (res) {
-        console.log("evernoteToken: " + res.evernoteToken);
-        if (typeof res.evernoteToken === 'string') {
-            Evernote.authenticationToken = res.evernoteToken;
-            callback(res.evernoteToken);
+    chrome.storage.sync.get('evernoteOAuth', function (res) {
+        var oAuth = res.evernoteOAuth;
+        var evernoteToken = oAuth.evernoteToken;
+        var notestoreUrl = oAuth.notestoreUrl;
+        if (typeof evernoteToken === 'string') {
+            Evernote.evernoteToken = evernoteToken;
+            Evernote.notestoreUrl = notestoreUrl;
+            callback(oAuth);
             return;
         }
         // Evernote.updateToken(callback);
-        alert("You must update Evernote token first");
+        alert("You must update Evernote oAuth information first");
     });
 };
 
 
 
-Evernote.updateToken = function (callback) {
+Evernote.promptUpdateToken = function (callback) {
     window.open(Evernote.evernoteHost + "/api/DeveloperToken.action",
                 "Evernote Token Setup page",
                 "left=0,width=700, height=600");
     window.open("options.html",
                 "Options page",
                 "left=700,width=700, height=600");
-    // var evernoteToken = window.prompt("Please enter Evernote token.\n" +
-    //                                   " You can get one from www.evernote.com/api/DeveloperToken.action",
-    // "");
-
-    // chrome.storage.sync.set({'evernoteToken': evernoteToken}, function () {
-    //     console.log('successfully stored token');
-    //     if (callback !== undefined) {
-    //         callback(evernoteToken);
-    //     }
-    // });
 }
 
 Evernote.sync = function () {
@@ -106,10 +99,11 @@ Evernote.sync = function () {
 
 
     TH.Models.fetchAllData(searchQuery, function (storedInfo) {
-        Evernote.getToken(function (authenticationToken) {
+        Evernote.getToken(function (oAuth) {
+            Evernote.init(oAuth.notestoreUrl);
             var note = new Note();
 
-            Evernote.noteStore.listNotebooks(authenticationToken,
+            Evernote.noteStore.listNotebooks(oAuth.evernoteToken,
                 function (notebooks) {
                     console.log(notebooks);
                 },
@@ -125,7 +119,8 @@ Evernote.sync = function () {
             note.content += Evernote.format(storedInfo);
             note.content += '</en-note>';
 
-            Evernote.noteStore.createNote(authenticationToken, note, function (res) {
+            // debugger;
+            Evernote.noteStore.createNote(oAuth.evernoteToken, note, function (res) {
                 if (res.guid !== undefined) {
                     console.log("Creating a new note in the default notebook");
                     console.log("Successfully created a new note with GUID: " +

@@ -27,9 +27,9 @@ var main = function (TH) {
     /*jslint unparam: false*/
 
     TH_views.updateInterval(TH.Para.Interval.init);
-    TH.Services.Evernote.init();
+    // TH.Services.Evernote.init();
     $('#sync_to_evernote').on("click", TH.Services.Evernote.sync);
-    $('#update_evernote_token').on("click", TH.Services.Evernote.updateToken);
+    $('#update_evernote_token').on("click", TH.Services.Evernote.promptUpdateToken);
 };
 
 main(TH);
