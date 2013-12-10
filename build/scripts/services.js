@@ -125,6 +125,7 @@ Evernote.sync = function () {
                     console.log("Creating a new note in the default notebook");
                     console.log("Successfully created a new note with GUID: " +
                                 res.guid);
+                    alert("Successfully synchronize the tagged notes to Evernote!");
                     return;
                 }
                 console.log("Error");
