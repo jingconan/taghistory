@@ -1,9 +1,8 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global TH, Thrift, NoteStoreClient, Note*/
+/*global $, TH, Thrift, NoteStoreClient, Note, chrome*/
 "use strict";
 
 var Services = TH.Services;
-// debugger;
 var Evernote = Services.Evernote;
 
 
@@ -61,6 +60,43 @@ Evernote.format = function (storedInfo) {
     return out;
 };
 
+Evernote.getToken = function (callback) {
+    if (Evernote.authenticationToken !== undefined) {
+        callback(Evernote.authenticationToken);
+    }
+    chrome.storage.sync.get('evernoteToken', function (res) {
+        console.log("evernoteToken: " + res.evernoteToken);
+        if (typeof res.evernoteToken === 'string') {
+            Evernote.authenticationToken = res.evernoteToken;
+            callback(res.evernoteToken);
+            return;
+        }
+        // Evernote.updateToken(callback);
+        alert("You must update Evernote token first");
+    });
+};
+
+
+
+Evernote.updateToken = function (callback) {
+    window.open(Evernote.evernoteHost + "/api/DeveloperToken.action",
+                "Evernote Token Setup page",
+                "left=0,width=700, height=600");
+    window.open("options.html",
+                "Options page",
+                "left=700,width=700, height=600");
+    // var evernoteToken = window.prompt("Please enter Evernote token.\n" +
+    //                                   " You can get one from www.evernote.com/api/DeveloperToken.action",
+    // "");
+
+    // chrome.storage.sync.set({'evernoteToken': evernoteToken}, function () {
+    //     console.log('successfully stored token');
+    //     if (callback !== undefined) {
+    //         callback(evernoteToken);
+    //     }
+    // });
+}
+
 Evernote.sync = function () {
     var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
     var searchQuery = {
@@ -70,50 +106,48 @@ Evernote.sync = function () {
 
 
     TH.Models.fetchAllData(searchQuery, function (storedInfo) {
-        console.log("run here");
-        var authenticationToken = Evernote.authenticationToken;
-        var note = new Note();
+        Evernote.getToken(function (authenticationToken) {
+            var note = new Note();
 
-        Evernote.noteStore.listNotebooks(authenticationToken,
-            function (notebooks) {
-                console.log(notebooks);
-            },
-            function onerror(error) {
-                console.log(error);
-            }
-            );
+            Evernote.noteStore.listNotebooks(authenticationToken,
+                function (notebooks) {
+                    console.log(notebooks);
+                },
+                function onerror(error) {
+                    console.log(error);
+                }
+                );
 
-        note.title = "Note Export Record";
-        note.content = '<?xml version="1.0" encoding="UTF-8"?>';
-        note.content += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">';
-        note.content += '<en-note>Exported by Tag-History<br/>';
-        note.content += Evernote.format(storedInfo);
-        note.content += '</en-note>';
+            note.title = "Note Export Record";
+            note.content = '<?xml version="1.0" encoding="UTF-8"?>';
+            note.content += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">';
+            note.content += '<en-note>Exported by Tag-History<br/>';
+            note.content += Evernote.format(storedInfo);
+            note.content += '</en-note>';
 
-        // debugger;
+            Evernote.noteStore.createNote(authenticationToken, note, function (res) {
+                if (res.guid !== undefined) {
+                    console.log("Creating a new note in the default notebook");
+                    console.log("Successfully created a new note with GUID: " +
+                                res.guid);
+                    return;
+                }
+                console.log("Error");
+                console.log(res);
+            });
 
-        Evernote.noteStore.createNote(authenticationToken, note, function (res) {
-            if (res.guid !== undefined) {
-                console.log("Creating a new note in the default notebook");
-                console.log("Successfully created a new note with GUID: " +
-                            res.guid);
-                return;
-            }
-            console.log("Error");
-            console.log(res);
         });
-
 
     });
 };
 
-Evernote.oauth = function (req, res) {
-  var client = new Evernote.Client({
-    consumerKey: config.API_CONSUMER_KEY,
-    consumerSecret: config.API_CONSUMER_SECRET,
-    sandbox: config.SANDBOX
-  });
+// Evernote.oauth = function (req, res) {
+//     var client = new Evernote.Client({
+//         consumerKey: config.API_CONSUMER_KEY,
+//         consumerSecret: config.API_CONSUMER_SECRET,
+//         sandbox: config.SANDBOX
+//     });
 
 
-};
+// };
 

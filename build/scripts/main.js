@@ -29,6 +29,7 @@ var main = function (TH) {
     TH_views.updateInterval(TH.Para.Interval.init);
     TH.Services.Evernote.init();
     $('#sync_to_evernote').on("click", TH.Services.Evernote.sync);
+    $('#update_evernote_token').on("click", TH.Services.Evernote.updateToken);
 };
 
 main(TH);

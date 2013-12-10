@@ -1,6 +1,8 @@
 {
     "background": {
         "scripts": [
+            // "frameworks/chrome_ex_oauthsimple.js",
+            // "frameworks/chrome_ex_oauth.js",
             "scripts/background.js"
         ],
         "persitent": false

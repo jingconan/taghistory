@@ -4,7 +4,7 @@
 var Util = TH.Util;
 var Models = TH.Models;
 
-Models.sortByTags = function(historyItems, storedTags, tags) {
+Models.sortByTags = function (historyItems, storedTags, tags) {
     var i = 0, N, item, tstr;
     var tg = '', tagsInfo = {};
     N = tags.length;
@@ -13,7 +13,7 @@ Models.sortByTags = function(historyItems, storedTags, tags) {
     }
 
     N = historyItems.length;
-    for (i = 0; i < N; ++i){
+    for (i = 0; i < N; ++i) {
         item = historyItems[i];
         tstr = (new Date(item.lastVisitTime)).toLocaleString();
         item.tstr = tstr;
@@ -138,9 +138,9 @@ Models.fetchAllData = function (searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function (historyItems) {
         chrome.storage.sync.get(Util.getTimeStamps(historyItems, 1), function (storedTags) {
             chrome.storage.sync.get('tagList', function (tagList) {
-                callback({historyItems: historyItems,
-                         storedTags: storedTags,
-                         tagList: tagList}, paras);
+                    callback({historyItems: historyItems,
+                             storedTags: storedTags,
+                             tagList: tagList}, paras);
             });
         });
     });
