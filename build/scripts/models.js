@@ -137,10 +137,14 @@ Models.searchDatasetID = function (target, i) {
 Models.fetchAllData = function (searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function (historyItems) {
         chrome.storage.sync.get(Util.getTimeStamps(historyItems, 1), function (storedTags) {
+
             chrome.storage.sync.get('tagList', function (tagList) {
-                    callback({historyItems: historyItems,
-                             storedTags: storedTags,
-                             tagList: tagList}, paras);
+                if (undefined === tagList.tagList) {
+                    tagList.tagList = [];
+                }
+                callback({historyItems: historyItems,
+                          storedTags: storedTags,
+                          tagList: tagList}, paras);
             });
         });
     });
