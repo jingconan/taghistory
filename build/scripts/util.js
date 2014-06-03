@@ -50,22 +50,21 @@ Util.truncStr = function (s, len) {
 };
 
 
+Util.tformat = function (t, type) {
+    if (type === 0) {
+        return t;
+    }
+    return (new Date(t)).toLocaleString();
+};
 
+// FIXME now only the last visit time for each history Item
 // function getTimeStamps(historyItems, type) {
 Util.getTimeStamps = function (historyItems, type) {
     // Get Time information About Each Visit
-    // FIXME now only the last visit time for each history Item
-    var tformat = function (t, type) {
-        if (type === 0) {
-            return t;
-        }
-        return (new Date(t)).toLocaleString();
-    };
-
     var timeStamps = [];
     var i;
     for (i = 0; i < historyItems.length; i += 1) {
-        timeStamps.push(tformat(historyItems[i].lastVisitTime, type));
+        timeStamps.push(Util.tformat(historyItems[i].lastVisitTime, type));
     }
     return timeStamps;
 };

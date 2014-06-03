@@ -44,37 +44,20 @@ Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
     var selector = Selectors.tag;
     var template = TH.Templates.tags;
 
-    function addTag(visit, tag) {
-        visit.tag = {tag_name: tag}; // Only allow one tag for each visit
-
-        var obj = {};
-        obj[visit.time] = visit.tag;
-        ++addTag.prototype.visitNum;
-        chrome.storage.sync.set(obj, function () {
-            --addTag.prototype.visitNum;
-            console.log("addTag.prototype.visitNum: " + addTag.prototype.visitNum);
-            if (addTag.prototype.visitNum === 0) {
-                console.log("run callback");
-                callbackHandle();
-            }
-        });
-        console.log("addTag.prototype.visitNum: " + addTag.prototype.visitNum);
-    }
-
-
     function onDrop(ev) {
         ev.preventDefault();
+        console.log("run on Drop");
         var itemID = ev.dataTransfer.getData("itemID");
         var item = massageInfo.IDMap[itemID];
         var tag = ev.target.textContent;
         var rect = ev.target.getBoundingClientRect();
 
-        addTag.prototype.visitNum = 0; // indicator or unfinished callbacks
+        Models.addTag.prototype.visitNum = 0; // indicator or unfinished callbacks
         if (item.visits === undefined) { // visit item
-            addTag(item, tag);
+            Models.addTag(item, tag, callbackHandle);
         } else { // group item
             $.each(item.visits, function (idx, value) {
-                addTag(value, tag);
+                Models.addTag(value, tag, callbackHandle);
             });
         }
 

@@ -55,7 +55,7 @@ Models.massage = function (historyItems, groups, storedTags) {
     var groupDate;
 
     var IDMap = {};
-    var visitId, groupID, visitTime, tag;
+    var visitId, groupID, visitTime, tag, vk;
     var visitItem;
     var groupItem;
 
@@ -69,10 +69,11 @@ Models.massage = function (historyItems, groups, storedTags) {
             urlInfo = Util.parseURL(item.url);
             visitId = 'c' + i.toString() + '-' + j.toString();
             visitTime = (new Date(item.lastVisitTime)).toLocaleString();
-            if (storedTags[visitTime] === undefined) {
+            vk = Models.getVisitItemKey(item);
+            if (storedTags[vk] === undefined) {
                 tag = [];
             } else {
-                tag = storedTags[visitTime];
+                tag = storedTags[vk];
                 // console.log('there is stored Tags for: ' + visitTime + ': ' + tag);
                 // debugger;
             }
@@ -136,7 +137,15 @@ Models.searchDatasetID = function (target, i) {
 // function fetchAllData(searchQuery, callback, paras) {
 Models.fetchAllData = function (searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function (historyItems) {
-        chrome.storage.sync.get(Util.getTimeStamps(historyItems, 1), function (storedTags) {
+        var i = 0,
+            k = "",
+            keys = [], 
+            N = historyItems.length;
+        for (i = 0; i < N; ++i) {
+            k = Models.getVisitItemKey(historyItems[i]);
+            keys.push(k);
+        }
+        chrome.storage.sync.get(keys, function (storedTags) {
 
             chrome.storage.sync.get('tagList', function (tagList) {
                 if (undefined === tagList.tagList) {
@@ -148,6 +157,53 @@ Models.fetchAllData = function (searchQuery, callback, paras) {
             });
         });
     });
+};
+
+
+Models.getVisitItemKey = function (visit) {
+    // return timeStamp;
+    // function GetBaseUrl(url) {
+    //     try {
+    //         var start = url.indexOf('//');
+    //         if (start < 0)
+    //             start = 0 
+    //         else 
+    //             start = start + 2;
+
+    //         var end = url.indexOf('/', start);
+    //         if (end < 0) end = url.length - start;
+
+    //         var baseURL = url.substring(start, end);
+    //         return baseURL;
+    //     }
+    //     catch (arg) {
+    //         return null;
+    //     }
+    // }
+    // debugger;
+    return visit.url.split("#")[0].split("&")[0].split('?')[0];
+    // return GetBaseUrl(visit.url);
+};
+
+Models.addTag = function (visit, tag, callback) {
+    visit.tag = {tag_name: tag}; // Only allow one tag for each visit
+    // debugger;
+
+    var obj = {};
+    var key = Models.getVisitItemKey(visit);
+    console.log("store: k: " + key + " val: " + visit.tag);
+    obj[key] = visit.tag;
+    ++Models.addTag.prototype.visitNum;
+    chrome.storage.sync.set(obj, function () {
+        --Models.addTag.prototype.visitNum;
+        console.log("addTag.prototype.visitNum: " + Models.addTag.prototype.visitNum);
+        if (Models.addTag.prototype.visitNum === 0) {
+            console.log("run callback");
+            callback();
+            // callbackHandle();
+        }
+    });
+    console.log("addTag.prototype.visitNum: " + Models.addTag.prototype.visitNum);
 };
 
 Models.divideData = function (storedInfo, interval) {
