@@ -5,7 +5,7 @@ var Util = TH.Util;
 var Models = TH.Models;
 
 Models.sortByTags = function (historyItems, storedTags, tags) {
-    var i = 0, N, item, tstr;
+    var i = 0, N, item, tstr, item_key;
     var tg = '', tagsInfo = {};
     N = tags.length;
     for (i = 0; i < N; ++i) {
@@ -17,7 +17,8 @@ Models.sortByTags = function (historyItems, storedTags, tags) {
         item = historyItems[i];
         tstr = (new Date(item.lastVisitTime)).toLocaleString();
         item.tstr = tstr;
-        tg = storedTags[tstr];
+        item_key = Models.getVisitItemKey(item);
+        tg = storedTags[item_key];
         if (tg !== undefined) {
             tagsInfo[tg.tag_name].push(item);
         }
