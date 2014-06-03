@@ -1,7 +1,8 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global TH*/
+/*global TH, Blob, saveAs */
 "use strict";
 var Util = TH.Util;
+var Models = TH.Models;
 
 // function groupItems(timeStamps, delta) {
 Util.groupItems = function (timeStamps, delta) {
@@ -12,7 +13,7 @@ Util.groupItems = function (timeStamps, delta) {
     var groups = [], group = [];
     var interval = 0;
     var i = 0, j = 0, N = timeStamps.length;
-    var lastTime = timeStamps[N-1];
+    var lastTime = timeStamps[N - 1];
     // for (i = N; i >= 0; --i) {
     for (i = 0; i < N; ++i) {
         interval = lastTime - timeStamps[i];
@@ -79,4 +80,22 @@ Util.tag_animate = function (target) {
     window.setInterval(function () {
         target.setAttribute('style', orig_style);
     }, showTime);
+};
+
+// Data exporter
+Util.data_export = function () {
+    var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
+    var searchQuery = {
+        'text': '',
+        'startTime': oneWeekAgo,
+    };
+
+
+    Models.fetchAllData(searchQuery, function (storedInfo) {
+        TH.Store.storedInfo = storedInfo;
+        var blob = new Blob([JSON.stringify(storedInfo)], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, "taghistory-data.txt");
+    });
+
+
 };
