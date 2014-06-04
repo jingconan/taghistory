@@ -1,5 +1,5 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global $, TH, Mustache, chrome*/
+/*global $, TH, Mustache, chrome, alert*/
 "use strict";
 var Views = TH.Views;
 var Models = TH.Models;
@@ -80,6 +80,11 @@ Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
     $(selector + ' .tags:not(#create_new_tag)').each(function (idx, tag) {
         tag.addEventListener('dragover', function (ev) {ev.preventDefault(); }, false);
         tag.addEventListener('drop', onDrop, false);
+        tag.addEventListener('dragstart', function (ev) {
+            console.log("drag start");
+            console.log("set removedTag of: " + ev + " as " + ev.target.textContent);
+            ev.dataTransfer.setData("removedTag", ev.target.textContent);
+        }, false);
     });
     $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault(); });
     $(selector + ' #create_new_tag').on('drop', createNewTag);
@@ -117,4 +122,19 @@ Views.intervalValue = function () {
 Views.updateInterval = function (val) {
     $(Selectors.interval_value).text(val + ' s');
     $(Selectors.interval_value).css('margin-left', val / TH.Para.Interval.max * 100 + '%');
+};
+
+Views.trash = function () {
+    $("#trash_bin").on('dragover', function (ev) {ev.preventDefault(); });
+    $("#trash_bin").each(function (idx, trash) {
+        trash.addEventListener('drop', function (ev) {
+            ev.preventDefault();
+            var removedTag = ev.dataTransfer.getData("removedTag");
+            //XXX now it is just a stub. need to remove tab from the data base.
+            alert("you removed tag: " + removedTag);
+        }, false);
+    });
+
+    $("#trash_bin").draggable();
+
 };

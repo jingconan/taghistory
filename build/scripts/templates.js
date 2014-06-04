@@ -2,5 +2,5 @@ TH.Templates.day_results = "<ol class='history'>    {{#history}}    <li class='i
 
 TH.Templates.evernote = "<ul>          {{#.}}    <li>          <div>{{tag_name}}</div>    <ul>        {{#items}}        <li>         <div>            <a href='{{url}}'>                <dl style='background-image: url(chrome://favicon/{{url}})'>                    {{#title}}                    {{{title}}}                    {{/title}}                    {{^title}}                    No Title                    {{/title}}                    <dt>{{tstr}}</dt>                </dl>            </a>        </div>        </li>        {{/items}}    </ul>    </li>         {{/.}}</ul>";
 
-TH.Templates.tags = "<ul class='menu'>          <li>          {{#tagList}}    <div class='tags'>{{tag_name}}</div>    {{/tagList}}    <div class='tags' id='create_new_tag'>+</div>    </li>     </ul>";
+TH.Templates.tags = "<ul class='menu'>          <li>          {{#tagList}}    <div class='tags' draggable='true'>{{tag_name}}</div>    {{/tagList}}    <div class='tags' id='create_new_tag'>+</div>    </li>     </ul>";
 
