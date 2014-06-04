@@ -1,5 +1,5 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global TH, Blob, saveAs */
+/*global TH, Blob, saveAs, chrome, FileReader*/
 "use strict";
 var Util = TH.Util;
 var Models = TH.Models;
@@ -97,4 +97,8 @@ Util.data_export = function () {
     });
 
 
+};
+
+Util.data_import = function () {
+    chrome.tabs.create({ url: "import.html"});
 };

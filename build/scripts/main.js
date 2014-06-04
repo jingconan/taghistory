@@ -31,6 +31,7 @@ var main = function (TH) {
     $('#sync_to_evernote').on("click", TH.Services.Evernote.sync);
     $('#update_evernote_token').on("click", TH.Services.Evernote.promptUpdateToken);
     $("#export_json").on("click", TH.Util.data_export);
+    $("#import_json").on("click", TH.Util.data_import);
 };
 
 main(TH);
