@@ -26,7 +26,7 @@ Models.sortByTags = function (historyItems, storedTags, tags) {
     return tagsInfo;
 };
 
-Models.massage = function (historyItems, groups, storedTags) {
+Models.massage = function (storedInfo, groups) {
 // function massage(historyItems, groups, storedTags) {
 // Massage the history data into format required by Mustache
 // Parameters
@@ -47,6 +47,10 @@ Models.massage = function (historyItems, groups, storedTags) {
 // idToPos : array of array
 //      map id to position of the records.
 //
+//
+    var historyItems = storedInfo.historyItems;
+    var storedTags = storedInfo.storedTags;
+    var tagList = storedInfo.tagList.tagList;
     var group, history = [];
     var urlInfo;
     var i, j;
@@ -60,6 +64,12 @@ Models.massage = function (historyItems, groups, storedTags) {
     var visitItem;
     var groupItem;
 
+
+    var tagSet = {}, tagNum = tagList.length;
+    for (i = 0; i < tagNum; ++i) {
+        tagSet[tagList[i].tag_name] = true;
+    }
+
     var gLen = groups.length;
     for (i = 0; i < gLen; i += 1) {
         group = groups[i];
@@ -71,7 +81,7 @@ Models.massage = function (historyItems, groups, storedTags) {
             visitId = 'c' + i.toString() + '-' + j.toString();
             visitTime = (new Date(item.lastVisitTime)).toLocaleString();
             vk = Models.getVisitItemKey(item);
-            if (storedTags[vk] === undefined) {
+            if (storedTags[vk] === undefined || tagSet[storedTags[vk].tag_name] !== true) {
                 tag = [];
             } else {
                 tag = storedTags[vk];
@@ -210,9 +220,7 @@ Models.addTag = function (visit, tag, callback) {
 Models.divideData = function (storedInfo, interval) {
     var groups = Util.groupItems(Util.getTimeStamps(storedInfo.historyItems, 0),
                                  interval);
-    return Models.massage(storedInfo.historyItems,
-                             groups,
-                             storedInfo.storedTags);
+    return Models.massage(storedInfo, groups);
 };
 
 // function init(TH) {
