@@ -78,7 +78,8 @@ Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
         tagList.tagList.push({tag_name: newTagName});
         Models.updateTagList(tagList, function () {
             Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
-            Views.renderTagsMenu(massageInfo, tagList, function () {});
+            // Views.renderTagsMenu(massageInfo, tagList, function () {});
+            $(selector).html(Mustache.to_html(template, tagList));
         });
     });
 };
