@@ -239,4 +239,8 @@ Models.init = function () {
 
 };
 
+Models.updateTagList = function (tagList, callback) {
+    chrome.storage.sync.set(tagList, callback);
+};
+
 
