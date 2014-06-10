@@ -140,7 +140,7 @@ Models.fetchAllData = function (searchQuery, callback, paras) {
     chrome.history.search(searchQuery, function (historyItems) {
         var i = 0,
             k = "",
-            keys = [], 
+            keys = [],
             N = historyItems.length;
         for (i = 0; i < N; ++i) {
             k = Models.getVisitItemKey(historyItems[i]);
@@ -229,10 +229,11 @@ Models.init = function () {
         var interval = TH.Views.intervalValue();
         console.log("interval: " + interval);
         var massageInfo = TH.Models.divideData(storedInfo, interval);
+        Models.massageInfo = massageInfo;
         TH.Store.storedInfo = storedInfo;
 
         TH.Views.renderHistory(massageInfo);
-        TH.Views.renderTagsMenu(massageInfo, storedInfo.tagList,
+        TH.Views.renderTagsMenu(massageInfo, storedInfo.tagList.tagList,
                                 function () { TH.Views.renderHistory(massageInfo); });
     });
 
@@ -240,7 +241,33 @@ Models.init = function () {
 };
 
 Models.updateTagList = function (tagList, callback) {
-    chrome.storage.sync.set(tagList, callback);
+    chrome.storage.sync.set({tagList: tagList}, callback);
+};
+
+Models.deleteTag = function (tag) {
+    chrome.storage.sync.get('tagList', function (obj) {
+        if (undefined === obj.tagList) {
+            obj.tagList = [];
+        }
+
+            // debugger;
+        // remove tags from an array
+        var newTagList = [];
+        var tagListLen = obj.tagList.length;
+        var tl;
+        var i;
+        for (i = 0; i < tagListLen; ++i) {
+            tl = obj.tagList[i];
+            if (tl.tag_name !== tag) {
+                newTagList.push(tl);
+            }
+        }
+        // update tag
+        console.log("remove tag: " + tag);
+        Models.updateTagList(newTagList);
+        // TH.Views.refreshTagsMenu(newTagList);
+        TH.Views.renderTagsMenu(Models.massageInfo, newTagList);
+    });
 };
 
 

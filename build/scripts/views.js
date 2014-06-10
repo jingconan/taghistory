@@ -33,6 +33,12 @@ Views.renderHistory = function (massageInfo) {
 };
 
 
+Views.refreshTagsMenu = function (tagList) {
+    var selector = Selectors.tag;
+    var template = TH.Templates.tags;
+    $(selector).html(Mustache.to_html(template, {tagList: tagList}));
+};
+
 /*jslint unparam: true*/
 // function buildTagsMenu(selector, massageInfo, template, tagList, callbackHandle) {
 Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
@@ -42,7 +48,6 @@ Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
     // chrome.storage.sync.set({'tagList': vd});
 
     var selector = Selectors.tag;
-    var template = TH.Templates.tags;
 
     function onDrop(ev) {
         ev.preventDefault();
@@ -64,7 +69,9 @@ Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
         Views.msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
     }
 
-    $(selector).html(Mustache.to_html(template, tagList));
+    // $(selector).html(Mustache.to_html(template, tagList));
+    Views.refreshTagsMenu(tagList);
+
     $(selector + ' .tags:not(#create_new_tag)').each(function (idx, tag) {
         tag.addEventListener('dragover', function (ev) {ev.preventDefault(); }, false);
         tag.addEventListener('dragstart', function (ev) {
@@ -75,11 +82,10 @@ Views.renderTagsMenu = function (massageInfo, tagList, callbackHandle) {
     $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault(); });
     $(selector + ' #create_new_tag').on('drop click', function (ev) {
         var newTagName = window.prompt("New tag name", "");
-        tagList.tagList.push({tag_name: newTagName});
+        tagList.push({tag_name: newTagName});
         Models.updateTagList(tagList, function () {
             Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
-            // Views.renderTagsMenu(massageInfo, tagList, function () {});
-            $(selector).html(Mustache.to_html(template, tagList));
+            Views.renderTagsMenu(massageInfo, tagList);
         });
     });
 };
@@ -123,7 +129,8 @@ Views.trash = function () {
             ev.preventDefault();
             var removedTag = ev.dataTransfer.getData("removedTag");
             //XXX now it is just a stub. need to remove tab from the data base.
-            alert("you removed tag: " + removedTag);
+            // alert("you removed tag: " + removedTag);
+            Models.deleteTag(removedTag);
         }, false);
     });
 
