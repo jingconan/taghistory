@@ -1,5 +1,5 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global TH, Blob, saveAs, chrome, FileReader*/
+/*global TH, Blob, saveAs, chrome, FileReader, $*/
 "use strict";
 var Util = TH.Util;
 var Models = TH.Models;
@@ -104,5 +104,14 @@ Util.data_import = function () {
 };
 
 Util.view_network = function () {
-    chrome.tabs.create({url: "network.html"});
+    // chrome.tabs.create({url: "network.html"});
+    var width = 960,
+        height = 500;
+    $("#network_dialog").dialog({
+        maxWidth:1000,
+        maxHeight: 800,
+        width: width,
+        height: height,
+    });
+    init_network("network_dialog", width, height);
 };

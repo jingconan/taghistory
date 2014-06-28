@@ -2,15 +2,18 @@
 /*global TH, d3*/
 "use strict";
 // set up SVG for D3
-(function () {
+function init_network(div_id, width, height) {
+    console.log("run here");
     var width  = 960,
         height = 500,
         colors = d3.scale.category10();
 
-    var svg = d3.select('body')
+    // var svg = d3.select('body')
+    var svg = d3.select('#' + div_id)
             .append('svg')
             .attr('width', width)
             .attr('height', height);
+    // debugger;
 
     // set up initial nodes and links
     //  - nodes are known by 'id', not by index in array.
@@ -389,4 +392,4 @@
         .on('keydown', keydown)
         .on('keyup', keyup);
     restart();
-}());
+}
