@@ -4,11 +4,10 @@
 // set up SVG for D3
 function init_network(div_id, width, height) {
     console.log("run here");
-    var width  = 960,
-        height = 500,
-        colors = d3.scale.category10();
+    var colors = d3.scale.category10();
 
     // var svg = d3.select('body')
+    d3.select('svg').remove();
     var svg = d3.select('#' + div_id)
             .append('svg')
             .attr('width', width)

@@ -108,10 +108,8 @@ Util.view_network = function () {
     var width = 960,
         height = 500;
     $("#network_dialog").dialog({
-        maxWidth:1000,
-        maxHeight: 800,
-        width: width,
-        height: height,
+        width: width * 1.2,
+        height: height * 1.2,
     });
     init_network("network_dialog", width, height);
 };
