@@ -1,8 +1,21 @@
 /*jslint browser: true, vars:true, plusplus:true*/
 /*global TH, d3*/
 "use strict";
+var Views = TH.Views;
+
+Views.plotGraph = function () {
+    // chrome.tabs.create({url: "network.html"});
+    var width = 960,
+        height = 500;
+    $("#network_dialog").dialog({
+        width: width * 1.2,
+        height: height * 1.2,
+    });
+    Views.D3Graph("network_dialog", width, height);
+};
+
 // set up SVG for D3
-function init_network(div_id, width, height) {
+Views.D3Graph = function (div_id, width, height) {
     console.log("run here");
     var colors = d3.scale.category10();
 
@@ -391,4 +404,4 @@ function init_network(div_id, width, height) {
         .on('keydown', keydown)
         .on('keyup', keyup);
     restart();
-}
+};

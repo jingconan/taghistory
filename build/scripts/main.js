@@ -32,7 +32,7 @@ var main = function (TH) {
     $('#update_evernote_token').on("click", TH.Services.Evernote.promptUpdateToken);
     $("#export_json").on("click", TH.Util.data_export);
     $("#import_json").on("click", TH.Util.data_import);
-    $("#view_network").on("click", TH.Util.view_network);
+    $("#view_network").on("click", TH.Views.plotGraph);
     TH_views.trash();
 };
 

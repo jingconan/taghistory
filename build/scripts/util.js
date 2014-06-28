@@ -102,14 +102,3 @@ Util.data_export = function () {
 Util.data_import = function () {
     chrome.tabs.create({ url: "import.html"});
 };
-
-Util.view_network = function () {
-    // chrome.tabs.create({url: "network.html"});
-    var width = 960,
-        height = 500;
-    $("#network_dialog").dialog({
-        width: width * 1.2,
-        height: height * 1.2,
-    });
-    init_network("network_dialog", width, height);
-};
