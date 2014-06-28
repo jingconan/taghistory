@@ -102,3 +102,7 @@ Util.data_export = function () {
 Util.data_import = function () {
     chrome.tabs.create({ url: "import.html"});
 };
+
+Util.view_network = function () {
+    chrome.tabs.create({url: "network.html"});
+};
