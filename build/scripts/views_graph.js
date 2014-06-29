@@ -38,8 +38,8 @@ Views.D3Graph = function (para) {
 
     // init D3 force layout
     var force = d3.layout.force()
-        .nodes(para.nodes)
-        .links(para.links)
+        .nodes(nodes)
+        .links(links)
         .size([para.width, para.height])
         .linkDistance(150)
         .charge(-500)
@@ -57,7 +57,6 @@ Views.D3Graph = function (para) {
         .attr('d', 'M0,-5L10,0L0,5')
         .attr('fill', '#000');
 
-    /*jslint nomen: true, debug: true, evil: false, vars: true */
     svg.append('svg:defs').append('svg:marker')
         .attr('id', 'start-arrow')
         .attr('viewBox', '0 -5 10 10')
@@ -153,7 +152,10 @@ Views.D3Graph = function (para) {
 
         // circle (node) group
         // NB: the function arg is crucial here! nodes are known by id, not by index!
-        circle = circle.data(nodes, function (d) { return d.id; });
+        // debugger;
+        // console.log("nodes #: " + nodes.length);
+        // circle = circle.data(nodes, function (d) { return d.id; });
+        circle = circle.data(nodes);
 
       // update existing nodes (reflexive & selected visual states)
         circle.selectAll('circle')
@@ -203,6 +205,7 @@ Views.D3Graph = function (para) {
                     selected_node = mousedown_node;
                 }
                 selected_link = null;
+                // console.log("url: " + d.item.url + "\n id: " + d.item.id);
 
                 // reposition drag line
                 drag_line
