@@ -275,23 +275,23 @@ Views.D3Graph = function (para) {
         force.start();
     }
 
-    function mousedown() {
-      // prevent I-bar on drag
-      //d3.event.preventDefault();
-      // because :active only works in WebKit?
-        svg.classed('active', true);
+    // function mousedown() {
+    // prevent I-bar on drag
+    // d3.event.preventDefault();
+    // because :active only works in WebKit?
+    // svg.classed('active', true);
 
-        if (d3.event.ctrlKey || mousedown_node || mousedown_link) {return; }
+    // if (d3.event.ctrlKey || mousedown_node || mousedown_link) {return; }
 
-      // insert new node at point
-        var point = d3.mouse(this),
-            node = {id: ++lastNodeId, reflexive: false};
-        node.x = point[0];
-        node.y = point[1];
-        nodes.push(node);
+    // insert new node at point
+    //     var point = d3.mouse(this),
+    //         node = {id: ++lastNodeId, reflexive: false};
+    //     node.x = point[0];
+    //     node.y = point[1];
+    //     nodes.push(node);
 
-        restart();
-    }
+    //     restart();
+    // }
 
     function mousemove() {
         if (!mousedown_node) {return; }
@@ -398,8 +398,8 @@ Views.D3Graph = function (para) {
     }
 
     // app starts here
-    svg.on('mousedown', mousedown)
-        .on('mousemove', mousemove)
+    // svg.on('mousedown', mousedown)
+    svg.on('mousemove', mousemove)
         .on('mouseup', mouseup);
     d3.select(window)
         .on('keydown', keydown)
