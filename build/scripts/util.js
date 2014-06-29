@@ -114,7 +114,7 @@ Util.graph.tagGraph = function () {
     var length = tagList.length, i = 0;
     var nodes = [];
     for (i = 0; i < length; ++i) {
-        nodes.push({id: tagList[i].tag_name, reflexive: false});
+        nodes.push({id: tagList[i].tag_name, reflexive: false, type:"tag"});
     }
     var links = [
             {source: nodes[0], target: nodes[1], left: false, right: true },
@@ -129,9 +129,8 @@ Util.graph.itemGraph = function (tag_name) {
     var length = items.length, i = 0;
     var nodes = [];
     for (i = 0; i < length; ++i) {
-        nodes.push({id: items[i].title, reflexive: false})
+        nodes.push({id: items[i].title, reflexive: false, type:"item", item: items[i]})
     }
     return {nodes: nodes, links: []};
-    
 }
 

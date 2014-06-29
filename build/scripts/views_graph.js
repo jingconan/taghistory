@@ -1,5 +1,5 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global TH, d3*/
+/*global TH, d3, $*/
 "use strict";
 var Views = TH.Views;
 var Models = TH.Models;
@@ -17,7 +17,7 @@ Views.plotGraph = function () {
         width: width * 1.2,
         height: height * 1.2,
     });
-    Views.D3Graph($.extend({}, TH.Para.tagGraph, tg));
+    Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
 };
 
 // set up SVG for D3
@@ -185,10 +185,13 @@ Views.D3Graph = function (para) {
             })
             .on('mousedown', function (d) {
                 if (d3.event.ctrlKey) {
-                    console.log("clicked a node");
-                    var ig = Util.graph.itemGraph(d.id);
-                    var new_para = $.extend({}, TH.Para.tagGraph, ig);
-                    Views.D3Graph(new_para);
+                    if (para.type == "tag") {
+                        var ig = Util.graph.itemGraph(d.id);
+                        var new_para = $.extend({type: "item"}, TH.Para.tagGraph, ig);
+                        Views.D3Graph(new_para);
+                    } else {
+                        chrome.tabs.create({ url: "https://github.com/hbhzwj"});
+                    }
                     return;
                 }
 
