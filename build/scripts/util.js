@@ -122,3 +122,16 @@ Util.graph.tagGraph = function () {
         ];
     return {nodes: nodes, links:links};
 }
+
+Util.graph.itemGraph = function (tag_name) {
+    // TODO need a way to calculate the link between nodes
+    var items = Models.getItemsWithTag(tag_name);
+    var length = items.length, i = 0;
+    var nodes = [];
+    for (i = 0; i < length; ++i) {
+        nodes.push({id: items[i].title, reflexive: false})
+    }
+    return {nodes: nodes, links: []};
+    
+}
+

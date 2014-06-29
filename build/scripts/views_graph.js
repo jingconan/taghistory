@@ -2,26 +2,21 @@
 /*global TH, d3*/
 "use strict";
 var Views = TH.Views;
+var Models = TH.Models;
+var Util = TH.Util;
 
 
 Views.plotGraph = function () {
     // chrome.tabs.create({url: "network.html"});
-    var width = 960,
-        height = 500;
+    var width = TH.Para.tagGraph.width,
+        height = TH.Para.tagGraph.height;
     var graph = TH.Util.graph;
     var tg = graph.tagGraph();
     $("#network_dialog").dialog({
         width: width * 1.2,
         height: height * 1.2,
     });
-
-    Views.D3Graph({
-        contiainer: "network_dialog",
-        width: width,
-        height: height,
-        nodes: tg.nodes,
-        links: tg.links
-    });
+    Views.D3Graph($.extend({}, TH.Para.tagGraph, tg));
 };
 
 // set up SVG for D3
@@ -189,10 +184,14 @@ Views.D3Graph = function (para) {
             })
             .on('mousedown', function (d) {
                 if (d3.event.ctrlKey) {
+                    console.log("clicked a node");
+                    var ig = Util.graph.itemGraph(d.id);
+                    var new_para = $.extend({}, TH.Para.tagGraph, ig);
+                    Views.D3Graph(new_para);
                     return;
                 }
 
-          // select node
+                // select node
                 mousedown_node = d;
                 if (mousedown_node === selected_node) {
                     selected_node = null;

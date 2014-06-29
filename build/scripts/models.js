@@ -278,4 +278,22 @@ Models.deleteTag = function (tag) {
     });
 };
 
+Models.getItemsWithTag = function (tag) {
+    //TODO Now it is to check each item using brute foce. Need to revise
+    //it to better data structure (like LRU cache) to reduce time
+    //complexity
+    var storedInfo = TH.Store.storedInfo;
+    var hLen = storedInfo.historyItems.length;
+    var i = 0, key, tag ;
+    var res = [], tag_tmp;
+    for (i = 0; i < hLen; ++i) {
+        key = Models.getVisitItemKey(storedInfo.historyItems[i]);
+        tag_tmp = storedInfo.storedTags[key];
+        if (tag_tmp !== undefined && tag_tmp.tag_name === tag) {
+            res.push(storedInfo.historyItems[i]);
+        }
+    }
+    return res;
+}
+
 

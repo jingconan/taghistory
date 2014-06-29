@@ -18,7 +18,12 @@ TH = {
             max: 3600,
             step: 10,
         },
-        query_time: 1000 * 60 * 60 * 24 * 7
+        query_time: 1000 * 60 * 60 * 24 * 7,
+        tagGraph: {
+            width: 960,
+            height: 500,
+            contiainer: "network_dialog"
+        }
     },
     Services: {
         Evernote: {
