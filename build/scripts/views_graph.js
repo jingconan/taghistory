@@ -8,29 +8,12 @@ Views.plotGraph = function () {
     // chrome.tabs.create({url: "network.html"});
     var width = 960,
         height = 500;
+    var graph = TH.Util.graph;
+    var tg = graph.tagGraph();
     $("#network_dialog").dialog({
         width: width * 1.2,
         height: height * 1.2,
     });
-    
-    function tagGraph() {
-        // set up initial nodes and links
-        //  - nodes are known by 'id', not by index in array.
-        //  - reflexive edges are indicated on the node (as a bold black circle).
-        //  - links are always source < target; edge directions are set by 'left' and 'right'.
-        var tagList = TH.Store.storedInfo.tagList.tagList;
-        var length = tagList.length, i = 0;
-        var nodes = [];
-        for (i = 0; i < length; ++i) {
-            nodes.push({id: tagList[i].tag_name, reflexive: false});
-        }
-        var links = [
-                {source: nodes[0], target: nodes[1], left: false, right: true },
-                {source: nodes[1], target: nodes[2], left: false, right: true }
-            ];
-        return {nodes: nodes, links:links};
-    }
-    var tg = tagGraph();
 
     Views.D3Graph({
         contiainer: "network_dialog",

@@ -102,3 +102,23 @@ Util.data_export = function () {
 Util.data_import = function () {
     chrome.tabs.create({ url: "import.html"});
 };
+
+Util.graph = {};
+
+Util.graph.tagGraph = function () {
+    // set up initial nodes and links
+    //  - nodes are known by 'id', not by index in array.
+    //  - reflexive edges are indicated on the node (as a bold black circle).
+    //  - links are always source < target; edge directions are set by 'left' and 'right'.
+    var tagList = TH.Store.storedInfo.tagList.tagList;
+    var length = tagList.length, i = 0;
+    var nodes = [];
+    for (i = 0; i < length; ++i) {
+        nodes.push({id: tagList[i].tag_name, reflexive: false});
+    }
+    var links = [
+            {source: nodes[0], target: nodes[1], left: false, right: true },
+            {source: nodes[1], target: nodes[2], left: false, right: true }
+        ];
+    return {nodes: nodes, links:links};
+}
