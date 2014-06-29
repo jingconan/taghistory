@@ -9,10 +9,11 @@ var Util = TH.Util;
 Views.plotGraph = function () {
     // chrome.tabs.create({url: "network.html"});
     var width = TH.Para.tagGraph.width,
-        height = TH.Para.tagGraph.height;
+        height = TH.Para.tagGraph.height,
+        contiainer = TH.Para.tagGraph.contiainer;
     var graph = TH.Util.graph;
     var tg = graph.tagGraph();
-    $("#network_dialog").dialog({
+    $("#" + contiainer).dialog({
         width: width * 1.2,
         height: height * 1.2,
     });
