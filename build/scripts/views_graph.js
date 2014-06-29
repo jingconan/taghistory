@@ -3,6 +3,7 @@
 "use strict";
 var Views = TH.Views;
 
+
 Views.plotGraph = function () {
     // chrome.tabs.create({url: "network.html"});
     var width = 960,
@@ -11,42 +12,56 @@ Views.plotGraph = function () {
         width: width * 1.2,
         height: height * 1.2,
     });
-    Views.D3Graph("network_dialog", width, height);
+    
+    function tagGraph() {
+        // set up initial nodes and links
+        //  - nodes are known by 'id', not by index in array.
+        //  - reflexive edges are indicated on the node (as a bold black circle).
+        //  - links are always source < target; edge directions are set by 'left' and 'right'.
+        var tagList = TH.Store.storedInfo.tagList.tagList;
+        var length = tagList.length, i = 0;
+        var nodes = [];
+        for (i = 0; i < length; ++i) {
+            nodes.push({id: tagList[i].tag_name, reflexive: false});
+        }
+        var links = [
+                {source: nodes[0], target: nodes[1], left: false, right: true },
+                {source: nodes[1], target: nodes[2], left: false, right: true }
+            ];
+        return {nodes: nodes, links:links};
+    }
+    var tg = tagGraph();
+
+    Views.D3Graph({
+        contiainer: "network_dialog",
+        width: width,
+        height: height,
+        nodes: tg.nodes,
+        links: tg.links
+    });
 };
 
 // set up SVG for D3
-Views.D3Graph = function (div_id, width, height) {
+Views.D3Graph = function (para) {
     console.log("run here");
     var colors = d3.scale.category10();
+    var links = para.links;
+    var nodes = para.nodes;
 
     // var svg = d3.select('body')
     d3.select('svg').remove();
-    var svg = d3.select('#' + div_id)
+    var svg = d3.select('#' + para.contiainer)
             .append('svg')
-            .attr('width', width)
-            .attr('height', height);
+            .attr('width', para.width)
+            .attr('height', para.height);
     // debugger;
-
-    // set up initial nodes and links
-    //  - nodes are known by 'id', not by index in array.
-    //  - reflexive edges are indicated on the node (as a bold black circle).
-    //  - links are always source < target; edge directions are set by 'left' and 'right'.
-    var nodes = [
-        {id: 0, reflexive: false},
-        {id: 1, reflexive: true },
-        {id: 2, reflexive: false}
-    ],
-        lastNodeId = 2,
-        links = [
-            {source: nodes[0], target: nodes[1], left: false, right: true },
-            {source: nodes[1], target: nodes[2], left: false, right: true }
-        ];
+    var lastNodeId = para.nodes.length - 1;
 
     // init D3 force layout
     var force = d3.layout.force()
-        .nodes(nodes)
-        .links(links)
-        .size([width, height])
+        .nodes(para.nodes)
+        .links(para.links)
+        .size([para.width, para.height])
         .linkDistance(150)
         .charge(-500)
         .on('tick', tick);
