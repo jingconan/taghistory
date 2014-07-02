@@ -19,6 +19,8 @@ Views.plotGraph = function () {
         width: TH.Para.tagGraph.width * 1.2,
         height: TH.Para.tagGraph.height * 1.2
     });
+
+    Views.D3Graph.sel_elements = {};
     // debugger;
     Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
 };
@@ -101,10 +103,64 @@ Views.D3Graph = function (para) {
         mousedown_node = null,
         mouseup_node = null;
 
-    function resetMouseVars() {
-        mousedown_node = null;
-        mouseup_node = null;
-        mousedown_link = null;
+    var mouseVars = {
+        sel_elements: Views.D3Graph.sel_elements,
+        toggle: function (obj0) {
+            var cache = this.sel_elements;
+            var obj = $.extend({}, obj0);
+            obj.x = 0;
+            obj.y = 0;
+            obj.px = 0;
+            obj.py = 0;
+            console.log("a node is toggled");
+            var key = JSON.stringify(obj);
+            if (cache[key] === "yes") {
+                cache[key] = undefined;
+            } else {
+                cache[key] = "yes";
+            }
+        },
+
+        reset: function () {
+            this.sel_elements = {};
+        },
+
+        list: function () {
+            var keys = [],
+                key;
+            for (key in this.sel_elements) {
+                if (this.sel_elements.hasOwnProperty(key)) {
+                    keys.push(key);
+                }
+            }
+            return keys;
+        }
+    };
+
+
+    function removeNodes(nodes, keys) {
+        function idInKey(keys, id) {
+            var i = 0, N = keys.length;
+            for (i = 0; i < N; ++i) {
+                if (keys[i].id === id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        var i, new_nodes = [];
+        var keyObjs = [];
+        for (i = 0; i < keys.length; ++i) {
+            keyObjs.push(JSON.parse(keys[i]));
+        }
+        for (i = 0; i < nodes.length; ++i) {
+            // debugger;
+            if (!idInKey(keyObjs, nodes[i].id)) {
+                new_nodes.push(nodes[i]);
+            }
+        }
+        return new_nodes;
     }
 
     // update force layout (called automatically each iteration)
@@ -148,18 +204,7 @@ Views.D3Graph = function (para) {
             .style('marker-start', function (d) { return d.left ? 'url(#start-arrow)' : ''; })
             .style('marker-end', function (d) { return d.right ? 'url(#end-arrow)' : ''; })
             .on('mousedown', function (d) {
-                if (d3.event.ctrlKey) {
-                    return;
-                }
-
-              // select link
-                mousedown_link = d;
-                if (mousedown_link === selected_link) {
-                    selected_link = null;
-                } else {
-                    selected_link = mousedown_link;
-                }
-                selected_node = null;
+                mouseVars.toggle(d); // select link
                 restart();
             });
 
@@ -204,6 +249,29 @@ Views.D3Graph = function (para) {
                 d3.select(this).attr('transform', '');
             })
             .on('mousedown', function (d) {
+
+                if (d3.event.ctrlKey) {
+                    // select node
+                    mousedown_node = d;
+                    if (mousedown_node === selected_node) {
+                        selected_node = null;
+                    } else {
+                        selected_node = mousedown_node;
+                    }
+                    mouseVars.toggle(d);
+                    console.log("node selected");
+                    // debugger;
+                    selected_link = null;
+                // reposition drag line
+                    drag_line
+                        .style('marker-end', 'url(#end-arrow)')
+                        .classed('hidden', false)
+                        .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+                    restart();
+                    console.log("run here");
+                    return;
+                }
+
                 if (para.type === "tag") {
                     var ig = Util.graph.itemGraph(d.id);
                     var new_para = $.extend({}, para, ig);
@@ -212,74 +280,9 @@ Views.D3Graph = function (para) {
                 } else if (para.type === "item") {
                     chrome.tabs.create({ url: "https://github.com/hbhzwj"});
                 }
-                return;
 
-                // }
-                // if (d3.event.ctrlKey) {
-                // select node
-                // mousedown_node = d;
-                // if (mousedown_node === selected_node) {
-                //     selected_node = null;
-                // } else {
-                //     selected_node = mousedown_node;
-                // }
-                // selected_link = null;
-                // console.log("url: " + d.item.url + "\n id: " + d.item.id);
 
-                // reposition drag line
-                // drag_line
-                //     .style('marker-end', 'url(#end-arrow)')
-                //     .classed('hidden', false)
-                //     .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
 
-                restart();
-            })
-            .on('mouseup', function (d) {
-                if (!mousedown_node) {
-                    return;
-                }
-
-                // needed by FF
-                drag_line
-                    .classed('hidden', true)
-                    .style('marker-end', '');
-
-                // check for drag-to-self
-                mouseup_node = d;
-                if (mouseup_node === mousedown_node) { resetMouseVars(); return; }
-
-                // unenlarge target node
-                d3.select(this).attr('transform', '');
-
-              // add link to graph (update if exists)
-                // NB: links are strictly source < target; arrows separately specified by booleans
-                var source, target, direction;
-                if (mousedown_node.id < mouseup_node.id) {
-                    source = mousedown_node;
-                    target = mouseup_node;
-                    direction = 'right';
-                } else {
-                    source = mouseup_node;
-                    target = mousedown_node;
-                    direction = 'left';
-                }
-
-                var link;
-                link = links.filter(function (l) {
-                    return (l.source === source && l.target === target);
-                })[0];
-
-                if (link) {
-                    link[direction] = true;
-                } else {
-                    link = {source: source, target: target, left: false, right: false};
-                    link[direction] = true;
-                    links.push(link);
-                }
-
-              // select new link
-                selected_link = link;
-                selected_node = null;
                 restart();
             });
 
@@ -295,48 +298,6 @@ Views.D3Graph = function (para) {
 
           // set the graph in motion
         force.start();
-    }
-
-    // function mousedown() {
-    // prevent I-bar on drag
-    // d3.event.preventDefault();
-    // because :active only works in WebKit?
-    // svg.classed('active', true);
-
-    // if (d3.event.ctrlKey || mousedown_node || mousedown_link) {return; }
-
-    // insert new node at point
-    //     var point = d3.mouse(this),
-    //         node = {id: ++lastNodeId, reflexive: false};
-    //     node.x = point[0];
-    //     node.y = point[1];
-    //     nodes.push(node);
-
-    //     restart();
-    // }
-
-    function mousemove() {
-        if (!mousedown_node) {return; }
-
-      // update drag line
-        drag_line.attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + d3.mouse(this)[0] + ',' + d3.mouse(this)[1]);
-
-        restart();
-    }
-
-    function mouseup() {
-        if (mousedown_node) {
-          // hide drag line
-            drag_line
-                .classed('hidden', true)
-                .style('marker-end', '');
-        }
-
-        // because :active only works in WebKit?
-        svg.classed('active', false);
-
-        // clear mouse event vars
-        resetMouseVars();
     }
 
     function spliceLinksForNode(node) {
@@ -366,14 +327,25 @@ Views.D3Graph = function (para) {
         switch (d3.event.keyCode) {
         case 8: // backspace
         case 46: // delete
-            if (selected_node) {
-                nodes.splice(nodes.indexOf(selected_node), 1);
-                spliceLinksForNode(selected_node);
-            } else if (selected_link) {
-                links.splice(links.indexOf(selected_link), 1);
-            }
-            selected_link = null;
-            selected_node = null;
+            console.log("before delete: node number " + nodes.length);
+            nodes = removeNodes(nodes, mouseVars.list());
+            console.log("after delete: node number " + nodes.length);
+            // debugger;
+            // var keys = mouseVars.list(),
+            //     i = 0;
+            // for (i = 0; i < keys; ++i) {
+            // }
+            
+            // remove all nodes
+            // remove all links
+            // if (selected_node) {
+            //     nodes.splice(nodes.indexOf(selected_node), 1);
+            //     spliceLinksForNode(selected_node);
+            // } else if (selected_link) {
+            //     links.splice(links.indexOf(selected_link), 1);
+            // }
+            // selected_link = null;
+            // selected_node = null;
             restart();
             break;
         case 66: // B
@@ -420,8 +392,8 @@ Views.D3Graph = function (para) {
 
     // app starts here
     // svg.on('mousedown', mousedown)
-    svg.on('mousemove', mousemove)
-        .on('mouseup', mouseup);
+    // svg.on('mousemove', mousemove)
+    //     .on('mouseup', mouseup);
     d3.select(window)
         .on('keydown', keydown)
         .on('keyup', keyup);
