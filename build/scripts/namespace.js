@@ -20,7 +20,7 @@ TH = {
         },
         query_time: 1000 * 60 * 60 * 24 * 7,
         tagGraph: {
-            contiainer: "network_dialog"
+            contiainer: "network_dialog_canvas"
         }
     },
     Services: {

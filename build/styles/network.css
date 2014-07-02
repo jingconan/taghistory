@@ -54,3 +54,15 @@ text.id {
   text-anchor: middle;
   font-weight: bold;
 }
+#network_dialog_nav a {
+    color: #15C;
+    font-size: 14pt;
+    /* font-weight: bold; */
+}
+
+#network_dialog_nav a:hover {
+    background-color: #15C;
+    color: #FFF;
+    font-size: 14pt;
+    /* font-weight: bold; */
+}

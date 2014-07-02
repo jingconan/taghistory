@@ -1,5 +1,5 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global TH, d3, $*/
+/*global TH, d3, $, chrome*/
 "use strict";
 var Views = TH.Views;
 var Models = TH.Models;
@@ -10,33 +10,50 @@ Views.plotGraph = function () {
     // chrome.tabs.create({url: "network.html"});
     // var width = TH.Para.tagGraph.width,
         // height = TH.Para.tagGraph.height,
-    var contiainer = TH.Para.tagGraph.contiainer;
-    var width = $(window).width() * 0.7,
-        height = $(window).height() * 0.7;
-    var graph = TH.Util.graph;
-    var tg = graph.tagGraph();
+    // var contiainer = TH.Para.tagGraph.contiainer;
+    var contiainer = "network_dialog",
+        tg = TH.Util.graph.tagGraph();
+    TH.Para.tagGraph.width = $(window).width() * 0.7;
+    TH.Para.tagGraph.height = $(window).height() * 0.7;
     $("#" + contiainer).dialog({
-        width: width * 1.2,
-        height: height * 1.2,
+        width: TH.Para.tagGraph.width * 1.2,
+        height: TH.Para.tagGraph.height * 1.2
     });
     // debugger;
-    Views.D3Graph($.extend({type: "tag", width: width, height: height}, 
-                           TH.Para.tagGraph, tg));
+    Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
 };
 
 // set up SVG for D3
 Views.D3Graph = function (para) {
-    console.log("run here");
+
+    (function cleanView() {
+        $("#network_dialog_nav").html("");
+        d3.select('svg').remove();
+    }());
+
+    console.log("para.width: " + para.width);
+    console.log("para.height: " + para.height);
+    console.log("para.type: " + para.type);
+    if (para.type === "item") {
+        (function moveBack(para) {
+            $("#network_dialog_nav").html("<a class='action'>back</a>");
+            $("#network_dialog_nav").on("click", function () {
+                console.log("dialog_nav is clicked!");
+                var newPara = $.extend({}, para, TH.Util.graph.tagGraph());
+                newPara.type = "tag";
+                Views.D3Graph(newPara);
+            });
+        }(para));
+    }
     var colors = d3.scale.category10();
     var links = para.links;
     var nodes = para.nodes;
 
     // var svg = d3.select('body')
-    d3.select('svg').remove();
     var svg = d3.select('#' + para.contiainer)
             .append('svg')
             .attr('width', para.width)
-            .attr('height', para.height);
+            .attr('height', para.height * 0.8);
     // debugger;
     var lastNodeId = para.nodes.length - 1;
 
@@ -191,11 +208,12 @@ Views.D3Graph = function (para) {
             })
             .on('mousedown', function (d) {
                 if (d3.event.ctrlKey) {
-                    if (para.type == "tag") {
+                    if (para.type === "tag") {
                         var ig = Util.graph.itemGraph(d.id);
-                        var new_para = $.extend({type: "item"}, TH.Para.tagGraph, ig);
+                        var new_para = $.extend({}, para, ig);
+                        new_para.type = "item";
                         Views.D3Graph(new_para);
-                    } else {
+                    } else if (para.type === "item") {
                         chrome.tabs.create({ url: "https://github.com/hbhzwj"});
                     }
                     return;
