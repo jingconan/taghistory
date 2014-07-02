@@ -69,9 +69,8 @@ Views.D3Graph = function (para) {
         .attr('refX', 6)
         .attr('markerWidth', 3)
         .attr('markerHeight', 3)
-        .attr('orient', 'auto');
-
-    svg.append('svg:path')
+        .attr('orient', 'auto')
+        .append('svg:path')
         .attr('d', 'M0,-5L10,0L0,5')
         .attr('fill', '#000');
 
@@ -81,9 +80,8 @@ Views.D3Graph = function (para) {
         .attr('refX', 4)
         .attr('markerWidth', 3)
         .attr('markerHeight', 3)
-        .attr('orient', 'auto');
-
-    svg.append('svg:path')
+        .attr('orient', 'auto')
+        .append('svg:path')
         .attr('d', 'M10,-5L0,0L10,5')
         .attr('fill', '#000');
 
