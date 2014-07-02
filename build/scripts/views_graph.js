@@ -8,16 +8,20 @@ var Util = TH.Util;
 
 Views.plotGraph = function () {
     // chrome.tabs.create({url: "network.html"});
-    var width = TH.Para.tagGraph.width,
-        height = TH.Para.tagGraph.height,
-        contiainer = TH.Para.tagGraph.contiainer;
+    // var width = TH.Para.tagGraph.width,
+        // height = TH.Para.tagGraph.height,
+    var contiainer = TH.Para.tagGraph.contiainer;
+    var width = $(window).width() * 0.7,
+        height = $(window).height() * 0.7;
     var graph = TH.Util.graph;
     var tg = graph.tagGraph();
     $("#" + contiainer).dialog({
         width: width * 1.2,
         height: height * 1.2,
     });
-    Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
+    // debugger;
+    Views.D3Graph($.extend({type: "tag", width: width, height: height}, 
+                           TH.Para.tagGraph, tg));
 };
 
 // set up SVG for D3
