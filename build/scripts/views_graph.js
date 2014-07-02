@@ -189,47 +189,48 @@ Views.D3Graph = function (para) {
             .style('stroke', function (d) { return d3.rgb(colors(d.id)).darker().toString(); })
             .classed('reflexive', function (d) { return d.reflexive; })
             .on('mouseover', function (d) {
-                if (!mousedown_node || d === mousedown_node) {
-                    return;
-                }
+                //TODO change it to show information when mouse over
+                // if (!mousedown_node || d === mousedown_node) {
+                //     return;
+                // }
                 // enlarge target node
-                d3.select(this).attr('transform', 'scale(1.1)');
+                d3.select(this).attr('transform', 'scale(3)');
             })
             .on('mouseout', function (d) {
-                if (!mousedown_node || d === mousedown_node) {
-                    return;
-                }
+                // if (!mousedown_node || d === mousedown_node) {
+                //     return;
+                // }
                 // unenlarge target node
                 d3.select(this).attr('transform', '');
             })
             .on('mousedown', function (d) {
-                if (d3.event.ctrlKey) {
-                    if (para.type === "tag") {
-                        var ig = Util.graph.itemGraph(d.id);
-                        var new_para = $.extend({}, para, ig);
-                        new_para.type = "item";
-                        Views.D3Graph(new_para);
-                    } else if (para.type === "item") {
-                        chrome.tabs.create({ url: "https://github.com/hbhzwj"});
-                    }
-                    return;
+                if (para.type === "tag") {
+                    var ig = Util.graph.itemGraph(d.id);
+                    var new_para = $.extend({}, para, ig);
+                    new_para.type = "item";
+                    Views.D3Graph(new_para);
+                } else if (para.type === "item") {
+                    chrome.tabs.create({ url: "https://github.com/hbhzwj"});
                 }
+                return;
 
+                // }
+                // if (d3.event.ctrlKey) {
                 // select node
-                mousedown_node = d;
-                if (mousedown_node === selected_node) {
-                    selected_node = null;
-                } else {
-                    selected_node = mousedown_node;
-                }
-                selected_link = null;
+                // mousedown_node = d;
+                // if (mousedown_node === selected_node) {
+                //     selected_node = null;
+                // } else {
+                //     selected_node = mousedown_node;
+                // }
+                // selected_link = null;
                 // console.log("url: " + d.item.url + "\n id: " + d.item.id);
 
                 // reposition drag line
-                drag_line
-                    .style('marker-end', 'url(#end-arrow)')
-                    .classed('hidden', false)
-                    .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+                // drag_line
+                //     .style('marker-end', 'url(#end-arrow)')
+                //     .classed('hidden', false)
+                //     .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
 
                 restart();
             })
