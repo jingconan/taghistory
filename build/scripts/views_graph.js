@@ -31,9 +31,6 @@ Views.D3Graph = function (para) {
         d3.select('svg').remove();
     }());
 
-    console.log("para.width: " + para.width);
-    console.log("para.height: " + para.height);
-    console.log("para.type: " + para.type);
     if (para.type === "item") {
         (function moveBack(para) {
             $("#network_dialog_nav").html("<a class='action'>back</a>");
@@ -49,13 +46,12 @@ Views.D3Graph = function (para) {
     var links = para.links;
     var nodes = para.nodes;
 
-    // var svg = d3.select('body')
     var svg = d3.select('#' + para.contiainer)
             .append('svg')
             .attr('width', para.width)
-            .attr('height', para.height * 0.8);
-    // debugger;
-    var lastNodeId = para.nodes.length - 1;
+            .attr('height', para.height);
+
+    // var lastNodeId = para.nodes.length - 1;
 
     // init D3 force layout
     var force = d3.layout.force()
@@ -73,8 +69,9 @@ Views.D3Graph = function (para) {
         .attr('refX', 6)
         .attr('markerWidth', 3)
         .attr('markerHeight', 3)
-        .attr('orient', 'auto')
-      .append('svg:path')
+        .attr('orient', 'auto');
+
+    svg.append('svg:path')
         .attr('d', 'M0,-5L10,0L0,5')
         .attr('fill', '#000');
 
@@ -84,8 +81,9 @@ Views.D3Graph = function (para) {
         .attr('refX', 4)
         .attr('markerWidth', 3)
         .attr('markerHeight', 3)
-        .attr('orient', 'auto')
-      .append('svg:path')
+        .attr('orient', 'auto');
+
+    svg.append('svg:path')
         .attr('d', 'M10,-5L0,0L10,5')
         .attr('fill', '#000');
 
@@ -360,8 +358,7 @@ Views.D3Graph = function (para) {
         if (lastKeyDown !== -1) {return; }
         lastKeyDown = d3.event.keyCode;
 
-            // ctrl
-        if (d3.event.keyCode === 17) {
+        if (d3.event.keyCode === 17) { // ctrl
             circle.call(force.drag);
             svg.classed('ctrl', true);
         }

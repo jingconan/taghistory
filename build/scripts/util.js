@@ -117,8 +117,8 @@ Util.graph.tagGraph = function () {
         nodes.push({id: tagList[i].tag_name, reflexive: false, type:"tag"});
     }
     var links = [
-            {source: nodes[0], target: nodes[1], left: false, right: true },
-            {source: nodes[1], target: nodes[2], left: false, right: true }
+            // {source: nodes[0], target: nodes[1], left: false, right: true },
+            // {source: nodes[1], target: nodes[2], left: false, right: true }
         ];
     return {nodes: nodes, links:links};
 }
