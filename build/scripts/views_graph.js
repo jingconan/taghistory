@@ -99,6 +99,50 @@ Views.D3Util.removeNodes = function (nodes, keys) {
 }
 
 
+Views.D3Util.graphInit_item = function (para) {
+        $("#network_dialog_nav").html("<a class='action'>back</a>");
+        $("#network_dialog_nav").on("click", function () {
+            console.log("dialog_nav is clicked!");
+            var newPara = $.extend({}, para, TH.Util.graph.tagGraph());
+            newPara.type = "tag";
+            Views.D3Graph(newPara);
+        });
+
+        var default_tran = 'translate(-50, -10)';
+        var shapes = para.g.append('svg:rect')
+                        .attr('width', 100)
+                        .attr('height', 20)
+                        .attr('rx', 5)
+                        .attr('ry', 5)
+                        .attr('transform', default_tran);
+
+        shapes.on('mouseover', function (d) {
+            d3.select(this).attr('transform', 'scale(1, 3) ' + default_tran); // enlarge target node
+        })
+        .on('mouseout', function (d) {
+            d3.select(this).attr('transform', default_tran); // unenlarge target node
+        });
+
+        return {
+            shapes: shapes
+        };
+}
+
+Views.D3Util.graphInit_tag = function (para) {
+        var shapes = para.g.append('svg:circle')
+                        .attr('r', 12);
+        shapes.on('mouseover', function (d) {
+            d3.select(this).attr('transform', 'scale(3)'); // enlarge target node
+        })
+        .on('mouseout', function (d) {
+            d3.select(this).attr('transform', ''); // unenlarge target node
+        });
+       return {
+            shapes: shapes
+        };
+
+}
+
 // set up SVG for D3
 Views.D3Graph = function (para) {
     var mouseVars = Views.D3MouseVars;
@@ -108,17 +152,6 @@ Views.D3Graph = function (para) {
         d3.select('svg').remove();
     }());
 
-    if (para.type === "item") {
-        (function moveBack(para) {
-            $("#network_dialog_nav").html("<a class='action'>back</a>");
-            $("#network_dialog_nav").on("click", function () {
-                console.log("dialog_nav is clicked!");
-                var newPara = $.extend({}, para, TH.Util.graph.tagGraph());
-                newPara.type = "tag";
-                Views.D3Graph(newPara);
-            });
-        }(para));
-    }
     var colors = d3.scale.category10();
     var links = para.links;
     var nodes = para.nodes;
@@ -199,37 +232,10 @@ Views.D3Graph = function (para) {
 
       // add new nodes
         var g = circle.enter().append('svg:g');
+        para.g = g;
 
-        var node_shapes, node_shape_d_tran;
-        if (para.type === 'item') {
-            node_shape_d_tran = 'translate(-50, -10)';
-            node_shapes = g.append('svg:rect')
-                            .attr('width', 100)
-                            .attr('height', 20)
-                            .attr('rx', 5)
-                            .attr('ry', 5);
-            node_shapes.on('mouseover', function (d) {
-                d3.select(this).attr('transform', 'scale(1, 3) ' + node_shape_d_tran); // enlarge target node
-                // circle.selectAll('circle')
-            })
-            .on('mouseout', function (d) {
-                d3.select(this).attr('transform', node_shape_d_tran); // unenlarge target node
-            })
-
-        } else if (para.type === 'tag') {
-            node_shapes = g.append('svg:circle')
-                            .attr('r', 12);
-
-            node_shapes.on('mouseover', function (d) {
-                d3.select(this).attr('transform', 'scale(3)'); // enlarge target node
-            })
-            .on('mouseout', function (d) {
-                d3.select(this).attr('transform', ''); // unenlarge target node
-            })
-        }
-
-        node_shapes
-            .attr('transform', node_shape_d_tran)
+        var ret = Views.D3Util['graphInit_' + para.type](para);
+        ret.shapes
             .attr('class', 'node')
             .style('fill', function (d) { return mouseVars.selected(d) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
             .style('stroke', function (d) { return d3.rgb(colors(d.id)).darker().toString(); })
