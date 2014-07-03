@@ -53,8 +53,6 @@ Views.D3Graph = function (para) {
             .attr('width', para.width)
             .attr('height', para.height);
 
-    // var lastNodeId = para.nodes.length - 1;
-
     // init D3 force layout
     var force = d3.layout.force()
         .nodes(nodes)
@@ -64,56 +62,24 @@ Views.D3Graph = function (para) {
         .charge(-500)
         .on('tick', tick);
 
-    // define arrow markers for graph links
-    svg.append('svg:defs').append('svg:marker')
-        .attr('id', 'end-arrow')
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 6)
-        .attr('markerWidth', 3)
-        .attr('markerHeight', 3)
-        .attr('orient', 'auto')
-        .append('svg:path')
-        .attr('d', 'M0,-5L10,0L0,5')
-        .attr('fill', '#000');
-
-    svg.append('svg:defs').append('svg:marker')
-        .attr('id', 'start-arrow')
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 4)
-        .attr('markerWidth', 3)
-        .attr('markerHeight', 3)
-        .attr('orient', 'auto')
-        .append('svg:path')
-        .attr('d', 'M10,-5L0,0L10,5')
-        .attr('fill', '#000');
-
-    // line displayed when dragging new nodes
-    var drag_line = svg.append('svg:path')
-        .attr('class', 'link dragline hidden')
-        .attr('d', 'M0,0L0,0');
-
     // handles to link and node element groups
     var path = svg.append('svg:g').selectAll('path'),
         circle = svg.append('svg:g').selectAll('g');
 
-    // mouse event vars
-    var selected_node = null,
-        selected_link = null,
-        mousedown_link = null,
-        mousedown_node = null,
-        mouseup_node = null;
-
     var mouseVars = {
         sel_elements: Views.D3Graph.sel_elements,
-        toggle: function (obj0) {
-            var cache = this.sel_elements;
+        hash: function (obj0){
             var obj = $.extend({}, obj0);
             obj.x = 0;
             obj.y = 0;
             obj.px = 0;
             obj.py = 0;
+            return JSON.stringify(obj);
+        },
+        toggle: function (d) {
             console.log("a node is toggled");
-            var key = JSON.stringify(obj);
+            var cache = this.sel_elements;
+            var key = this.hash(d);
             if (cache[key] === "yes") {
                 cache[key] = undefined;
             } else {
@@ -134,9 +100,11 @@ Views.D3Graph = function (para) {
                 }
             }
             return keys;
+        },
+        selected: function (d) {
+            return (this.sel_elements[this.hash(d)] === "yes");
         }
     };
-
 
     function removeNodes(nodes, keys) {
         function idInKey(keys, id) {
@@ -188,21 +156,16 @@ Views.D3Graph = function (para) {
 
     // update graph (called when needed)
     function restart() {
-      // path (link) group
+        // path (link) group
         path = path.data(links);
 
-      // update existing links
-        path.classed('selected', function (d) { return d === selected_link; })
-            .style('marker-start', function (d) { return d.left ? 'url(#start-arrow)' : ''; })
-            .style('marker-end', function (d) { return d.right ? 'url(#end-arrow)' : ''; });
+        // update existing links
+        path.classed('selected', function (d) { return mouseVars.selected(d); });
 
-
-      // add new links
+        // add new links
         path.enter().append('svg:path')
             .attr('class', 'link')
-            .classed('selected', function (d) { return d === selected_link; })
-            .style('marker-start', function (d) { return d.left ? 'url(#start-arrow)' : ''; })
-            .style('marker-end', function (d) { return d.right ? 'url(#end-arrow)' : ''; })
+            .classed('selected', function (d) { return mouseVars.selected(d); })
             .on('mousedown', function (d) {
                 mouseVars.toggle(d); // select link
                 restart();
@@ -221,7 +184,7 @@ Views.D3Graph = function (para) {
 
       // update existing nodes (reflexive & selected visual states)
         circle.selectAll('circle')
-            .style('fill', function (d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
+            .style('fill', function (d) { return mouseVars.selected(d) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
             .classed('reflexive', function (d) { return d.reflexive; });
 
       // add new nodes
@@ -258,27 +221,20 @@ Views.D3Graph = function (para) {
         node_shapes
             .attr('transform', node_shape_d_tran)
             .attr('class', 'node')
-            .style('fill', function (d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
+            .style('fill', function (d) { return mouseVars.selected(d) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
             .style('stroke', function (d) { return d3.rgb(colors(d.id)).darker().toString(); })
             .classed('reflexive', function (d) { return d.reflexive; })
             .on('mousedown', function (d) {
                 if (d3.event.ctrlKey) {
                     // select node
-                    mousedown_node = d;
-                    if (mousedown_node === selected_node) {
-                        selected_node = null;
-                    } else {
-                        selected_node = mousedown_node;
-                    }
+                    // mousedown_node = d;
                     mouseVars.toggle(d);
                     console.log("node selected");
-                    // debugger;
-                    selected_link = null;
-                // reposition drag line
-                    drag_line
-                        .style('marker-end', 'url(#end-arrow)')
-                        .classed('hidden', false)
-                        .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+                    // reposition drag line
+                    // drag_line
+                    //     .style('marker-end', 'url(#end-arrow)')
+                    //     .classed('hidden', false)
+                    //     .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
                     restart();
                     console.log("run here");
                     return;
@@ -349,56 +305,12 @@ Views.D3Graph = function (para) {
             svg.classed('ctrl', true);
         }
 
-        if (!selected_node && !selected_link) {return; }
         switch (d3.event.keyCode) {
         case 8: // backspace
         case 46: // delete
             console.log("before delete: node number " + nodes.length);
             nodes = removeNodes(nodes, mouseVars.list());
             console.log("after delete: node number " + nodes.length);
-            // debugger;
-            // var keys = mouseVars.list(),
-            //     i = 0;
-            // for (i = 0; i < keys; ++i) {
-            // }
-            
-            // remove all nodes
-            // remove all links
-            // if (selected_node) {
-            //     nodes.splice(nodes.indexOf(selected_node), 1);
-            //     spliceLinksForNode(selected_node);
-            // } else if (selected_link) {
-            //     links.splice(links.indexOf(selected_link), 1);
-            // }
-            // selected_link = null;
-            // selected_node = null;
-            restart();
-            break;
-        case 66: // B
-            if (selected_link) {
-                // set link direction to both left and right
-                selected_link.left = true;
-                selected_link.right = true;
-            }
-            restart();
-            break;
-        case 76: // L
-            if (selected_link) {
-                // set link direction to left only
-                selected_link.left = true;
-                selected_link.right = false;
-            }
-            restart();
-            break;
-        case 82: // R
-            if (selected_node) {
-                // toggle node reflexivity
-                selected_node.reflexive = !selected_node.reflexive;
-            } else if (selected_link) {
-                // set link direction to right only
-                selected_link.left = false;
-                selected_link.right = true;
-            }
             restart();
             break;
         }
