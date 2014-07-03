@@ -20,14 +20,89 @@ Views.plotGraph = function () {
         height: TH.Para.tagGraph.height * 1.2
     });
 
-    Views.D3Graph.sel_elements = {};
+    // Views.D3Graph.sel_elements = {};
+    Views.D3MouseVars.reset();
     // debugger;
     Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
 };
 
+
+// Manage cache of selected elementes. (nodes, links. etc);
+Views.D3MouseVars = {
+    hash: function (obj0){
+        var obj = $.extend({}, obj0);
+        obj.x = 0;
+        obj.y = 0;
+        obj.px = 0;
+        obj.py = 0;
+        return JSON.stringify(obj);
+    },
+    toggle: function (d) {
+        console.log("a node is toggled");
+        var cache = this.sel_elements;
+        var key = this.hash(d);
+        if (cache[key] === "yes") {
+            cache[key] = undefined;
+        } else {
+            cache[key] = "yes";
+        }
+    },
+
+    reset: function () {
+        this.sel_elements = {};
+    },
+
+    list: function () {
+        var keys = [],
+        key;
+        for (key in this.sel_elements) {
+            if (this.sel_elements.hasOwnProperty(key)) {
+                keys.push(key);
+            }
+        }
+        return keys;
+    },
+    selected: function (d) {
+        return (this.sel_elements[this.hash(d)] === "yes");
+    }
+};
+
+Views.D3Util = {};
+
+Views.D3Util.removeNodes = function (nodes, keys) {
+    function hash(d) {
+        return d.id;
+    }
+    function exists(keys, nd) {
+        var h = hash(nd);
+        var i = 0, N = keys.length;
+        for (i = 0; i < N; ++i) {
+            if (hash(keys[i]) === h) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    var new_nodes = [];
+    var kset = [];
+    $.each(keys, function (i, d) {
+        kset.push(JSON.parse(d));
+    });
+
+    $.each(nodes, function (i, d) {
+        if (!exists(kset, d)) {
+            new_nodes.push(d);
+        }
+    });
+    return new_nodes;
+}
+
+
 // set up SVG for D3
 Views.D3Graph = function (para) {
-
+    var mouseVars = Views.D3MouseVars;
+    var removeNodes = Views.D3Util.removeNodes;
     (function cleanView() {
         $("#network_dialog_nav").html("");
         d3.select('svg').remove();
@@ -65,71 +140,6 @@ Views.D3Graph = function (para) {
     // handles to link and node element groups
     var path = svg.append('svg:g').selectAll('path'),
         circle = svg.append('svg:g').selectAll('g');
-
-    var mouseVars = {
-        sel_elements: Views.D3Graph.sel_elements,
-        hash: function (obj0){
-            var obj = $.extend({}, obj0);
-            obj.x = 0;
-            obj.y = 0;
-            obj.px = 0;
-            obj.py = 0;
-            return JSON.stringify(obj);
-        },
-        toggle: function (d) {
-            console.log("a node is toggled");
-            var cache = this.sel_elements;
-            var key = this.hash(d);
-            if (cache[key] === "yes") {
-                cache[key] = undefined;
-            } else {
-                cache[key] = "yes";
-            }
-        },
-
-        reset: function () {
-            this.sel_elements = {};
-        },
-
-        list: function () {
-            var keys = [],
-                key;
-            for (key in this.sel_elements) {
-                if (this.sel_elements.hasOwnProperty(key)) {
-                    keys.push(key);
-                }
-            }
-            return keys;
-        },
-        selected: function (d) {
-            return (this.sel_elements[this.hash(d)] === "yes");
-        }
-    };
-
-    function removeNodes(nodes, keys) {
-        function idInKey(keys, id) {
-            var i = 0, N = keys.length;
-            for (i = 0; i < N; ++i) {
-                if (keys[i].id === id) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        var i, new_nodes = [];
-        var keyObjs = [];
-        for (i = 0; i < keys.length; ++i) {
-            keyObjs.push(JSON.parse(keys[i]));
-        }
-        for (i = 0; i < nodes.length; ++i) {
-            // debugger;
-            if (!idInKey(keyObjs, nodes[i].id)) {
-                new_nodes.push(nodes[i]);
-            }
-        }
-        return new_nodes;
-    }
 
     // update force layout (called automatically each iteration)
     function tick() {
