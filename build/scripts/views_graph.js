@@ -227,29 +227,41 @@ Views.D3Graph = function (para) {
       // add new nodes
         var g = circle.enter().append('svg:g');
 
-        g.append('svg:circle')
+        var node_shapes, node_shape_d_tran;
+        if (para.type === 'item') {
+            node_shape_d_tran = 'translate(-50, -10)';
+            node_shapes = g.append('svg:rect')
+                            .attr('width', 100)
+                            .attr('height', 20)
+                            .attr('rx', 5)
+                            .attr('ry', 5);
+            node_shapes.on('mouseover', function (d) {
+                d3.select(this).attr('transform', 'scale(1, 3) ' + node_shape_d_tran); // enlarge target node
+                // circle.selectAll('circle')
+            })
+            .on('mouseout', function (d) {
+                d3.select(this).attr('transform', node_shape_d_tran); // unenlarge target node
+            })
+
+        } else if (para.type === 'tag') {
+            node_shapes = g.append('svg:circle')
+                            .attr('r', 12);
+
+            node_shapes.on('mouseover', function (d) {
+                d3.select(this).attr('transform', 'scale(3)'); // enlarge target node
+            })
+            .on('mouseout', function (d) {
+                d3.select(this).attr('transform', ''); // unenlarge target node
+            })
+        }
+
+        node_shapes
+            .attr('transform', node_shape_d_tran)
             .attr('class', 'node')
-            .attr('r', 12)
             .style('fill', function (d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
             .style('stroke', function (d) { return d3.rgb(colors(d.id)).darker().toString(); })
             .classed('reflexive', function (d) { return d.reflexive; })
-            .on('mouseover', function (d) {
-                //TODO change it to show information when mouse over
-                // if (!mousedown_node || d === mousedown_node) {
-                //     return;
-                // }
-                // enlarge target node
-                d3.select(this).attr('transform', 'scale(3)');
-            })
-            .on('mouseout', function (d) {
-                // if (!mousedown_node || d === mousedown_node) {
-                //     return;
-                // }
-                // unenlarge target node
-                d3.select(this).attr('transform', '');
-            })
             .on('mousedown', function (d) {
-
                 if (d3.event.ctrlKey) {
                     // select node
                     mousedown_node = d;
@@ -293,11 +305,19 @@ Views.D3Graph = function (para) {
             .attr('class', 'id')
             .text(function (d) { 
                 if (d.type === 'item') {
-                    return d.item.title; 
+                    if (d.item.title.slice(0, 8) !== '') {
+                        return d.item.title.slice(0, 8);
+                    } else {
+                        return d.item.url.slice(0, 8);
+                    }
+                    return ; 
                 } else {
                     return d.id;
                 }
             });
+
+        // $('#id').tipsy();
+
 
         // remove old nodes
         circle.exit().remove();
