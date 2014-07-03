@@ -129,7 +129,7 @@ Util.graph.itemGraph = function (tag_name) {
     var length = items.length, i = 0;
     var nodes = [];
     for (i = 0; i < length; ++i) {
-        nodes.push({id: items[i].title, reflexive: false, type:"item", item: items[i]})
+        nodes.push({id: items[i].id, reflexive: false, type:"item", item: items[i]})
     }
     return {nodes: nodes, links: []};
 }

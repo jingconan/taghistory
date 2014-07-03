@@ -291,7 +291,13 @@ Views.D3Graph = function (para) {
             .attr('x', 0)
             .attr('y', 4)
             .attr('class', 'id')
-            .text(function (d) { return d.id; });
+            .text(function (d) { 
+                if (d.type === 'item') {
+                    return d.item.title; 
+                } else {
+                    return d.id;
+                }
+            });
 
         // remove old nodes
         circle.exit().remove();
