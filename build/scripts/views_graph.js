@@ -20,30 +20,138 @@ Views.plotGraph = function () {
         height: TH.Para.tagGraph.height * 1.2
     });
 
-    Views.D3Graph.sel_elements = {};
+    // Views.D3Graph.sel_elements = {};
+    Views.D3MouseVars.reset();
     // debugger;
     Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
 };
 
+
+// Manage cache of selected elementes. (nodes, links. etc);
+Views.D3MouseVars = {
+    hash: function (obj0){
+        var obj = $.extend({}, obj0);
+        obj.x = 0;
+        obj.y = 0;
+        obj.px = 0;
+        obj.py = 0;
+        return JSON.stringify(obj);
+    },
+    toggle: function (d) {
+        console.log("a node is toggled");
+        var cache = this.sel_elements;
+        var key = this.hash(d);
+        if (cache[key] === "yes") {
+            cache[key] = undefined;
+        } else {
+            cache[key] = "yes";
+        }
+    },
+
+    reset: function () {
+        this.sel_elements = {};
+    },
+
+    list: function () {
+        var keys = [],
+        key;
+        for (key in this.sel_elements) {
+            if (this.sel_elements.hasOwnProperty(key)) {
+                keys.push(key);
+            }
+        }
+        return keys;
+    },
+    selected: function (d) {
+        return (this.sel_elements[this.hash(d)] === "yes");
+    }
+};
+
+Views.D3Util = {};
+
+Views.D3Util.removeNodes = function (nodes, keys) {
+    function hash(d) {
+        return d.id;
+    }
+    function exists(keys, nd) {
+        var h = hash(nd);
+        var i = 0, N = keys.length;
+        for (i = 0; i < N; ++i) {
+            if (hash(keys[i]) === h) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    var new_nodes = [];
+    var kset = [];
+    $.each(keys, function (i, d) {
+        kset.push(JSON.parse(d));
+    });
+
+    $.each(nodes, function (i, d) {
+        if (!exists(kset, d)) {
+            new_nodes.push(d);
+        }
+    });
+    return new_nodes;
+}
+
+
+Views.D3Util.graphInit_item = function (para) {
+        $("#network_dialog_nav").html("<a class='action'>back</a>");
+        $("#network_dialog_nav").on("click", function () {
+            console.log("dialog_nav is clicked!");
+            var newPara = $.extend({}, para, TH.Util.graph.tagGraph());
+            newPara.type = "tag";
+            Views.D3Graph(newPara);
+        });
+
+        var default_tran = 'translate(-50, -10)';
+        var shapes = para.g.append('svg:rect')
+                        .attr('width', 100)
+                        .attr('height', 20)
+                        .attr('rx', 5)
+                        .attr('ry', 5)
+                        .attr('transform', default_tran);
+
+        shapes.on('mouseover', function (d) {
+            d3.select(this).attr('transform', 'scale(1, 3) ' + default_tran); // enlarge target node
+        })
+        .on('mouseout', function (d) {
+            d3.select(this).attr('transform', default_tran); // unenlarge target node
+        });
+
+        return {
+            shapes: shapes
+        };
+}
+
+Views.D3Util.graphInit_tag = function (para) {
+        var shapes = para.g.append('svg:circle')
+                        .attr('r', 12);
+        shapes.on('mouseover', function (d) {
+            d3.select(this).attr('transform', 'scale(3)'); // enlarge target node
+        })
+        .on('mouseout', function (d) {
+            d3.select(this).attr('transform', ''); // unenlarge target node
+        });
+       return {
+            shapes: shapes
+        };
+
+}
+
 // set up SVG for D3
 Views.D3Graph = function (para) {
-
+    var mouseVars = Views.D3MouseVars;
+    var removeNodes = Views.D3Util.removeNodes;
     (function cleanView() {
         $("#network_dialog_nav").html("");
         d3.select('svg').remove();
     }());
 
-    if (para.type === "item") {
-        (function moveBack(para) {
-            $("#network_dialog_nav").html("<a class='action'>back</a>");
-            $("#network_dialog_nav").on("click", function () {
-                console.log("dialog_nav is clicked!");
-                var newPara = $.extend({}, para, TH.Util.graph.tagGraph());
-                newPara.type = "tag";
-                Views.D3Graph(newPara);
-            });
-        }(para));
-    }
     var colors = d3.scale.category10();
     var links = para.links;
     var nodes = para.nodes;
@@ -52,8 +160,6 @@ Views.D3Graph = function (para) {
             .append('svg')
             .attr('width', para.width)
             .attr('height', para.height);
-
-    // var lastNodeId = para.nodes.length - 1;
 
     // init D3 force layout
     var force = d3.layout.force()
@@ -64,104 +170,9 @@ Views.D3Graph = function (para) {
         .charge(-500)
         .on('tick', tick);
 
-    // define arrow markers for graph links
-    svg.append('svg:defs').append('svg:marker')
-        .attr('id', 'end-arrow')
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 6)
-        .attr('markerWidth', 3)
-        .attr('markerHeight', 3)
-        .attr('orient', 'auto')
-        .append('svg:path')
-        .attr('d', 'M0,-5L10,0L0,5')
-        .attr('fill', '#000');
-
-    svg.append('svg:defs').append('svg:marker')
-        .attr('id', 'start-arrow')
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 4)
-        .attr('markerWidth', 3)
-        .attr('markerHeight', 3)
-        .attr('orient', 'auto')
-        .append('svg:path')
-        .attr('d', 'M10,-5L0,0L10,5')
-        .attr('fill', '#000');
-
-    // line displayed when dragging new nodes
-    var drag_line = svg.append('svg:path')
-        .attr('class', 'link dragline hidden')
-        .attr('d', 'M0,0L0,0');
-
     // handles to link and node element groups
     var path = svg.append('svg:g').selectAll('path'),
         circle = svg.append('svg:g').selectAll('g');
-
-    // mouse event vars
-    var selected_node = null,
-        selected_link = null,
-        mousedown_link = null,
-        mousedown_node = null,
-        mouseup_node = null;
-
-    var mouseVars = {
-        sel_elements: Views.D3Graph.sel_elements,
-        toggle: function (obj0) {
-            var cache = this.sel_elements;
-            var obj = $.extend({}, obj0);
-            obj.x = 0;
-            obj.y = 0;
-            obj.px = 0;
-            obj.py = 0;
-            console.log("a node is toggled");
-            var key = JSON.stringify(obj);
-            if (cache[key] === "yes") {
-                cache[key] = undefined;
-            } else {
-                cache[key] = "yes";
-            }
-        },
-
-        reset: function () {
-            this.sel_elements = {};
-        },
-
-        list: function () {
-            var keys = [],
-                key;
-            for (key in this.sel_elements) {
-                if (this.sel_elements.hasOwnProperty(key)) {
-                    keys.push(key);
-                }
-            }
-            return keys;
-        }
-    };
-
-
-    function removeNodes(nodes, keys) {
-        function idInKey(keys, id) {
-            var i = 0, N = keys.length;
-            for (i = 0; i < N; ++i) {
-                if (keys[i].id === id) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        var i, new_nodes = [];
-        var keyObjs = [];
-        for (i = 0; i < keys.length; ++i) {
-            keyObjs.push(JSON.parse(keys[i]));
-        }
-        for (i = 0; i < nodes.length; ++i) {
-            // debugger;
-            if (!idInKey(keyObjs, nodes[i].id)) {
-                new_nodes.push(nodes[i]);
-            }
-        }
-        return new_nodes;
-    }
 
     // update force layout (called automatically each iteration)
     function tick() {
@@ -188,21 +199,16 @@ Views.D3Graph = function (para) {
 
     // update graph (called when needed)
     function restart() {
-      // path (link) group
+        // path (link) group
         path = path.data(links);
 
-      // update existing links
-        path.classed('selected', function (d) { return d === selected_link; })
-            .style('marker-start', function (d) { return d.left ? 'url(#start-arrow)' : ''; })
-            .style('marker-end', function (d) { return d.right ? 'url(#end-arrow)' : ''; });
+        // update existing links
+        path.classed('selected', function (d) { return mouseVars.selected(d); });
 
-
-      // add new links
+        // add new links
         path.enter().append('svg:path')
             .attr('class', 'link')
-            .classed('selected', function (d) { return d === selected_link; })
-            .style('marker-start', function (d) { return d.left ? 'url(#start-arrow)' : ''; })
-            .style('marker-end', function (d) { return d.right ? 'url(#end-arrow)' : ''; })
+            .classed('selected', function (d) { return mouseVars.selected(d); })
             .on('mousedown', function (d) {
                 mouseVars.toggle(d); // select link
                 restart();
@@ -221,52 +227,30 @@ Views.D3Graph = function (para) {
 
       // update existing nodes (reflexive & selected visual states)
         circle.selectAll('circle')
-            .style('fill', function (d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
+            .style('fill', function (d) { return mouseVars.selected(d) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
             .classed('reflexive', function (d) { return d.reflexive; });
 
       // add new nodes
         var g = circle.enter().append('svg:g');
+        para.g = g;
 
-        g.append('svg:circle')
+        var ret = Views.D3Util['graphInit_' + para.type](para);
+        ret.shapes
             .attr('class', 'node')
-            .attr('r', 12)
-            .style('fill', function (d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
+            .style('fill', function (d) { return mouseVars.selected(d) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
             .style('stroke', function (d) { return d3.rgb(colors(d.id)).darker().toString(); })
             .classed('reflexive', function (d) { return d.reflexive; })
-            .on('mouseover', function (d) {
-                //TODO change it to show information when mouse over
-                // if (!mousedown_node || d === mousedown_node) {
-                //     return;
-                // }
-                // enlarge target node
-                d3.select(this).attr('transform', 'scale(3)');
-            })
-            .on('mouseout', function (d) {
-                // if (!mousedown_node || d === mousedown_node) {
-                //     return;
-                // }
-                // unenlarge target node
-                d3.select(this).attr('transform', '');
-            })
             .on('mousedown', function (d) {
-
                 if (d3.event.ctrlKey) {
                     // select node
-                    mousedown_node = d;
-                    if (mousedown_node === selected_node) {
-                        selected_node = null;
-                    } else {
-                        selected_node = mousedown_node;
-                    }
+                    // mousedown_node = d;
                     mouseVars.toggle(d);
                     console.log("node selected");
-                    // debugger;
-                    selected_link = null;
-                // reposition drag line
-                    drag_line
-                        .style('marker-end', 'url(#end-arrow)')
-                        .classed('hidden', false)
-                        .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+                    // reposition drag line
+                    // drag_line
+                    //     .style('marker-end', 'url(#end-arrow)')
+                    //     .classed('hidden', false)
+                    //     .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
                     restart();
                     console.log("run here");
                     return;
@@ -293,11 +277,19 @@ Views.D3Graph = function (para) {
             .attr('class', 'id')
             .text(function (d) { 
                 if (d.type === 'item') {
-                    return d.item.title; 
+                    if (d.item.title.slice(0, 8) !== '') {
+                        return d.item.title.slice(0, 8);
+                    } else {
+                        return d.item.url.slice(0, 8);
+                    }
+                    return ; 
                 } else {
                     return d.id;
                 }
             });
+
+        // $('#id').tipsy();
+
 
         // remove old nodes
         circle.exit().remove();
@@ -329,56 +321,12 @@ Views.D3Graph = function (para) {
             svg.classed('ctrl', true);
         }
 
-        if (!selected_node && !selected_link) {return; }
         switch (d3.event.keyCode) {
         case 8: // backspace
         case 46: // delete
             console.log("before delete: node number " + nodes.length);
             nodes = removeNodes(nodes, mouseVars.list());
             console.log("after delete: node number " + nodes.length);
-            // debugger;
-            // var keys = mouseVars.list(),
-            //     i = 0;
-            // for (i = 0; i < keys; ++i) {
-            // }
-            
-            // remove all nodes
-            // remove all links
-            // if (selected_node) {
-            //     nodes.splice(nodes.indexOf(selected_node), 1);
-            //     spliceLinksForNode(selected_node);
-            // } else if (selected_link) {
-            //     links.splice(links.indexOf(selected_link), 1);
-            // }
-            // selected_link = null;
-            // selected_node = null;
-            restart();
-            break;
-        case 66: // B
-            if (selected_link) {
-                // set link direction to both left and right
-                selected_link.left = true;
-                selected_link.right = true;
-            }
-            restart();
-            break;
-        case 76: // L
-            if (selected_link) {
-                // set link direction to left only
-                selected_link.left = true;
-                selected_link.right = false;
-            }
-            restart();
-            break;
-        case 82: // R
-            if (selected_node) {
-                // toggle node reflexivity
-                selected_node.reflexive = !selected_node.reflexive;
-            } else if (selected_link) {
-                // set link direction to right only
-                selected_link.left = false;
-                selected_link.right = true;
-            }
             restart();
             break;
         }
