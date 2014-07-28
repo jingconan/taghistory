@@ -36,7 +36,7 @@ var main = function (TH) {
     TH_views.trash();
 };
 
-main(TH);
+// main(TH);
 
 // var update = function (dst, src) {
 //     var mks = Object.keys(src);
