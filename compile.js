@@ -15,7 +15,7 @@ function concat_template() {
         console.log(filepath);
         key = path.basename(filepath, '.html');
         code = fs.readFileSync(filepath).toString();
-        template = code.replace(/\n/g, '').replace(/\"/, '\"');
+        template = code.replace(/\n/g, '').replace(/\"/g, '\'');
         concatedTemplates += ("TH.Templates." + key + " = \"" + template + "\";\n\n");
         filepath = 'build/scripts/templates.js';
         // console.log(concatedTemplates);
