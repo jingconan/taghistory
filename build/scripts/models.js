@@ -296,4 +296,85 @@ Models.getItemsWithTag = function (tag) {
     return res;
 }
 
+Models.BaseModel = Backbone.Model.extend({
+});
 
+Models.BaseModel.prototype.getI18nValues = function() {
+        return this.t([]);
+};
+
+Models.History = Backbone.Model.extend({
+    defaults: {
+        history: []
+    }
+});
+
+
+Models.DayHistory = Models.BaseModel({
+    initialize: function(attrs, options) {
+        this.chromeAPI = chrome;
+        this.settings = options.settings;
+        //FIXME
+        this.historyQuery = new TH.Lib.HistoryQuery(this.chromeAPI);
+    },
+    sync: function(method, model, options) {
+        if (method === 'read') {
+            this.set({history: []}, {silent: true});
+            this.historyQuery.run(this.toChrome(true), function(history) {
+                this.preparse(history, options.success);
+            });
+        } else if (method === 'delete') {
+            this.chromeAPI.history.deleteRange(this.toChrome(false), function() {
+                this.set({history: this.defaults.history});
+            });
+        }
+    },
+    toChrome: function(reading) {
+        var properties = {
+            startTime: this.sod(),
+            endTime: this.end()
+        };
+        if (reading) {
+            properties.text = '';
+        }
+        return properties;
+    },
+    sod: function() {
+        return new Date(this.get('date').sod()).getTime();
+    },
+    eod: function() {
+        return new Date(this.get('date').eod()).getTime();
+    },
+    defaults: {
+        history: []
+    }
+});
+
+
+
+
+Models.Day = Backbone.Model.extend({
+    initialize: function (attrs, options) {
+        this.chromeAPI = chrome;
+        this.settings = options.settings;
+        this.set = {id: this.get('date').id()};
+    },
+    defaults: {
+        history: []
+    }
+});
+
+
+Models.Tag = Backbone.Model.extend({
+    defaults: {
+        name: 'Fetus',
+        age: 0
+    },
+    initialize: function(){
+        alert("Welcome to this world");
+        this.on("change:name", function(model){
+            var name = model.get("name"); // 'Stewie Griffin'
+            alert("Changed my name to " + name );
+        });
+    }
+});

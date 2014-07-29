@@ -15,75 +15,6 @@
 </head>
 <body class="chrome-bootstrap new_tags">
 <div class="app">
-    <div class="frame">
-        <div class="mainview view">
-            <div class="day_view with_controls selected" style="display: block;">
-                <header>  
-                    <h1 class="title">    
-                        History <span class="sub_title"> Last Week</span>  
-                    </h1>  
-                    <div class="corner">    
-                        <input class="search" placeholder="Search title, url, or date" type="text" tabindex="1">  
-                    </div>  
-                    <div class="controls">    
-                        <a class="text back_to_week" href="#weeks/10-21-13">      ← Back to Week    </a>    
-                        <div class="spacer"></div>    
-                        <!-- <button class="delete_day">      Delete...    </button>   -->
-                        <!-- <button id="refresh_display">Refresh</button>   -->
-                        <button id="update_evernote_token">update evernote token</button>  
-                        <button id="sync_to_evernote">sync to evernote</button>  
-                        <button id="import_json">import</button>  
-                        <button id="export_json">export</button>  
-                        <button id="view_network">View as network</button>  
-
-                        <!-- <div><input type="checkbox" name="auto_refresh" value="Bike" id="auto_refresh" checked>Auto Refresh</div> -->
-                    </div>
-                </header>
-                <div class="content">
-                    <div id="history_items">            
-                    </div>
-                </div>        
-            </div>
-        </div>
-
-        <div class="navigation">    
-            <h1>      <a href="#/">        Tag History </a>    </h1>    
-            <div class="available_tags"></div>    
-            <ul class="menu">      
-                <div id="menu_title">Tags</div>
-                <!-- <li class="">        <a class="tags" href="#tags">          Tags          </a>      </li>     -->
-            </ul>    
-            <div class="menu menu_view disappearable" id="tags_menu">
-                <!-- <ul class="menu">       -->
-                <!--     <li>       -->
-                <!--     <div id="tag1" class="tags">Research</div> -->
-                <!--     <div id="tag2" class="tags">Music</div> -->
-                <!--     </li>       -->
-                <!-- </ul> -->
-            </div>
-            <div class="menu menu_view disappearable" id="tags_menu1">
-                <!-- <ul><li>Plus</li></ul> -->
-                <!-- <div class="tags">+</div> -->
-                <!-- </div> -->
-                <p class="speech">Tagged !</p>
-                <ul class="menu disappearable"><li class="">        <a
-                        class="setting" href="#settings">          Settings        </a>
-                    <div>
-                    <div>Interval</div> 
-                    <div id="interval_slider"></div>
-                    <div id='interval_value'></div>
-                    </div>
-                </li></ul>  
-            </div>
-            <div class="menu disappearable" id="trash_bin" align="middle">
-                <img src="images/trash.ico" alt="trash", height="80" width="80" align="middle">
-            </div>
-
-
-
-            <!-- <div id="coverup"></div> -->
-        </div>
-    </div>
 </div>
 
 
@@ -100,12 +31,16 @@
 <script type="text/javascript" src="frameworks/jquery-ui.js"></script>
 <script type="text/javascript" src="frameworks/jquery.tipsy.js"></script>
 <script type="text/javascript" src="frameworks/underscore-min.js"></script>
+<script type="text/javascript" src="frameworks/moment.min.js"></script>
 <script type="text/javascript" src="frameworks/backbone-min.js"></script>
 <script type="text/javascript" src="frameworks/mustache.js"></script>
 <script type="text/javascript" src="frameworks/evernote-sdk-minified.js"></script>
 <script type="text/javascript" src="frameworks/FileSaver.js"></script>
 <script type="text/javascript" src="frameworks/d3.v3.min.js"></script>
+<script type="text/javascript" src="frameworks/toolbox.js"></script>
 <script type="text/javascript" src='scripts/namespace.js'></script>
+<script type="text/javascript" src='scripts/modules.js'></script>
+<script type="text/javascript" src='scripts/lib.js'></script>
 <script type="text/javascript" src='scripts/templates.js'></script>
 <script type="text/javascript" src='scripts/util.js'></script>
 <script type="text/javascript" src='scripts/models.js'></script>

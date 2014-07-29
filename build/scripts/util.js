@@ -127,7 +127,7 @@ Util.graph.tagGraph = function () {
         nodes: nodes,
         links: links
     };
-}
+};
 
 Util.graph.itemGraph = function (tag_name) {
     // TODO need a way to calculate the link between nodes
@@ -138,5 +138,60 @@ Util.graph.itemGraph = function (tag_name) {
         nodes.push({id: items[i].id, reflexive: false, type:"item", item: items[i]})
     }
     return {nodes: nodes, links: []};
+};
+
+// Util.HistoryQuery = _.extend({}, function() {
+//     
+// });
+// Util.HistoryQuery = function() {
+//     this.chromeAPI = chrome;
+//     this.run = function(options, callback) {
+//         this.options = options;
+//         if (this.options.text) {
+//             this.text = this.options.text;
+//             this.options.text = '';
+//         }
+//         var options = {};
+//         _.extend(options, this.options);
+//         if (this.options.searching)
+//     }
+// }
+//
+Util.isDefined = function() {
+    return (typeof MyVariable !== "undefined" && MyVariable !== null);
 }
+
+Util.HistoryQuery = Toolbox.Base.extend({
+    constructor: function() {
+        this.chromeAPI = chrome;
+    },
+    run: function(options, callback) {
+        this.options = options;
+        if (this.options.text) {
+            this.text = this.options.text;
+            this.options.text = '';
+        }
+        var options = {};
+        _.extend(options, this.options);
+        // FIXME plase comment this part
+        if (Util.isDefined(this.options.searching)) {
+            _.extend(options, this.searchOptions);
+        } else {
+            options.maxResults = 5000;
+        }
+        delete options.searching;
+
+        this.chromeAPI.history.search(options, function(results) {
+            this.searchHandler(results, callback);
+        });
+    },
+    searchHandler: function(results, callback) {
+        if (this.text) {
+            this.options.text = this.text;
+        }
+        // FIXME
+        // results = this._prepareResults(results);
+        // return this._sanitizedResults(results, callback);
+    }
+});
 

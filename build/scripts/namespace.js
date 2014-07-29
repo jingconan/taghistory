@@ -11,6 +11,7 @@ TH = {
     Util: {},
     Views: {},
     Models: {},
+    Collections: {},
     Para: {
         Interval: {
             init: 100,

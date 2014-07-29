@@ -14,14 +14,44 @@ var AppRouter = Backbone.Router.extend({
     week: function(id) {
         console.log("week: " + id);
     },
+    initialize: function(options) {
+        var settings = options.settings,
+            tracker = options.tracker;
+        this.state = options.state;
+
+        this.app = new TH.Views.AppView({
+            el: $('.app'),
+            collection: {},
+            settings: settings,
+            state: this.state,
+            options: {settings: settings}
+        });
+        // collection: new TH.Collections.Weeks(null, {settings: settings}),
+        this.app.render();
+
+    // @on 'route', (route) =>
+    //   tracker.pageView(Backbone.history.getFragment())
+    //   window.scroll 0, 0
+    //   if settings.get('openLocation') == 'last_visit'
+    //     @state.set route: location.hash
+
+    // @reset if location.hash == ''
+
+    },
     defaultRoute: function() {
         console.log("default route");
-        main(TH);
+        // this.app.render();
+        // main(TH);
 
     }
 });
 // Initiate the router
-var app_router = new AppRouter;
+var app_router = new AppRouter({
+    // settings: settings,
+    settings: {}, //FIXME
+    state: {}
+    // tracker: analyticsTracker
+});
 
 // app_router.on('route:defaultRoute', function(actions) {
 //     alert(actions);
