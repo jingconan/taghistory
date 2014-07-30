@@ -264,16 +264,12 @@ Views.TagView = Views.BaseView.extend({
             if (!newTagName) {
                 return;
             }
-            // tagList.push({tag_name: newTagName});
-            // Models.updateTagList(tagList, function () {
-            //     Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
-            //     Views.renderTagsMenu(massageInfo, tagList);
-            // });
             console.log('newTagName here');
-            this.collection.persistence.addSiteToTag('', newTagName, function () {
+            this.collection.persistence.addSiteToTag('', newTagName, (function () {
                 console.log('newTagName has been added');
                 Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
-            });
+                this.render();
+            }).bind(this));
 
         }).bind(this));
 
@@ -288,11 +284,6 @@ Views.TagView = Views.BaseView.extend({
     render: function () {
         console.log('TagView.render');
         this.collection.fetch((function () {
-                console.log('this.collection.fetch');
-                console.log("this.template: " + this.template);
-                console.log("_this.collection: " + this.collection);
-                console.log("_this.collection.models: " + this.collection.models);
-                console.log("_this.collection.toTemplate(): " + this.collection.toTemplate());
                 var dat = this.collection.toTemplate();
                 var html = Mustache.to_html(this.template, this.collection.toTemplate());
                 this.$el.html(html);
@@ -307,8 +298,9 @@ Views.MenuView = Views.BaseView.extend({
     template: TH.Templates['menu'],
     initialize: function(options) {
         this.options = options;
-        this.cache = options.cache;
         this.el = options.el;
+        this.cache = options.cache;
+        this.collection = options.collection;
         // FIXME
         this.intervalSlider = TH.Selectors.interval_slider;
         this.trashBin = "#trash_bin";
@@ -323,12 +315,12 @@ Views.MenuView = Views.BaseView.extend({
         this.renderTags();
     },
     renderTags: function () {
-        var tagView = new Views.TagView({
+        this.tagView = new Views.TagView({
             el: TH.Selectors.tag,
             cache: this.cache,
             collection: this.collection
         });
-        tagView.render();
+        this.tagView.render();
     },
     renderSlider: function() {
         var TH_interval = TH.Para.Interval;
@@ -357,13 +349,20 @@ Views.MenuView = Views.BaseView.extend({
     }, 
     renderTrashBin: function() {
         $(this.trashBin).on('dragover', function (ev) {ev.preventDefault(); });
-        $(this.trashBin).each(function (idx, trash) {
-            trash.addEventListener('drop', function (ev) {
+        $(this.trashBin).each((function (idx, trash) {
+            trash.addEventListener('drop', (function (ev) {
+                console.log('drop event trigged!');
                 ev.preventDefault();
-                // var removedTag = ev.dataTransfer.getData("removedTag");
+                var removedTag = ev.dataTransfer.getData("removedTag");
+                console.log("this.collection: " + this.collection);
+                this.collection.persistence.removeTag(removedTag, (function () {
+                    console.log('successfully removed!');
+                    this.renderTags();
+                    console.log('tag menu is refreshed!');
+                }).bind(this));
                 // Models.deleteTag(removedTag);
-            }, false);
-        });
+            }).bind(this), false);
+        }).bind(this));
 
         $(this.trashBin).draggable();
     }

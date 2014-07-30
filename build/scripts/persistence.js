@@ -73,7 +73,6 @@ TH.Persistence.Tag = Toolbox.Base.extend({
                 console.log("data.tags: " + data.tags);
                 console.log("tag: " + tag);
                 console.log('if has been executed');
-                debugger;
             }
             console.log("data.tags: " + data.tags);
             this.localStore.set(data, (function () {
@@ -86,7 +85,27 @@ TH.Persistence.Tag = Toolbox.Base.extend({
                 //         callback(operations);
                 //     });
                 // }).bind(this));
+                callback(operations);
             }).bind(this, tag));
         }).bind(this));
+    },
+    removeTag: function (tag, callback) {
+        this.localStore.get('tags', (function (data) {
+            data.tags = data.tags || [];
+            data.tags = _.without(data.tags, tag);
+            this.localStore.set(data, (function () {
+                this.localStore.remove(tag, function () {
+                    callback();
+                });
+            }).bind(this));
+        }).bind(this));
     }
+
+  // removeTag: (tag, callback = ->) ->
+  //   @localStore.get 'tags', (data) =>
+  //     data.tags ||= []
+  //     data.tags = _.without(data.tags, tag)
+  //     @localStore.set data, =>
+  //       @localStore.remove tag, ->
+  //         callback()
 });
