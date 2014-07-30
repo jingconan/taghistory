@@ -21,7 +21,7 @@ var AppRouter = Backbone.Router.extend({
 
         this.app = new TH.Views.AppView({
             el: $('.app'),
-            collection: {},
+            collection: new TH.Collections.Tags(null, {settings: settings}),
             settings: settings,
             state: this.state,
             options: {settings: settings}

@@ -12,6 +12,7 @@ TH = {
     Views: {},
     Models: {},
     Collections: {},
+    Persistence: {},
     Para: {
         Interval: {
             init: 100,

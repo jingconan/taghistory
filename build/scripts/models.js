@@ -296,12 +296,12 @@ Models.getItemsWithTag = function (tag) {
     return res;
 }
 
-Models.BaseModel = Backbone.Model.extend({
-});
+// Models.BaseModel = Backbone.Model.extend({
+// });
 
-Models.BaseModel.prototype.getI18nValues = function() {
-        return this.t([]);
-};
+// Models.BaseModel.prototype.getI18nValues = function() {
+//         return this.t([]);
+// };
 
 Models.History = Backbone.Model.extend({
     defaults: {
@@ -310,12 +310,13 @@ Models.History = Backbone.Model.extend({
 });
 
 
-Models.DayHistory = Models.BaseModel({
+// Models.DayHistory = Models.BaseModel({
+Models.DayHistory = Backbone.Model.extend({
     initialize: function(attrs, options) {
         this.chromeAPI = chrome;
         this.settings = options.settings;
         //FIXME
-        this.historyQuery = new TH.Lib.HistoryQuery(this.chromeAPI);
+        this.historyQuery = new TH.Util.HistoryQuery(this.chromeAPI);
     },
     sync: function(method, model, options) {
         if (method === 'read') {
@@ -366,15 +367,34 @@ Models.Day = Backbone.Model.extend({
 
 
 Models.Tag = Backbone.Model.extend({
-    defaults: {
-        name: 'Fetus',
-        age: 0
-    },
     initialize: function(){
         alert("Welcome to this world");
         this.on("change:name", function(model){
             var name = model.get("name"); // 'Stewie Griffin'
             alert("Changed my name to " + name );
         });
+    },
+    validate: function(attrs, options) {
+        var name = attrs.name.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+
+        if (name.length == 0) {
+            return "tag is empty";
+        }
+        if (name.match(/[\"\'\~\,\.\|\(\)\{\}\[\]\;\:\<\>\^\*\%\^]/)) {
+            return "tag contains special characterse";
+        }
+    },
+    fetch: function(callback) {
+        this.persistence = this.persistence || lazyPersistence() || {};
+        // FIXME
+        this.persistence.fetchTagSites(this.get('name'), function(sites) {
+            this.persistence.fetchSharedTag(this.get('name'), function(url) {
+                this.set({sites: sites, url: url});
+                callback();
+            });
+        });
+    },
+    toTemplate: function () {
+        
     }
 });

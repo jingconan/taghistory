@@ -238,6 +238,70 @@ Views.Cache = function (options) {
     };
 };
 
+Views.TagView = Views.BaseView.extend({
+    template: TH.Templates['tags'],
+    initialize: function(options) {
+        this.options = options;
+        this.el = options.el;
+        this.collection = options.collection;
+    },
+    bindEvent: function () {
+        console.log('run bindEvent');
+        // debugger;
+        var selector = Selectors.tag;
+
+        $(selector + ' .tags:not(#create_new_tag)').each(function (idx, tag) {
+            tag.addEventListener('dragover', function (ev) {ev.preventDefault(); }, false);
+            tag.addEventListener('dragstart', function (ev) {
+                ev.dataTransfer.setData("removedTag", ev.target.textContent);
+            }, false);
+            tag.addEventListener('drop', function (ev) {
+            }, false);
+        });
+        $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault(); });
+        $(selector + ' #create_new_tag').on('drop click', (function (ev) {
+            var newTagName = window.prompt("New tag name", "");
+            if (!newTagName) {
+                return;
+            }
+            // tagList.push({tag_name: newTagName});
+            // Models.updateTagList(tagList, function () {
+            //     Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
+            //     Views.renderTagsMenu(massageInfo, tagList);
+            // });
+            console.log('newTagName here');
+            this.collection.persistence.addSiteToTag('', newTagName, function () {
+                console.log('newTagName has been added');
+                Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
+            });
+
+        }).bind(this));
+
+        // debugger;
+        // $(selector).on('click', + ' #create_new_tag', function (ev) {
+        //     var newTagName = window.prompt("New tag name", "");
+        //     if (!newTagName) {
+        //         return;
+        //     }
+        // });
+    },
+    render: function () {
+        console.log('TagView.render');
+        this.collection.fetch((function () {
+                console.log('this.collection.fetch');
+                console.log("this.template: " + this.template);
+                console.log("_this.collection: " + this.collection);
+                console.log("_this.collection.models: " + this.collection.models);
+                console.log("_this.collection.toTemplate(): " + this.collection.toTemplate());
+                var dat = this.collection.toTemplate();
+                var html = Mustache.to_html(this.template, this.collection.toTemplate());
+                this.$el.html(html);
+                this.bindEvent();
+        }).bind(this));
+    }
+    
+});
+
 
 Views.MenuView = Views.BaseView.extend({
     template: TH.Templates['menu'],
@@ -250,12 +314,21 @@ Views.MenuView = Views.BaseView.extend({
         this.trashBin = "#trash_bin";
     },
     render: function() {
-        debugger;
+        // debugger;
         var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
 
         this.renderSlider();
         this.renderTrashBin();
+        this.renderTags();
+    },
+    renderTags: function () {
+        var tagView = new Views.TagView({
+            el: TH.Selectors.tag,
+            cache: this.cache,
+            collection: this.collection
+        });
+        tagView.render();
     },
     renderSlider: function() {
         var TH_interval = TH.Para.Interval;
@@ -287,8 +360,8 @@ Views.MenuView = Views.BaseView.extend({
         $(this.trashBin).each(function (idx, trash) {
             trash.addEventListener('drop', function (ev) {
                 ev.preventDefault();
-                var removedTag = ev.dataTransfer.getData("removedTag");
-                Models.deleteTag(removedTag);
+                // var removedTag = ev.dataTransfer.getData("removedTag");
+                // Models.deleteTag(removedTag);
             }, false);
         });
 
@@ -301,6 +374,7 @@ Views.AppView = Views.BaseView.extend({
     template: TH.Templates['app'], //FIXME 
     initialize: function(options) {
         this.chromeAPI = chrome;
+        _.extend(this, options);
         // this.settings = this.options.settings;
         // this.collection.reload(this.settings.get('startingWeekDay'));
         // this.options.state.on('change', this.onStateChanged, this);
@@ -308,22 +382,28 @@ Views.AppView = Views.BaseView.extend({
         // this.settings.on('change:weekDayOrder', this.onWeekDayOrderChanged, this);
         // this.collection.on('reloaded', this.onWeeksReloaded, this);
 
-        TH.Models.init();
+        // TH.Models.init();
         this.cache = new Views.Cache(options);
     },
     render: function() {
+        // render the overall view
         var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
+
         this.renderMenu();
+        this.renderHistory();
         TH.Views.updateInterval(TH.Para.Interval.init); //FIXME
 
         return this;
     },
+    renderHistory: function() {
+        
+    },
     renderMenu: function() {
         var menuView = new Views.MenuView({
             el: '.navigation',
-            cache: this.cache
-            // collection: this.collection
+            cache: this.cache,
+            collection: this.collection
         });
         menuView.render();
     },
