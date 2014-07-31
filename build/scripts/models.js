@@ -454,11 +454,15 @@ Models.Day = Backbone.Model.extend({
 
 
 Models.Tag = Backbone.Model.extend({
+    defaults: {
+        name : null,
+        cream_filled : false
+    },
     initialize: function(){
-        alert("Welcome to this world");
+        // alert("Welcome to this world");
         this.on("change:name", function(model){
             var name = model.get("name"); // 'Stewie Griffin'
-            alert("Changed my name to " + name );
+            // alert("Changed my name to " + name );
         });
     },
     validate: function(attrs, options) {
@@ -471,18 +475,17 @@ Models.Tag = Backbone.Model.extend({
             return "tag contains special characterse";
         }
     },
-    fetch: function(callback) {
-        this.persistence = this.persistence || lazyPersistence() || {};
-        // FIXME
-        this.persistence.fetchTagSites(this.get('name'), function(sites) {
-            this.persistence.fetchSharedTag(this.get('name'), function(url) {
-                this.set({sites: sites, url: url});
-                callback();
-            });
-        });
-    },
+    // fetch: function(callback) {
+    //     this.persistence = this.persistence || lazyPersistence() || {};
+    //     this.persistence.fetchTagSites(this.get('name'), function(sites) {
+    //         this.persistence.fetchSharedTag(this.get('name'), function(url) {
+    //             this.set({sites: sites, url: url});
+    //             callback();
+    //         });
+    //     });
+    // },
     toTemplate: function () {
-        
+        return {tag_name: this.get('name')};
     }
 });
 

@@ -339,11 +339,18 @@ Views.TagView = Backbone.View.extend({
                 return;
             }
             console.log('newTagName here');
-            this.collection.persistence.addSiteToTag('', newTagName, (function () {
-                console.log('newTagName has been added');
-                Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
-                this.render();
-            }).bind(this));
+            this.collection.create({name: newTagName}, {
+                success: (function () {
+                    console.log('newTagName has been added');
+                    Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
+                    this.render();
+                }).bind(this)
+            });
+            // this.collection.persistence.addSiteToTag('', newTagName, (function () {
+            //     console.log('newTagName has been added');
+            //     Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
+            //     this.render();
+            // }).bind(this));
 
         }).bind(this));
 
@@ -357,12 +364,19 @@ Views.TagView = Backbone.View.extend({
     },
     render: function () {
         console.log('TagView.render');
-        this.collection.fetch((function () {
+        this.collection.fetch().then(
+            (function () { // success call back
+                console.log('fetch tags succesfully');
                 var dat = this.collection.toTemplate();
+                debugger;
                 var html = Mustache.to_html(this.template, this.collection.toTemplate());
                 this.$el.html(html);
                 this.bindEvent();
-        }).bind(this));
+            }).bind(this),
+            (function () { // fail call back
+                console.log('fetch fail');
+            }).bind(this)
+        );
     }
     
 });

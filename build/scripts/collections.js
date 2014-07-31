@@ -5,12 +5,12 @@
 _.extend(Backbone.Collection.prototype, {
     toTemplate: function (start, end) {
         start = (start !== undefined) ? start : 0;
-        end = (end !== undefined) ? end : (this.models.length - 1);
+        end = (end !== undefined) ? end : (this.models.length);
         var templates = [], i, res = {};
-        for (i = 0; i < this.models[i]; ++i) {
+        for (i = start; i < end; ++i) {
             templates.push(this.models[i].toTemplate());
         }
-        res[this.modelName] = this.templates;
+        res[this.modelName] = templates;
         if (this.modelName === undefined) {
             return templates;
         }
@@ -37,7 +37,7 @@ TH.Collections.Intervals = Backbone.Collection.extend({
     //         intervals.push(this.models[i].toTemplate);
     //     }
     //     return intervals;
-    // },
+    // },Array[0]
 
     destroyAll: function () {
         while (this.length > 0) {
@@ -55,37 +55,34 @@ function lazyPersistence() {
 
 TH.Collections.Tags = Backbone.Collection.extend({
     model: TH.Models.Tag,
-    constructor : function (attributes, options) {
+    modelName: 'tagList',
+    chromeStorage: new Backbone.ChromeStorage("Tags", "sync"),
+    // constructor : function (attributes, options) {
         // Backbone.Collection.apply( this, arguments );
-    },
-    initialize: function (models, options) {
-        this.persistence = options.persistence || lazyPersistence();
-    },
-    fetch: function (callback) {
-        console.log('TH.Collections.Tags.fetch');
-        this.persistence = this.persistence || lazyPersistence();
-        this.persistence.fetchTags((function (tags, compileTags) {
-            // debugger;
-            console.log('run here tags');
-            this.models = tags;
-            callback();
-        }).bind(this));
-    },
-    destroy: function (callback) {
-        this.persistence = this.persistence || lazyPersistence();
-        this.persistence.removeAllTags(callback);
-    },
-    toTemplate: function () {
-        var tagList = [];
-        var i;
-        for (i = 0; i < this.models.length; ++i) {
-            // console.log("i: " + i);
-            // console.log("this.models[i].toTemplate(): " + this.models[i].toTemplate());
-            // tagList.push(this.models[i].toTemplate());
-            tagList.push({tag_name: this.models[i]});
-        }
-        return {tagList: tagList};
-    }
+    // },
+    // initialize: function (models, options) {
+    //     this.persistence = options.persistence || lazyPersistence();
+    // },
+    // fetch: function (callback) {
+    //     console.log('TH.Collections.Tags.fetch');
+    //     this.persistence = this.persistence || lazyPersistence();
+    //     this.persistence.fetchTags((function (tags, compileTags) {
+    //         this.models = tags;
+    //         callback();
+    //     }).bind(this));
+    // },
+    // destroy: function (callback) {
+    //     this.persistence = this.persistence || lazyPersistence();
+    //     this.persistence.removeAllTags(callback);
+    // }
+    // toTemplate: function () {
+    //     var tagList = [];
+    //     var i;
+    //     for (i = 0; i < this.models.length; ++i) {
+    //         tagList.push({tag_name: this.models[i]});
+    //     }
+    //     return {tagList: tagList};
+    // }
     
 });
 
