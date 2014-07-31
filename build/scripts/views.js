@@ -138,15 +138,6 @@ Views.trash = function () {
 
 };
 
-// Views.Cache = {
-//     constructor: function(options) {
-//     }
-//     this.
-//     tagsView: {
-//     },
-
-// };
-//
 Backbone.View.prototype.chromeAPI = chrome;
 _.extend(Backbone.View.prototype, TH.Modules.I18n);
 _.extend(Backbone.View.prototype, {
@@ -172,9 +163,7 @@ Views.DayView = Views.MainView.extend({
         var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
         var html = Mustache.to_html(this.template, properties);
         this.$el.html(html);
-        console.log('renderHhistory Before');
         this.renderHistory();
-        console.log('renderHhistory Finishes');
     },
     renderHistory: function() {
         this.dayResultsView = new TH.Views.DayResultsView({
@@ -209,16 +198,27 @@ Views.DayView = Views.MainView.extend({
 
 Views.DayResultsView = Backbone.View.extend({
     template: TH.Templates['day_results'],
-    events: {
-        'click .delete_visit': 'deleteVisitClicked',
-        'click .delete_grouped_visit': 'deleteGroupedVisitClicked',
-        'click .delete_interval': 'deleteIntervalClicked',
-        'click .show_visits': 'toggleGroupedVisitsClicked',
-        'click .hide_visits': 'toggleGroupedVisitsClicked',
-        'click .visit > a': 'visitClicked'
-    },
-    initialize: function() {
-        this.chromeAPI = chrome;
+    // events: {
+    //     'click .delete_visit': 'deleteVisitClicked',
+    //     'click .delete_grouped_visit': 'deleteGroupedVisitClicked',
+    //     'click .delete_interval': 'deleteIntervalClicked',
+    //     'click .show_visits': 'toggleGroupedVisitsClicked',
+    //     'click .hide_visits': 'toggleGroupedVisitsClicked',
+    //     'click .visit > a': 'visitClicked'
+    // },
+    // initialize: function() {
+    //     this.chromeAPI = chrome;
+    // },
+    bindEvent: function () {
+        // Add EventListeners
+        /*jslint unparam: true*/
+        function onDragStart(i, visit) {
+            visit.addEventListener('dragstart', function (ev) {
+                ev.dataTransfer.setData("itemID", Models.searchDatasetID(ev.target, 0));
+            }, false);
+        }
+        /*jslint unparam: false*/
+        $('.interval').each(onDragStart);
     },
     render: function() {
         console.log('day result render');
@@ -228,9 +228,11 @@ Views.DayResultsView = Backbone.View.extend({
             //FIXME check TH.Propmpts
             console.log('test for model fetch');
             console.log('test for model fetch 2');
-            var properties = _.extend(this.getI18nValues(), data);
-            var html = Mustache.to_html(this.template, properties);
+            var massageInfo = _.extend(this.getI18nValues(), data);
+            var html = Mustache.to_html(this.template, massageInfo);
             this.$el.html(html);
+            this.massageInfo = massageInfo; // cache the massageInfo
+            this.bindEvent();
 
         }).bind(this));
 
@@ -266,6 +268,11 @@ Views.Cache = Toolbox.Base.extend({
         }
     },
     dayView: function(id) {
+        if (id === undefined) {
+            id = this.dayID;
+        } else {
+            this.dayID = id;
+        }
         var day, history;
         if (!this.cache.days[id]) {
             day = new Models.Day({date: moment(new Date(id))}, 
@@ -287,6 +294,7 @@ Views.TagView = Backbone.View.extend({
     template: TH.Templates['tags'],
     initialize: function(options) {
         this.options = options;
+        this.cache = options.cache;
         this.el = options.el;
         this.collection = options.collection;
     },
@@ -294,14 +302,35 @@ Views.TagView = Backbone.View.extend({
         console.log('run bindEvent');
         // debugger;
         var selector = Selectors.tag;
+        var onDrop = (function (ev) {
+            var massageInfo = this.cache.dayView().dayResultsView.massageInfo;
+            ev.preventDefault();
+            console.log("run on Drop");
+            var itemID = ev.dataTransfer.getData("itemID");
+            var item = massageInfo.IDMap[itemID]; //FIXME
+            var tag = ev.target.textContent;
+            var rect = ev.target.getBoundingClientRect();
+            var callbackHandle = function () {};
+
+            // FIXME, need to update this using the Models.Tag
+            Models.addTag.prototype.visitNum = 0; // indicator or unfinished callbacks
+            if (item.visits === undefined) { // visit item
+                Models.addTag(item, tag, callbackHandle);
+            } else { // group item
+                $.each(item.visits, function (idx, value) {
+                    Models.addTag(value, tag, callbackHandle);
+                });
+            }
+
+            Views.msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
+        }).bind(this);
 
         $(selector + ' .tags:not(#create_new_tag)').each(function (idx, tag) {
             tag.addEventListener('dragover', function (ev) {ev.preventDefault(); }, false);
             tag.addEventListener('dragstart', function (ev) {
                 ev.dataTransfer.setData("removedTag", ev.target.textContent);
             }, false);
-            tag.addEventListener('drop', function (ev) {
-            }, false);
+            tag.addEventListener('drop', onDrop, false);
         });
         $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault(); });
         $(selector + ' #create_new_tag').on('drop click', (function (ev) {
@@ -417,8 +446,8 @@ Views.AppView = Backbone.View.extend({
     class_name: 'app_view',
     template: TH.Templates['app'], //FIXME 
     initialize: function(options) {
-        this.chromeAPI = chrome;
-        _.extend(this, options);
+        // debugger;
+        // _.extend(this, options);
         // this.settings = this.options.settings;
         // this.collection.reload(this.settings.get('startingWeekDay'));
         // this.options.state.on('change', this.onStateChanged, this);

@@ -15,9 +15,8 @@ var AppRouter = Backbone.Router.extend({
         console.log("week: " + id);
     },
     day: function (id) {
-        console.log('day is executed');
         var view = this.app.loadDay(id);
-        view.history.fetch();
+        // view.history.fetch();
         view.render();
         // view.select();
     },
@@ -59,9 +58,7 @@ var app_router = new AppRouter({
     // tracker: analyticsTracker
 });
 
-// app_router.on('route:defaultRoute', function(actions) {
-//     alert(actions);
-// })
+
 
 // Start Backbone history a necessary step for bookmarkable URL's
 Backbone.history.start();
