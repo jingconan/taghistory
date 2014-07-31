@@ -147,10 +147,18 @@ Views.trash = function () {
 
 // };
 //
-Views.BaseView = Backbone.View.extend(TH.Modules.I18n);
-Views.BaseView.prototype.getI18nValues = function() {
+Backbone.View.prototype.chromeAPI = chrome;
+_.extend(Backbone.View.prototype, TH.Modules.I18n);
+_.extend(Backbone.View.prototype, {
+    getI18nValues: function() {
         return this.t([]);
-};
+    }
+});
+
+Views.BaseView = Backbone.View;
+// Views.BaseView.prototype.getI18nValues = function() {
+//         return this.t([]);
+// };
 
 Views.MainView = Backbone.View.extend({
     select: function() {
@@ -164,18 +172,44 @@ Views.DayView = Views.MainView.extend({
         this.history = this.options.history
         // this.history.bind('change', @onDayHistoryLoaded, @)
     },
+    template: TH.Templates['day'],
+    render: function () {
+        var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
+        var html = Mustache.to_html(this.template, properties);
+        this.$el.html(html);
+        console.log('renderHhistory Before');
+        this.renderHistory();
+        console.log('renderHhistory Finishes');
+    },
     renderHistory: function() {
-        this.dayResultsView = new BH.Views.DayResultsView({
-            model: this.history
+        this.dayResultsView = new TH.Views.DayResultsView({
+            model: this.history,
+            el: $('.content')
         });
-        this.$('.content').html(this.dayResultsView.render().el);
+        console.log('run here test');
+        this.dayResultsView.render();
+        // this.$('.history').html(this.dayResultsView.render().el);
         // this.dayResultsView.insertTags()
         // this.dayResultsView.attachDragging()
     },
     updateInterval: function(interval) {
         $(Selectors.interval_value).text(val + ' s');
         $(Selectors.interval_value).css('margin-left', val / TH.Para.Interval.max * 100 + '%');
+    },
+    getI18nValues: function () {
+        var properties = this.t([
+            'collapse_button',
+            'expand_button',
+            'delete_all_visits_for_filter_button',
+            'no_visits_found',
+            'search_input_placeholder_text',
+        ]);
+        properties['i18n_back_to_week_link'] = this.t('back_to_week_link', [
+            this.t('back_arrow')
+        ]);
+        return properties;
     }
+
 });
 
 Views.DayResultsView = Views.BaseView.extend({
@@ -192,14 +226,22 @@ Views.DayResultsView = Views.BaseView.extend({
         this.chromeAPI = chrome;
     },
     render: function() {
+        console.log('day result render');
         //FIXME solve the internationalization problem
-        var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
-        var html = Mustache.to_html(this.template, properties);
-        this.$el.html(html);
+        // Add collection into this
+        this.model.fetch((function (data) {
+            //FIXME check TH.Propmpts
+            console.log('test for model fetch');
+            console.log('test for model fetch 2');
+            var properties = _.extend(this.getI18nValues(), data);
+            var html = Mustache.to_html(this.template, properties);
+            this.$el.html(html);
+        }).bind(this));
+
         return this;
     },
     getI18nValues: function() {
-        return self.t([
+        return this.t([
             'prompt_delete_button',
             'delete_time_interval_button',
             'no_visits_found',
@@ -210,33 +252,40 @@ Views.DayResultsView = Views.BaseView.extend({
     }
 });
 
-// Cache of views
-Views.Cache = function (options) {
-    this.options = options;
-    this.settings = options.settings;
-    this.state = options.state;
-    this.expire = function() {
+
+Views.Cache = Toolbox.Base.extend({
+    constructor: function (options) {
+        this.options = options;
+        this.settings = options.settings;
+        this.state = options.state;
+        this.expire(); 
+        console.log('cache is initialized')
+    },
+    expire: function() {
         console.log('expire is runned');
         this.cache = {
             weeks: {},
             days: {},
             tags: {}
         }
-    };
-    this.expire();
+    },
+    dayView: function(id) {
+        var day, history;
+        if (!this.cache.days[id]) {
+            day = new Models.Day({date: moment(new Date(id))}, 
+                                 {settings: this.settings});
+            history = new Models.DayHistory(day.toHistory(), 
+                                            {settings: this.settings});
+            this.cache.days[id] = new Views.DayView({
+                model: day,
+                history: history,
+                el: $('.day_view')
+            });
+        }
+        return this.cache.days[id];
+    }
 
-    this.dayView = function(id) {
-      if (!this.cache.days[id]) {
-        day = new Models.Day({date: moment(new Date(id))}, {settings: settings});
-        history = new Models.DayHistory(day.toHistory(), {settings: settings});
-        this.cache.days[id] = new Views.DayView({
-            model: day,
-            history: history
-        });
-      }
-      return this.cache.days[id];
-    };
-};
+});
 
 Views.TagView = Views.BaseView.extend({
     template: TH.Templates['tags'],
@@ -384,6 +433,12 @@ Views.AppView = Views.BaseView.extend({
         // TH.Models.init();
         this.cache = new Views.Cache(options);
     },
+    loadDay: function (id) {
+        // var startingWeekDay = this.settings.get('startingWeekDay');
+        // var weekId = moment(id).past(startingWeekDay, 0).id();
+        // this.updateMenuSelection(weekId)
+        return this.cache.dayView(id)
+    },
     render: function() {
         // render the overall view
         var html = Mustache.to_html(this.template, this.getI18nValues());
@@ -396,13 +451,18 @@ Views.AppView = Views.BaseView.extend({
         return this;
     },
     renderHistory: function() {
+        var dayHistoryView = new Views.DayResultsView({
+            el: '#history_items',
+            cache: this.cache
+            // collection: new TH.Collections
+        });
         
     },
     renderMenu: function() {
         var menuView = new Views.MenuView({
             el: '.navigation',
             cache: this.cache,
-            collection: this.collection
+            collection: new TH.Collections.Tags(null, {settings: this.settings})
         });
         menuView.render();
     },

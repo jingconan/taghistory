@@ -321,19 +321,37 @@ Models.DayHistory = Backbone.Model.extend({
     sync: function(method, model, options) {
         if (method === 'read') {
             this.set({history: []}, {silent: true});
-            this.historyQuery.run(this.toChrome(true), function(history) {
-                this.preparse(history, options.success);
-            });
+            // this.historyQuery.run(this.toChrome(true), function(history) {
+            //     this.preparse(history, options.success);
+            // });
+            this.fetch(); //FIXME
+
         } else if (method === 'delete') {
             this.chromeAPI.history.deleteRange(this.toChrome(false), function() {
                 this.set({history: this.defaults.history});
             });
         }
     },
+    toTemplate: function () {
+        return this.info;
+    },
+    fetch: function (callback) {
+        if (typeof callback === 'undefined') {
+            callback = (function (info) {
+                this.info = info;
+            }).bind(this);
+        }
+        Models.fetchAllData(this.toChrome(true), function (storedInfo) {
+            var interval = TH.Views.intervalValue();
+            console.log("interval: " + interval);
+            var massageInfo = TH.Models.divideData(storedInfo, interval); 
+            callback(massageInfo);
+        });
+    },
     toChrome: function(reading) {
         var properties = {
             startTime: this.sod(),
-            endTime: this.end()
+            endTime: this.eod()
         };
         if (reading) {
             properties.text = '';
@@ -341,27 +359,96 @@ Models.DayHistory = Backbone.Model.extend({
         return properties;
     },
     sod: function() {
-        return new Date(this.get('date').sod()).getTime();
+        return new Date(this.get('date').startOf('day')).getTime();
     },
     eod: function() {
-        return new Date(this.get('date').eod()).getTime();
+        return new Date(this.get('date').endOf('day')).getTime();
     },
-    defaults: {
-        history: []
+    preparse: function (storedInfo, callback) { // namely the stored infomation
+        // var options = {
+        //     visits: results,
+        //     interval: this.settings.get('timeGrouping'); //FIXME
+        // };
+        var interval = this.settings.get('timeGrouping');
+        var groups = Util.groupItems(Util.getTimeStamps(storedInfo.historyItems, 0), options.interval);
+        callback(Models.massage(storedInfo, groups));
+    },
+    parse: function (data) {
+        // look at the massage function
+        var intervals = new TH.Collections.Intervals(), // FIXME add def
+            i, j, interval, visit, visits;
+
+        for (i = 0; i < data.length; ++i) {
+            visits = new TH.Collections.Visits();
+            interval = data[i];
+            for (j = 0; j < interval.visits.length; ++j) {
+                visit = interval[j];
+                if (_.isArray(visit)) {
+                    visits.add(new TH.Models.GroupedVisit(visit));
+                } else {
+                    visits.add(new TH.Models.Visit(visit));
+                }
+            }
+
+            intervals.add({
+                id: interval.id,
+                datetime: interval.datetime,
+                visits: visits
+            }, {settings: this.settings});
+
+        }
+
+        return {history: intervals};
+        
     }
 });
 
 
 
 
+// Backbone.Model.prototype.urlFor = function (key, id, opts) {
+//     var base = 'chrome://history/'
+//     return base unless key?
+
+//     buildBase = (opts) ->
+//       if opts?.absolute then base else ''
+
+//     route =
+//       switch key
+//         when 'search'
+//           "#search/#{id}"
+//         when 'week'
+//           "#weeks/#{id}"
+//         when 'day'
+//           "#days/#{id}"
+//         when 'tag'
+//           "#tags/#{id}"
+
+//     "#{buildBase(opts)}#{route}"
+// }
+//
 Models.Day = Backbone.Model.extend({
     initialize: function (attrs, options) {
         this.chromeAPI = chrome;
         this.settings = options.settings;
-        this.set = {id: this.get('date').id()};
+        this.set({id: this.get('date')._i});
     },
-    defaults: {
-        history: []
+    toHistory: function () {
+        return {date: this.get('date')};
+    },
+    toTemplate: function () {
+        var date = this.get('date');
+        var weekId = this.startingWeekDate().id();
+        var properties = {
+            title: date.format('dddd'),
+            formalDate: date.format('LLL')
+            // weekUrl: this.urlFor('week', weekId) FIXME
+        };
+        return _.extend(properties, this.toJSON());
+    },
+    startingWeekDate: function () {
+        // return moment(this.get('date')).past(this.settings.get('startingWeekDay'), 0)
+        return this.get('date').startOf('week');
     }
 });
 
@@ -397,4 +484,49 @@ Models.Tag = Backbone.Model.extend({
     toTemplate: function () {
         
     }
+});
+
+
+Models.Visit = Backbone.Model.extend({
+    default: {
+        title: '(No Title)'
+    },
+    initialize: function () {
+        this.chromeAPI = chrome;
+        this.set({id: this.cid});
+        if (this.get('title') === '') {
+            this.set({title: this.defaults.title}); 
+        }
+    },
+    sync: function (method, model, options) {
+        if (method === 'delete') {
+            this.chromeAPI.history.deleteUrl({url: this.get('url')});
+            options.success(this);
+        } 
+    },
+    toTemplate: function () {
+        return _.extend({
+            isGrouped: false,
+            host: this.domain(),
+            path: this.path(),
+        }, this.toJSON());
+    },
+    domain: function () {
+        var match = this._getDomain(this.get('url'));
+        if (match === null) {
+            return null; 
+        } else {
+            return match[0];
+        }
+    },
+    path: function () {
+        var url = this._getDomain(this.get('url'));
+        if (typeof url !== 'undefined') {
+            return this.get('url').replace(url[0], '');
+        } 
+    },
+    _getDomain: function (url) {
+        return url.match(/\w+:\/\/(.*?)\//);
+    }
+
 });

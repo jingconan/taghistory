@@ -4,7 +4,7 @@
 TH.Modules.I18n = {
     t: function(key, replacements) {
         // default
-        var replacements = typeof replacements !== 'undefined' ? b : [];
+        var replacements = typeof replacements !== 'undefined' ? replacements : [];
         if (key instanceof Array) {
             var keys = key;
             var lookup = {};

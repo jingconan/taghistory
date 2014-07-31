@@ -4,8 +4,8 @@
 
 var AppRouter = Backbone.Router.extend({
     routes: {
-        "help": "help",
         'weeks/:id': 'week',
+        'days/:id': 'day',
         "*actions": "defaultRoute" // matches http://example.com/#anything-here
     },
     help: function() {
@@ -14,6 +14,13 @@ var AppRouter = Backbone.Router.extend({
     week: function(id) {
         console.log("week: " + id);
     },
+    day: function (id) {
+        console.log('day is executed');
+        var view = this.app.loadDay(id);
+        view.history.fetch();
+        view.render();
+        // view.select();
+    },
     initialize: function(options) {
         var settings = options.settings,
             tracker = options.tracker;
@@ -21,7 +28,6 @@ var AppRouter = Backbone.Router.extend({
 
         this.app = new TH.Views.AppView({
             el: $('.app'),
-            collection: new TH.Collections.Tags(null, {settings: settings}),
             settings: settings,
             state: this.state,
             options: {settings: settings}
