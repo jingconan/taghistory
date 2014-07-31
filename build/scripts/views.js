@@ -368,7 +368,6 @@ Views.TagView = Backbone.View.extend({
             (function () { // success call back
                 console.log('fetch tags succesfully');
                 var dat = this.collection.toTemplate();
-                debugger;
                 var html = Mustache.to_html(this.template, this.collection.toTemplate());
                 this.$el.html(html);
                 this.bindEvent();
@@ -392,6 +391,8 @@ Views.MenuView = Backbone.View.extend({
         // FIXME
         this.intervalSlider = TH.Selectors.interval_slider;
         this.trashBin = "#trash_bin";
+        this.collection.bind("remove", this.onTagRemoved.bind(this));
+
     },
     render: function() {
         // debugger;
@@ -439,20 +440,17 @@ Views.MenuView = Backbone.View.extend({
         $(this.trashBin).on('dragover', function (ev) {ev.preventDefault(); });
         $(this.trashBin).each((function (idx, trash) {
             trash.addEventListener('drop', (function (ev) {
-                console.log('drop event trigged!');
                 ev.preventDefault();
                 var removedTag = ev.dataTransfer.getData("removedTag");
-                console.log("this.collection: " + this.collection);
-                this.collection.persistence.removeTag(removedTag, (function () {
-                    console.log('successfully removed!');
-                    this.renderTags();
-                    console.log('tag menu is refreshed!');
-                }).bind(this));
-                // Models.deleteTag(removedTag);
+                this.collection.remove(removedTag);
             }).bind(this), false);
         }).bind(this));
 
         $(this.trashBin).draggable();
+    },
+    onTagRemoved: function () {
+        // update tag menu if tags removed.
+        this.tagView.render();
     }
 });
 

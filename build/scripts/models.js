@@ -454,6 +454,7 @@ Models.Day = Backbone.Model.extend({
 
 
 Models.Tag = Backbone.Model.extend({
+    idAttribute: 'name',
     defaults: {
         name : null,
         cream_filled : false
@@ -463,6 +464,10 @@ Models.Tag = Backbone.Model.extend({
         this.on("change:name", function(model){
             var name = model.get("name"); // 'Stewie Griffin'
             // alert("Changed my name to " + name );
+        });
+        // destroy it so that server is updated if the tag is removed
+        this.on("remove", function() {
+            this.destroy();
         });
     },
     validate: function(attrs, options) {

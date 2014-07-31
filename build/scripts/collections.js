@@ -56,7 +56,7 @@ function lazyPersistence() {
 TH.Collections.Tags = Backbone.Collection.extend({
     model: TH.Models.Tag,
     modelName: 'tagList',
-    chromeStorage: new Backbone.ChromeStorage("Tags", "sync"),
+    chromeStorage: new Backbone.ChromeStorage("Tags", "local"),
     // constructor : function (attributes, options) {
         // Backbone.Collection.apply( this, arguments );
     // },
