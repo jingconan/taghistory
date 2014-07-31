@@ -155,11 +155,6 @@ _.extend(Backbone.View.prototype, {
     }
 });
 
-Views.BaseView = Backbone.View;
-// Views.BaseView.prototype.getI18nValues = function() {
-//         return this.t([]);
-// };
-
 Views.MainView = Backbone.View.extend({
     select: function() {
         
@@ -212,7 +207,7 @@ Views.DayView = Views.MainView.extend({
 
 });
 
-Views.DayResultsView = Views.BaseView.extend({
+Views.DayResultsView = Backbone.View.extend({
     template: TH.Templates['day_results'],
     events: {
         'click .delete_visit': 'deleteVisitClicked',
@@ -236,6 +231,7 @@ Views.DayResultsView = Views.BaseView.extend({
             var properties = _.extend(this.getI18nValues(), data);
             var html = Mustache.to_html(this.template, properties);
             this.$el.html(html);
+
         }).bind(this));
 
         return this;
@@ -287,7 +283,7 @@ Views.Cache = Toolbox.Base.extend({
 
 });
 
-Views.TagView = Views.BaseView.extend({
+Views.TagView = Backbone.View.extend({
     template: TH.Templates['tags'],
     initialize: function(options) {
         this.options = options;
@@ -343,7 +339,7 @@ Views.TagView = Views.BaseView.extend({
 });
 
 
-Views.MenuView = Views.BaseView.extend({
+Views.MenuView = Backbone.View.extend({
     template: TH.Templates['menu'],
     initialize: function(options) {
         this.options = options;
@@ -417,7 +413,7 @@ Views.MenuView = Views.BaseView.extend({
     }
 });
 
-Views.AppView = Views.BaseView.extend({
+Views.AppView = Backbone.View.extend({
     class_name: 'app_view',
     template: TH.Templates['app'], //FIXME 
     initialize: function(options) {
