@@ -480,15 +480,6 @@ Models.Tag = Backbone.Model.extend({
             return "tag contains special characterse";
         }
     },
-    // fetch: function(callback) {
-    //     this.persistence = this.persistence || lazyPersistence() || {};
-    //     this.persistence.fetchTagSites(this.get('name'), function(sites) {
-    //         this.persistence.fetchSharedTag(this.get('name'), function(url) {
-    //             this.set({sites: sites, url: url});
-    //             callback();
-    //         });
-    //     });
-    // },
     toTemplate: function () {
         return {tag_name: this.get('name')};
     }

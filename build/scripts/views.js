@@ -346,21 +346,7 @@ Views.TagView = Backbone.View.extend({
                     this.render();
                 }).bind(this)
             });
-            // this.collection.persistence.addSiteToTag('', newTagName, (function () {
-            //     console.log('newTagName has been added');
-            //     Views.msgAnimate("40%", "40%", "system updated", "10%", "10%");
-            //     this.render();
-            // }).bind(this));
-
         }).bind(this));
-
-        // debugger;
-        // $(selector).on('click', + ' #create_new_tag', function (ev) {
-        //     var newTagName = window.prompt("New tag name", "");
-        //     if (!newTagName) {
-        //         return;
-        //     }
-        // });
     },
     render: function () {
         console.log('TagView.render');
