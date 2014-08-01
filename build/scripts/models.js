@@ -297,18 +297,10 @@ Models.getItemsWithTag = function (tag) {
     return res;
 }
 
-// Models.BaseModel = Backbone.Model.extend({
-// });
-
-// Models.BaseModel.prototype.getI18nValues = function() {
-//         return this.t([]);
-// };
-
 Models.History = Backbone.Model.extend({
     defaults: {
         history: []
     },
-
     isNew: function () {
         return false; 
     },
@@ -318,7 +310,6 @@ Models.History = Backbone.Model.extend({
 });
 
 
-// Models.DayHistory = Models.BaseModel({
 Models.DayHistory = Models.History.extend({
     initialize: function(attrs, options) {
         this.chromeAPI = chrome;

@@ -170,7 +170,6 @@ Views.DayView = Views.MainView.extend({
             model: this.history, //DayHistory Model
             el: $('.content')
         });
-        console.log('run here test');
         this.dayResultsView.render();
         // this.$('.history').html(this.dayResultsView.render().el);
         // this.dayResultsView.insertTags()
@@ -214,47 +213,29 @@ Views.DayResultsView = Backbone.View.extend({
         /*jslint unparam: true*/
         function onDragStart(i, visit) {
             visit.addEventListener('dragstart', function (ev) {
-                ev.dataTransfer.setData("itemID", Models.searchDatasetID(ev.target, 0));
+                debugger;
+                // ev.dataTransfer.setData("itemID", Models.searchDatasetID(ev.target, 0));
+                ev.dataTransfer.setData("dragItem", ev.target);
             }, false);
         }
         /*jslint unparam: false*/
         $('.interval').each(onDragStart);
     },
     render: function() {
-        console.log('day result render');
-        //FIXME solve the internationalization problem
-        // Add collection into this
-        console.log('day result render here'); 
-        // debugger;
         this.model.fetch({
             success: (function () {
-                debugger;
                 var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
-                debugger;
                 var html = Mustache.to_html(this.template, properties);
                 this.$el.html(html);                
+                this.bindEvent();
             }).bind(this),
             error: function () {
-                console.log('error happ in fetch');
+                console.log('error happens in fetch');
             }
         });
 
-        // this.model.fetch((function (data) { // fetch the DayHistory model
-        //     console.log('test for model fetch');
-        //     console.log('test for model fetch 2');
-        //     var massageInfo = _.extend(this.getI18nValues(), data);
-        //     var html = Mustache.to_html(this.template, massageInfo);
-        //     this.$el.html(html);
-        //     this.massageInfo = massageInfo; // cache the massageInfo
-        //     this.bindEvent();
-
-        // }).bind(this));
-
         return this;
     },
-    // insertTags: function () {
-    //      
-    // },
     getI18nValues: function() {
         return this.t([
             'prompt_delete_button',
@@ -323,21 +304,23 @@ Views.TagView = Backbone.View.extend({
             var massageInfo = this.cache.dayView().dayResultsView.massageInfo;
             ev.preventDefault();
             console.log("run on Drop");
-            var itemID = ev.dataTransfer.getData("itemID");
-            var item = massageInfo.IDMap[itemID]; //FIXME
+            // var itemID = ev.dataTransfer.getData("itemID");
+            // var item = massageInfo.IDMap[itemID];
+            var dragItem = ev.dataTransfer.getData("dragItem");
             var tag = ev.target.textContent;
             var rect = ev.target.getBoundingClientRect();
-            var callbackHandle = function () {};
+            debugger;
+            // var callbackHandle = function () {};
 
             // FIXME, need to update this using the Models.Tag
-            Models.addTag.prototype.visitNum = 0; // indicator or unfinished callbacks
-            if (item.visits === undefined) { // visit item
-                Models.addTag(item, tag, callbackHandle);
-            } else { // group item
-                $.each(item.visits, function (idx, value) {
-                    Models.addTag(value, tag, callbackHandle);
-                });
-            }
+            // Models.addTag.prototype.visitNum = 0; // indicator or unfinished callbacks
+            // if (item.visits === undefined) { // visit item
+            //     Models.addTag(item, tag, callbackHandle);
+            // } else { // group item
+                // $.each(item.visits, function (idx, value) {
+                    // Models.addTag(value, tag, callbackHandle);
+                // });
+            // }
 
             Views.msgAnimate(rect.right, rect.bottom, "Tagged !", "100px", "50px");
         }).bind(this);
