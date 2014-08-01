@@ -159,7 +159,9 @@ Util.graph.itemGraph = function (tag_name) {
 //
 Util.isDefined = function() {
     return (typeof MyVariable !== "undefined" && MyVariable !== null);
-}
+};
+
+_.extend(Toolbox.Base.prototype, TH.Modules.I18n);
 
 Util.HistoryQuery = Toolbox.Base.extend({
     constructor: function() {
@@ -174,24 +176,47 @@ Util.HistoryQuery = Toolbox.Base.extend({
         var options = {};
         _.extend(options, this.options);
         // FIXME plase comment this part
-        if (Util.isDefined(this.options.searching)) {
+        if (typeof this.options.searching !== 'undefined') {
             _.extend(options, this.searchOptions);
         } else {
             options.maxResults = 5000;
         }
         delete options.searching;
 
-        this.chromeAPI.history.search(options, function(results) {
+        this.chromeAPI.history.search(options, (function(results) {
             this.searchHandler(results, callback);
-        });
+        }).bind(this));
     },
     searchHandler: function(results, callback) {
         if (this.text) {
             this.options.text = this.text;
         }
-        // FIXME
-        // results = this._prepareResults(results);
-        // return this._sanitizedResults(results, callback);
+        var results = this._prepareResults(results);
+        callback(results);
+        // return this._sanitizeResults(results, callback);
+    },
+    _prepareResults: function (results) {
+        _(results).each((function (result) {
+            result.date = new Date(result.lastVisitTime)
+            //Translate dates and times here for the search sanitizer
+            result.extendedDate = moment(result.date).format(this.t('extended_formal_date'));
+            result.time = moment(result.date).format(this.t('local_time'));
+        }).bind(this));
+        return results;
+    },
+    searchOptions: {
+        startTime: 0,
+        maxResults: 0
+    },
+
+    _sanitizeResults: function (results, callback) {
+        var options = {
+            options: this.options,
+            results: results
+        };
+        // debugger;
+
+        // this.worker('sanitizer', options, callback);
     }
 });
 

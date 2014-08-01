@@ -3,6 +3,7 @@
 "use strict";
 var Util = TH.Util;
 var Models = TH.Models;
+_.extend(Backbone.Model.prototype, TH.Modules.I18n);
 
 Models.sortByTags = function (historyItems, storedTags, tags) {
     var i = 0, N, item, tstr, item_key;
@@ -306,25 +307,35 @@ Models.getItemsWithTag = function (tag) {
 Models.History = Backbone.Model.extend({
     defaults: {
         history: []
+    },
+
+    isNew: function () {
+        return false; 
+    },
+    isEmpty: function () {
+        return  this.get('history').length === 0;
     }
 });
 
 
 // Models.DayHistory = Models.BaseModel({
-Models.DayHistory = Backbone.Model.extend({
+Models.DayHistory = Models.History.extend({
     initialize: function(attrs, options) {
         this.chromeAPI = chrome;
         this.settings = options.settings;
-        //FIXME
         this.historyQuery = new TH.Util.HistoryQuery(this.chromeAPI);
     },
     sync: function(method, model, options) {
+        console.log("sync method: " + method);
         if (method === 'read') {
-            this.set({history: []}, {silent: true});
-            // this.historyQuery.run(this.toChrome(true), function(history) {
-            //     this.preparse(history, options.success);
-            // });
-            this.fetch(); //FIXME
+            this.set({history: []}, {silent: false});
+            this.setOptions = options;
+            this.historyQuery.run(this.toChrome(true), (function(history) {
+                console.log("options: ");
+                this.preparse(history, this.setOptions.success);
+            }).bind(this));
+            console.log("read is exec: ");
+            // this.fetch(); //FIXME
 
         } else if (method === 'delete') {
             this.chromeAPI.history.deleteRange(this.toChrome(false), function() {
@@ -333,21 +344,28 @@ Models.DayHistory = Backbone.Model.extend({
         }
     },
     toTemplate: function () {
-        return this.info;
+        return {
+            history: this.get('history').map(function (it) {
+                return it.toTemplate();
+            })
+        };
     },
-    fetch: function (callback) {
-        if (typeof callback === 'undefined') {
-            callback = (function (info) {
-                this.info = info;
-            }).bind(this);
-        }
-        Models.fetchAllData(this.toChrome(true), function (storedInfo) {
-            var interval = TH.Views.intervalValue();
-            console.log("interval: " + interval);
-            var massageInfo = TH.Models.divideData(storedInfo, interval); 
-            callback(massageInfo);
-        });
-    },
+    // toTemplate: function () {
+    //     return this.info;
+    // },
+    // fetch: function (callback) {
+    //     if (typeof callback === 'undefined') {
+    //         callback = (function (info) {
+    //             this.info = info;
+    //         }).bind(this);
+    //     }
+    //     Models.fetchAllData(this.toChrome(true), function (storedInfo) {
+    //         var interval = TH.Views.intervalValue();
+    //         console.log("interval: " + interval);
+    //         var massageInfo = TH.Models.divideData(storedInfo, interval); 
+    //         callback(massageInfo);
+    //     });
+    // },
     toChrome: function(reading) {
         var properties = {
             startTime: this.sod(),
@@ -369,20 +387,25 @@ Models.DayHistory = Backbone.Model.extend({
         //     visits: results,
         //     interval: this.settings.get('timeGrouping'); //FIXME
         // };
-        var interval = this.settings.get('timeGrouping');
-        var groups = Util.groupItems(Util.getTimeStamps(storedInfo.historyItems, 0), options.interval);
-        callback(Models.massage(storedInfo, groups));
+        // var interval = this.settings.get('timeGrouping');
+        var interval = Views.intervalValue();
+        var groups = Util.groupItems(Util.getTimeStamps(storedInfo, 0), interval);
+        // debugger;
+        callback(Models.massage({historyItems: storedInfo, 
+                                 tagList: {tagList: []},
+                                 storedTags: {}}, groups));
     },
     parse: function (data) {
         // look at the massage function
         var intervals = new TH.Collections.Intervals(), // FIXME add def
             i, j, interval, visit, visits;
 
-        for (i = 0; i < data.length; ++i) {
+        for (i = 0; i < data.history.length; ++i) {
             visits = new TH.Collections.Visits();
-            interval = data[i];
+            interval = data.history[i];
             for (j = 0; j < interval.visits.length; ++j) {
-                visit = interval[j];
+                // debugger;
+                visit = interval.visits[j];
                 if (_.isArray(visit)) {
                     visits.add(new TH.Models.GroupedVisit(visit));
                 } else {
@@ -392,7 +415,7 @@ Models.DayHistory = Backbone.Model.extend({
 
             intervals.add({
                 id: interval.id,
-                datetime: interval.datetime,
+                datetime: interval.timeStamp,
                 visits: visits
             }, {settings: this.settings});
 
@@ -487,11 +510,11 @@ Models.Tag = Backbone.Model.extend({
 
 
 Models.Visit = Backbone.Model.extend({
-    default: {
+    defaults: {
         title: '(No Title)'
     },
     initialize: function () {
-        this.chromeAPI = chrome;
+        // this.chromeAPI = chrome;
         this.set({id: this.cid});
         if (this.get('title') === '') {
             this.set({title: this.defaults.title}); 
@@ -526,6 +549,42 @@ Models.Visit = Backbone.Model.extend({
     },
     _getDomain: function (url) {
         return url.match(/\w+:\/\/(.*?)\//);
+    }
+
+});
+
+Models.Interval = Backbone.Model.extend({
+    toTemplate: function () {
+        return _.extend({
+            amount: this.t('number_of_visits', 
+            [
+                this.get('visits').length.toString(),
+                '<span class="amount">',
+                '</span>'
+            ]),
+            time: moment(this.get('datetime')).format('LT'),
+            id: this.id
+        }, this.get('visits').toTemplate());
+    }
+});
+
+Models.GroupedVisit = Backbone.Model.extend({
+    initialize: function (attr) {
+        this.visits = new TH.Collections.GroupedVisits(attr) ;
+        this.set({
+            host: this.h().domain(),
+            domain: this.h().domain(),
+            url: this.h().get('url'),
+            time: this.h().get('time'),
+            isGrouped: true,
+            visits: this.visits
+        });
+    },
+    h: function () {
+        return this.visits.at(0);
+    },
+    toTemplate: function () {
+        _.extend(this.toJSON(), {groupedVisits: this.visits.toTemplate()});
     }
 
 });

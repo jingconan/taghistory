@@ -92,18 +92,10 @@ TH.Collections.Intervals = Backbone.Collection.extend({
 });
 
 TH.Collections.Visits = Backbone.Collection.extend({
-    // model: TH.Models.Visit
+    model: TH.Models.Visit,
     modelName: 'visits'
 });
 
 TH.Collections.GroupedVisits = Backbone.Collection.extend({
     model: TH.Models.Visit,
-    // toTemplate: function () {
-    //     var i, model, res = [];
-    //     for (i = 0; i < this.models.length; ++i) {
-    //         model = this.models[i];
-    //         res.push(model.toTemplate());
-    //     }
-    //     return res;
-    // }
 });

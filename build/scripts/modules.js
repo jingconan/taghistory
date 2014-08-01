@@ -2,6 +2,7 @@
 /*global TH, chrome*/
 
 TH.Modules.I18n = {
+    chromeAPI: chrome,
     t: function(key, replacements) {
         // default
         var replacements = typeof replacements !== 'undefined' ? replacements : [];

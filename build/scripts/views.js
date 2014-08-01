@@ -167,7 +167,7 @@ Views.DayView = Views.MainView.extend({
     },
     renderHistory: function() {
         this.dayResultsView = new TH.Views.DayResultsView({
-            model: this.history,
+            model: this.history, //DayHistory Model
             el: $('.content')
         });
         console.log('run here test');
@@ -224,20 +224,37 @@ Views.DayResultsView = Backbone.View.extend({
         console.log('day result render');
         //FIXME solve the internationalization problem
         // Add collection into this
-        this.model.fetch((function (data) {
-            //FIXME check TH.Propmpts
-            console.log('test for model fetch');
-            console.log('test for model fetch 2');
-            var massageInfo = _.extend(this.getI18nValues(), data);
-            var html = Mustache.to_html(this.template, massageInfo);
-            this.$el.html(html);
-            this.massageInfo = massageInfo; // cache the massageInfo
-            this.bindEvent();
+        console.log('day result render here'); 
+        // debugger;
+        this.model.fetch({
+            success: (function () {
+                debugger;
+                var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
+                debugger;
+                var html = Mustache.to_html(this.template, properties);
+                this.$el.html(html);                
+            }).bind(this),
+            error: function () {
+                console.log('error happ in fetch');
+            }
+        });
 
-        }).bind(this));
+        // this.model.fetch((function (data) { // fetch the DayHistory model
+        //     console.log('test for model fetch');
+        //     console.log('test for model fetch 2');
+        //     var massageInfo = _.extend(this.getI18nValues(), data);
+        //     var html = Mustache.to_html(this.template, massageInfo);
+        //     this.$el.html(html);
+        //     this.massageInfo = massageInfo; // cache the massageInfo
+        //     this.bindEvent();
+
+        // }).bind(this));
 
         return this;
     },
+    // insertTags: function () {
+    //      
+    // },
     getI18nValues: function() {
         return this.t([
             'prompt_delete_button',
@@ -468,19 +485,19 @@ Views.AppView = Backbone.View.extend({
         this.$el.html(html);
 
         this.renderMenu();
-        this.renderHistory();
+        // this.renderHistory();
         TH.Views.updateInterval(TH.Para.Interval.init); //FIXME
 
         return this;
     },
-    renderHistory: function() {
-        var dayHistoryView = new Views.DayResultsView({
-            el: '#history_items',
-            cache: this.cache
+    // renderHistory: function() {
+    //     var dayHistoryView = new Views.DayResultsView({
+    //         el: '#history_items',
+    //         cache: this.cache
             // collection: new TH.Collections
-        });
-        
-    },
+    //     });
+    //     
+    // },
     renderMenu: function() {
         var menuView = new Views.MenuView({
             el: '.navigation',
