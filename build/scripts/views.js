@@ -156,6 +156,7 @@ Views.DayView = Views.MainView.extend({
     initialize: function(options) {
         this.options = options;
         this.history = this.options.history
+        this.tagRelationship = options.tagRelationship;
         // this.history.bind('change', @onDayHistoryLoaded, @)
     },
     template: TH.Templates['day'],
@@ -168,7 +169,8 @@ Views.DayView = Views.MainView.extend({
     renderHistory: function() {
         this.dayResultsView = new TH.Views.DayResultsView({
             model: this.history, //DayHistory Model
-            el: $('.content')
+            el: $('.content'),
+            tagRelationship: this.tagRelationship
         });
         this.dayResultsView.render();
         // this.$('.history').html(this.dayResultsView.render().el);
@@ -205,19 +207,25 @@ Views.DayResultsView = Backbone.View.extend({
     //     'click .hide_visits': 'toggleGroupedVisitsClicked',
     //     'click .visit > a': 'visitClicked'
     // },
-    // initialize: function() {
-    //     this.chromeAPI = chrome;
-    // },
+    initialize: function(options) {
+        this.tagRelationship = options.tagRelationship;
+    },
+    getID: function (obj) {
+        // FIXME to handle drag interval case
+        return {
+            visitID: obj.getAttribute('data-id'),
+            intervalID: obj.parentElement.parentElement.getAttribute('data-id')
+        };
+    },
     bindEvent: function () {
         // Add EventListeners
         /*jslint unparam: true*/
-        function onDragStart(i, visit) {
-            visit.addEventListener('dragstart', function (ev) {
-                debugger;
-                // ev.dataTransfer.setData("itemID", Models.searchDatasetID(ev.target, 0));
-                ev.dataTransfer.setData("dragItem", ev.target);
-            }, false);
-        }
+        var onDragStart = (function (i, visit) {
+            visit.addEventListener('dragstart', (function (ev) {
+                ev.dataTransfer.setData("itemID", JSON.stringify(this.getID(ev.target)));
+            }).bind(this), false);
+        }).bind(this);
+        // debugger;
         /*jslint unparam: false*/
         $('.interval').each(onDragStart);
     },
@@ -254,6 +262,7 @@ Views.Cache = Toolbox.Base.extend({
         this.options = options;
         this.settings = options.settings;
         this.state = options.state;
+        this.tagRelationship = options.tagRelationship;
         this.expire(); 
         console.log('cache is initialized')
     },
@@ -280,7 +289,8 @@ Views.Cache = Toolbox.Base.extend({
             this.cache.days[id] = new Views.DayView({
                 model: day,
                 history: history,
-                el: $('.day_view')
+                el: $('.day_view'),
+                tagRelationship: this.tagRelationship
             });
         }
         return this.cache.days[id];
@@ -295,6 +305,7 @@ Views.TagView = Backbone.View.extend({
         this.cache = options.cache;
         this.el = options.el;
         this.collection = options.collection;
+        this.tagRelationship = options.tagRelationship;
     },
     bindEvent: function () {
         console.log('run bindEvent');
@@ -304,12 +315,15 @@ Views.TagView = Backbone.View.extend({
             var massageInfo = this.cache.dayView().dayResultsView.massageInfo;
             ev.preventDefault();
             console.log("run on Drop");
-            // var itemID = ev.dataTransfer.getData("itemID");
+            var itemID = ev.dataTransfer.getData("itemID");
             // var item = massageInfo.IDMap[itemID];
-            var dragItem = ev.dataTransfer.getData("dragItem");
+            // var dragItem = ev.dataTransfer.getData("dragItem");
             var tag = ev.target.textContent;
             var rect = ev.target.getBoundingClientRect();
-            debugger;
+            this.tagRelationship.addSiteToTag(itemID, tag, (function (operations) {
+                console.log('add site to tag'); 
+                this.tagRelationship.save();
+            }).bind(this));
             // var callbackHandle = function () {};
 
             // FIXME, need to update this using the Models.Tag
@@ -374,6 +388,7 @@ Views.MenuView = Backbone.View.extend({
         this.el = options.el;
         this.cache = options.cache;
         this.collection = options.collection;
+        this.tagRelationship = options.tagRelationship;
         // FIXME
         this.intervalSlider = TH.Selectors.interval_slider;
         this.trashBin = "#trash_bin";
@@ -393,7 +408,8 @@ Views.MenuView = Backbone.View.extend({
         this.tagView = new Views.TagView({
             el: TH.Selectors.tag,
             cache: this.cache,
-            collection: this.collection
+            collection: this.collection,
+            tagRelationship: this.tagRelationship
         });
         this.tagView.render();
     },
@@ -443,6 +459,7 @@ Views.MenuView = Backbone.View.extend({
 Views.AppView = Backbone.View.extend({
     class_name: 'app_view',
     template: TH.Templates['app'], //FIXME 
+    ready: false,
     initialize: function(options) {
         // debugger;
         // _.extend(this, options);
@@ -454,6 +471,8 @@ Views.AppView = Backbone.View.extend({
         // this.collection.on('reloaded', this.onWeeksReloaded, this);
 
         // TH.Models.init();
+        this.tagRelationship = new Models.TagRelationship();
+        options.tagRelationship = this.tagRelationship;
         this.cache = new Views.Cache(options);
     },
     loadDay: function (id) {
@@ -485,7 +504,8 @@ Views.AppView = Backbone.View.extend({
         var menuView = new Views.MenuView({
             el: '.navigation',
             cache: this.cache,
-            collection: new TH.Collections.Tags(null, {settings: this.settings})
+            collection: new TH.Collections.Tags(null, {settings: this.settings}),
+            tagRelationship: this.tagRelationship
         });
         menuView.render();
     },

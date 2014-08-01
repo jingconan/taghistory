@@ -411,6 +411,7 @@ Models.DayHistory = Models.History.extend({
             }, {settings: this.settings});
 
         }
+        // debugger;
 
         return {history: intervals};
         
@@ -576,6 +577,45 @@ Models.GroupedVisit = Backbone.Model.extend({
     },
     toTemplate: function () {
         _.extend(this.toJSON(), {groupedVisits: this.visits.toTemplate()});
+    }
+
+});
+
+Models.TagRelationship = Backbone.Model.extend({
+    defaults: {
+        tagToSites: {},
+        siteToTags: {}
+    },
+    chromeStorage: new Backbone.ChromeStorage("TagRelationship", "local"),
+    addSiteToTag: function (site, tag, callback) {
+        var operations = {tagCreated: false};
+        var tagToSites = this.get('tagToSites');
+        var siteToTags = this.get('siteToTags');
+        if (tagToSites[tag] === undefined) {
+            operations.tagCreated = true;
+            tagToSites[tag] = [];
+        }
+        if (siteToTags[site] === undefined) {
+            siteToTags[site] = [];
+        }
+        tagToSites[tag].push(site);
+        siteToTags[site].push(tag);
+        callback(operations);
+    },
+    _remove: function (arr, val) {
+        if (arr === undefined) {
+            return; 
+        }
+        var idx = arr.indexOf(val);
+        if (idx === -1) {
+            return;
+        } 
+        arr.splice(idx, 1);
+    },
+    removeSiteFromTag: function (site, tag, callback) {
+        this._remove(tagToSites[tag], site);
+        this._remove(siteToTags[site], tag);
+        callback();
     }
 
 });
