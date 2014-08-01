@@ -155,7 +155,6 @@ Views.MainView = Backbone.View.extend({
 Views.DayView = Views.MainView.extend({
     initialize: function(options) {
         this.options = options;
-        this.history = this.options.history
         this.tagRelationship = options.tagRelationship;
         // this.history.bind('change', @onDayHistoryLoaded, @)
     },
@@ -167,12 +166,24 @@ Views.DayView = Views.MainView.extend({
         this.renderHistory();
     },
     renderHistory: function() {
+        var options = {
+            settings: this.settings,
+            tagRelationship: this.tagRelationship
+        };
         this.dayResultsView = new TH.Views.DayResultsView({
-            model: this.history, //DayHistory Model
+            model: new Models.DayHistory(this.model.toHistory(), options),
             el: $('.content'),
             tagRelationship: this.tagRelationship
         });
-        this.dayResultsView.render();
+        this.tagRelationship.fetch().then(
+            (function () {
+                console.log('tagRelationship fetch succeed');
+                this.dayResultsView.render();
+            }).bind(this),
+            (function () { // fail call back
+                console.log('tagRelationship fetch fail');
+            }).bind(this)
+        );
         // this.$('.history').html(this.dayResultsView.render().el);
         // this.dayResultsView.insertTags()
         // this.dayResultsView.attachDragging()
@@ -212,10 +223,19 @@ Views.DayResultsView = Backbone.View.extend({
     },
     getID: function (obj) {
         // FIXME to handle drag interval case
-        return {
-            visitID: obj.getAttribute('data-id'),
-            intervalID: obj.parentElement.parentElement.getAttribute('data-id')
-        };
+        var t1 = $(obj).attr('href');
+        if (t1 !== undefined) {
+             console.log("t1: " + t1);
+             return t1;
+        }
+        console.log("$(obj).find('a').attr('href'): " + $(obj).find('a').attr('href'));
+        return $(obj).find('a').attr('href');
+        // return {
+        //     visitID: obj.getAttribute('data-id'),
+        //     intervalID: obj.parentElement.parentElement.getAttribute('data-id')
+        // };
+    },
+    insertTags: function () {
     },
     bindEvent: function () {
         // Add EventListeners
@@ -284,11 +304,9 @@ Views.Cache = Toolbox.Base.extend({
         if (!this.cache.days[id]) {
             day = new Models.Day({date: moment(new Date(id))}, 
                                  {settings: this.settings});
-            history = new Models.DayHistory(day.toHistory(), 
-                                            {settings: this.settings});
             this.cache.days[id] = new Views.DayView({
                 model: day,
-                history: history,
+                // history: history,
                 el: $('.day_view'),
                 tagRelationship: this.tagRelationship
             });
@@ -318,11 +336,16 @@ Views.TagView = Backbone.View.extend({
             var itemID = ev.dataTransfer.getData("itemID");
             // var item = massageInfo.IDMap[itemID];
             // var dragItem = ev.dataTransfer.getData("dragItem");
-            var tag = ev.target.textContent;
+            var tag = {'tag_name': ev.target.textContent};
             var rect = ev.target.getBoundingClientRect();
-            this.tagRelationship.addSiteToTag(itemID, tag, (function (operations) {
+            this.tagRelationship.addSiteToTag(JSON.parse(itemID), tag, (function (operations) {
                 console.log('add site to tag'); 
-                this.tagRelationship.save();
+                this.tagRelationship.save({}, {
+                    success: (function () {
+                        console.log('tagRelationship has been succesfully saved!');  
+                    }).bind(this)
+                });
+                this.cache.dayView().render() //FIXME update the tag directly.
             }).bind(this));
             // var callbackHandle = function () {};
 

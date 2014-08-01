@@ -315,6 +315,7 @@ Models.DayHistory = Models.History.extend({
         this.chromeAPI = chrome;
         this.settings = options.settings;
         this.historyQuery = new TH.Util.HistoryQuery(this.chromeAPI);
+        this.tagRelationship = options.tagRelationship;
     },
     sync: function(method, model, options) {
         console.log("sync method: " + method);
@@ -395,8 +396,15 @@ Models.DayHistory = Models.History.extend({
             visits = new TH.Collections.Visits();
             interval = data.history[i];
             for (j = 0; j < interval.visits.length; ++j) {
-                // debugger;
                 visit = interval.visits[j];
+                // var visitKey = {
+                //     visitID: visit.id,
+                //     intervalID: interval.id
+                // };
+                // console.log("visitKey: " + JSON.stringify(visitKey));
+                visit.tag = this.tagRelationship.getTags(visit.url);
+
+
                 if (_.isArray(visit)) {
                     visits.add(new TH.Models.GroupedVisit(visit));
                 } else {
@@ -588,6 +596,8 @@ Models.TagRelationship = Backbone.Model.extend({
     },
     chromeStorage: new Backbone.ChromeStorage("TagRelationship", "local"),
     addSiteToTag: function (site, tag, callback) {
+        tag = JSON.stringify(tag);
+        // site = JSON.stringify(site);
         var operations = {tagCreated: false};
         var tagToSites = this.get('tagToSites');
         var siteToTags = this.get('siteToTags');
@@ -613,9 +623,32 @@ Models.TagRelationship = Backbone.Model.extend({
         arr.splice(idx, 1);
     },
     removeSiteFromTag: function (site, tag, callback) {
+        tag = JSON.stringify(tag);
+        site = JSON.stringify(site);
         this._remove(tagToSites[tag], site);
         this._remove(siteToTags[site], tag);
         callback();
+    },
+    getSites: function (tag) {
+        tag = JSON.stringify(tag);
+        var siteList = this.get('tagToSites')[tag];
+        if (siteList === undefined) {
+            return [];
+        }
+        return siteList;
+        // return siteList.map(function (site) {
+        //     return JSON.parse(site);
+        // });
+    },
+    getTags: function (site) {
+        // site = JSON.stringify(site);
+        var tagList = this.get('siteToTags')[site];
+        if (tagList === undefined) {
+            return [];
+        }
+        console.log("tagList: " + JSON.stringify(tagList));
+        return tagList.map(function (tag) {
+            return JSON.parse(tag); 
+        }); 
     }
-
 });
