@@ -342,13 +342,7 @@ Views.TagView = Backbone.View.extend({
             var tag = ev.target.textContent;
             var rect = ev.target.getBoundingClientRect();
             this.tagRelationship.addSiteToTag(JSON.parse(itemID), tag, (function (operations) {
-                console.log('add site to tag'); 
-                // this.tagRelationship.save(null, {
-                //     success: (function () {
-                //         console.log('tagRelationship has been succesfully saved!');  
-                //     }).bind(this)
-                // });
-                this.cache.dayView().render() //FIXME update the tag directly.
+                this.cache.dayView().renderHistory();
             }).bind(this));
             // var callbackHandle = function () {};
 
