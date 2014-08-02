@@ -35,7 +35,8 @@ TH.Collections.Intervals = Backbone.Collection.extend({
 TH.Collections.Tags = Backbone.Collection.extend({
     model: TH.Models.Tag,
     modelName: 'tagList',
-    chromeStorage: new Backbone.ChromeStorage("Tags", "local")
+    // chromeStorage: new Backbone.ChromeStorage("Tags", "local")
+    localStorage: new Backbone.LocalStorage("Tags")
 });
 
 TH.Collections.Intervals = Backbone.Collection.extend({

@@ -401,7 +401,6 @@ Models.DayHistory = Models.History.extend({
                 //     visitID: visit.id,
                 //     intervalID: interval.id
                 // };
-                // console.log("visitKey: " + JSON.stringify(visitKey));
                 visit.tag = this.tagRelationship.getTags(visit.url);
 
 
@@ -594,10 +593,10 @@ Models.TagRelationship = Backbone.Model.extend({
         tagToSites: {},
         siteToTags: {}
     },
-    chromeStorage: new Backbone.ChromeStorage("TagRelationship", "local"),
+    id: 'tagrelationship',
+    // chromeStorage: new Backbone.ChromeStorage("TagRelationship5", "local"),
+    localStorage: new Backbone.LocalStorage("TagRelationship"),
     addSiteToTag: function (site, tag, callback) {
-        tag = JSON.stringify(tag);
-        // site = JSON.stringify(site);
         var operations = {tagCreated: false};
         var tagToSites = this.get('tagToSites');
         var siteToTags = this.get('siteToTags');
@@ -610,6 +609,17 @@ Models.TagRelationship = Backbone.Model.extend({
         }
         tagToSites[tag].push(site);
         siteToTags[site].push(tag);
+        this.operations = operations
+        this.callback = callback
+        this.save({}, {
+            success: (function () {
+                console.log('tagRelationship has been succesfully saved!');  
+                this.callback(this.operations);
+            }).bind(this),
+            error: function (model, response, options) {
+                console.log('error happened in addSiteToTag: reponse: ' + JSON.stringify(response)); 
+            }
+        });
         callback(operations);
     },
     _remove: function (arr, val) {
@@ -624,31 +634,24 @@ Models.TagRelationship = Backbone.Model.extend({
     },
     removeSiteFromTag: function (site, tag, callback) {
         tag = JSON.stringify(tag);
-        site = JSON.stringify(site);
         this._remove(tagToSites[tag], site);
         this._remove(siteToTags[site], tag);
         callback();
     },
     getSites: function (tag) {
-        tag = JSON.stringify(tag);
         var siteList = this.get('tagToSites')[tag];
         if (siteList === undefined) {
             return [];
         }
         return siteList;
-        // return siteList.map(function (site) {
-        //     return JSON.parse(site);
-        // });
     },
     getTags: function (site) {
-        // site = JSON.stringify(site);
         var tagList = this.get('siteToTags')[site];
         if (tagList === undefined) {
             return [];
         }
-        console.log("tagList: " + JSON.stringify(tagList));
         return tagList.map(function (tag) {
-            return JSON.parse(tag); 
+            return {tag_name: tag}; 
         }); 
     }
 });

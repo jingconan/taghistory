@@ -180,8 +180,9 @@ Views.DayView = Views.MainView.extend({
                 console.log('tagRelationship fetch succeed');
                 this.dayResultsView.render();
             }).bind(this),
-            (function () { // fail call back
-                console.log('tagRelationship fetch fail');
+            (function (collection, response, options) { // fail call back
+                console.log('There is not remote storage. Initialize now:');
+                this.tagRelationship.save(); // layze initialization.
             }).bind(this)
         );
         // this.$('.history').html(this.dayResultsView.render().el);
@@ -250,8 +251,10 @@ Views.DayResultsView = Backbone.View.extend({
         $('.interval').each(onDragStart);
     },
     render: function() {
+        console.log('DayResultsView render is executed'); 
         this.model.fetch({
             success: (function () {
+                console.log('views render succeed'); 
                 var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
                 var html = Mustache.to_html(this.template, properties);
                 this.$el.html(html);                
@@ -336,15 +339,15 @@ Views.TagView = Backbone.View.extend({
             var itemID = ev.dataTransfer.getData("itemID");
             // var item = massageInfo.IDMap[itemID];
             // var dragItem = ev.dataTransfer.getData("dragItem");
-            var tag = {'tag_name': ev.target.textContent};
+            var tag = ev.target.textContent;
             var rect = ev.target.getBoundingClientRect();
             this.tagRelationship.addSiteToTag(JSON.parse(itemID), tag, (function (operations) {
                 console.log('add site to tag'); 
-                this.tagRelationship.save({}, {
-                    success: (function () {
-                        console.log('tagRelationship has been succesfully saved!');  
-                    }).bind(this)
-                });
+                // this.tagRelationship.save(null, {
+                //     success: (function () {
+                //         console.log('tagRelationship has been succesfully saved!');  
+                //     }).bind(this)
+                // });
                 this.cache.dayView().render() //FIXME update the tag directly.
             }).bind(this));
             // var callbackHandle = function () {};
@@ -495,6 +498,10 @@ Views.AppView = Backbone.View.extend({
 
         // TH.Models.init();
         this.tagRelationship = new Models.TagRelationship();
+        // this.tagRelationship = new TH.Collections.TagRelationships();
+        // this.tagRelationship.add(new Models.TagRelationship());
+        // this.tagRelationship.add();
+        console.log('this line 500'); 
         options.tagRelationship = this.tagRelationship;
         this.cache = new Views.Cache(options);
     },
