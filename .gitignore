@@ -8,3 +8,8 @@
 /.project
 /node_module/*
 node_modules/*
+
+build/scripts/workers.js
+build/index_back.html
+extension/templates/day_results.html_back
+build/frameworks/backbone.chromestorage.js
