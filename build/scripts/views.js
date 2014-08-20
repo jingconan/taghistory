@@ -441,13 +441,10 @@ Views.MenuView = Backbone.View.extend({
                 console.log('moved'); // Run code if slider value changes
                 TH_views.updateInterval(ui.value);
             },
-            stop: function (event, ui) {
+            stop: (function (event, ui) {
                 console.log('released handle: ' + ui.value);
-                var interval = TH_views.intervalValue();
-                // FIXME replace this with this.cache.dayView(id)
-                var massageInfo = TH.Models.divideData(TH.Store.storedInfo, interval);
-                TH_views.renderHistory(massageInfo);
-            }
+                this.cache.dayView().render();
+            }).bind(this)
         });
         /*jslint unparam: false*/
 
