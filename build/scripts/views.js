@@ -1,5 +1,6 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global $, TH, Mustache, chrome, alert*/
+/*jslint nomen: true */
+/*global $, TH, Mustache, chrome, alert, Backbone, _, Toolbox, moment*/
 "use strict";
 var Views = TH.Views;
 var Models = TH.Models;
@@ -141,31 +142,25 @@ Views.trash = function () {
 Backbone.View.prototype.chromeAPI = chrome;
 _.extend(Backbone.View.prototype, TH.Modules.I18n);
 _.extend(Backbone.View.prototype, {
-    getI18nValues: function() {
+    getI18nValues: function () {
         return this.t([]);
     }
 });
 
-Views.MainView = Backbone.View.extend({
-    select: function() {
-        
-    }
-});
-
-Views.DayView = Views.MainView.extend({
-    initialize: function(options) {
+Views.DayView = Backbone.View.extend({
+    initialize: function (options) {
         this.options = options;
         this.tagRelationship = options.tagRelationship;
         // this.history.bind('change', @onDayHistoryLoaded, @)
     },
-    template: TH.Templates['day'],
+    template: TH.Templates.day,
     render: function () {
         var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
         var html = Mustache.to_html(this.template, properties);
         this.$el.html(html);
         this.renderHistory();
     },
-    renderHistory: function() {
+    renderHistory: function () {
         var options = {
             settings: this.settings,
             tagRelationship: this.tagRelationship
@@ -189,7 +184,7 @@ Views.DayView = Views.MainView.extend({
         // this.dayResultsView.insertTags()
         // this.dayResultsView.attachDragging()
     },
-    updateInterval: function(interval) {
+    updateInterval: function (val) {
         $(Selectors.interval_value).text(val + ' s');
         $(Selectors.interval_value).css('margin-left', val / TH.Para.Interval.max * 100 + '%');
     },
@@ -201,7 +196,7 @@ Views.DayView = Views.MainView.extend({
             'no_visits_found',
             'search_input_placeholder_text',
         ]);
-        properties['i18n_back_to_week_link'] = this.t('back_to_week_link', [
+        properties.i18n_back_to_week_link = this.t('back_to_week_link', [
             this.t('back_arrow')
         ]);
         return properties;
@@ -210,7 +205,7 @@ Views.DayView = Views.MainView.extend({
 });
 
 Views.DayResultsView = Backbone.View.extend({
-    template: TH.Templates['day_results'],
+    template: TH.Templates.day_results,
     // events: {
     //     'click .delete_visit': 'deleteVisitClicked',
     //     'click .delete_grouped_visit': 'deleteGroupedVisitClicked',
@@ -219,15 +214,15 @@ Views.DayResultsView = Backbone.View.extend({
     //     'click .hide_visits': 'toggleGroupedVisitsClicked',
     //     'click .visit > a': 'visitClicked'
     // },
-    initialize: function(options) {
+    initialize: function (options) {
         this.tagRelationship = options.tagRelationship;
     },
     getID: function (obj) {
         // FIXME to handle drag interval case
         var t1 = $(obj).attr('href');
         if (t1 !== undefined) {
-             console.log("t1: " + t1);
-             return t1;
+            console.log("t1: " + t1);
+            return t1;
         }
         console.log("$(obj).find('a').attr('href'): " + $(obj).find('a').attr('href'));
         return $(obj).find('a').attr('href');
@@ -250,14 +245,14 @@ Views.DayResultsView = Backbone.View.extend({
         /*jslint unparam: false*/
         $('.interval').each(onDragStart);
     },
-    render: function() {
-        console.log('DayResultsView render is executed'); 
+    render: function () {
+        console.log('DayResultsView render is executed');
         this.model.fetch({
             success: (function () {
-                console.log('views render succeed'); 
+                console.log('views render succeed');
                 var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
                 var html = Mustache.to_html(this.template, properties);
-                this.$el.html(html);                
+                this.$el.html(html);
                 this.bindEvent();
             }).bind(this),
             error: function () {
@@ -267,7 +262,7 @@ Views.DayResultsView = Backbone.View.extend({
 
         return this;
     },
-    getI18nValues: function() {
+    getI18nValues: function () {
         return this.t([
             'prompt_delete_button',
             'delete_time_interval_button',
@@ -286,26 +281,26 @@ Views.Cache = Toolbox.Base.extend({
         this.settings = options.settings;
         this.state = options.state;
         this.tagRelationship = options.tagRelationship;
-        this.expire(); 
-        console.log('cache is initialized')
+        this.expire();
+        console.log('cache is initialized');
     },
-    expire: function() {
+    expire: function () {
         console.log('expire is runned');
         this.cache = {
             weeks: {},
             days: {},
             tags: {}
-        }
+        };
     },
-    dayView: function(id) {
+    dayView: function (id) {
         if (id === undefined) {
             id = this.dayID;
         } else {
             this.dayID = id;
         }
-        var day, history;
+        var day;
         if (!this.cache.days[id]) {
-            day = new Models.Day({date: moment(new Date(id))}, 
+            day = new Models.Day({date: moment(new Date(id))},
                                  {settings: this.settings});
             this.cache.days[id] = new Views.DayView({
                 model: day,
@@ -320,8 +315,8 @@ Views.Cache = Toolbox.Base.extend({
 });
 
 Views.TagView = Backbone.View.extend({
-    template: TH.Templates['tags'],
-    initialize: function(options) {
+    template: TH.Templates.tags,
+    initialize: function (options) {
         this.options = options;
         this.cache = options.cache;
         this.el = options.el;
@@ -333,7 +328,7 @@ Views.TagView = Backbone.View.extend({
         // debugger;
         var selector = Selectors.tag;
         var onDrop = (function (ev) {
-            var massageInfo = this.cache.dayView().dayResultsView.massageInfo;
+            // var massageInfo = this.cache.dayView().dayResultsView.massageInfo;
             ev.preventDefault();
             console.log("run on Drop");
             var itemID = ev.dataTransfer.getData("itemID");
@@ -387,7 +382,7 @@ Views.TagView = Backbone.View.extend({
         this.collection.fetch().then(
             (function () { // success call back
                 console.log('fetch tags succesfully');
-                var dat = this.collection.toTemplate();
+                // var dat = this.collection.toTemplate();
                 var html = Mustache.to_html(this.template, this.collection.toTemplate());
                 this.$el.html(html);
                 this.bindEvent();
@@ -397,13 +392,12 @@ Views.TagView = Backbone.View.extend({
             }).bind(this)
         );
     }
-    
 });
 
 
 Views.MenuView = Backbone.View.extend({
-    template: TH.Templates['menu'],
-    initialize: function(options) {
+    template: TH.Templates.menu,
+    initialize: function (options) {
         this.options = options;
         this.el = options.el;
         this.cache = options.cache;
@@ -415,7 +409,7 @@ Views.MenuView = Backbone.View.extend({
         this.collection.bind("remove", this.onTagRemoved.bind(this));
 
     },
-    render: function() {
+    render: function () {
         // debugger;
         var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
@@ -433,7 +427,7 @@ Views.MenuView = Backbone.View.extend({
         });
         this.tagView.render();
     },
-    renderSlider: function() {
+    renderSlider: function () {
         var TH_interval = TH.Para.Interval;
         var TH_views = TH.Views;
 
@@ -457,8 +451,8 @@ Views.MenuView = Backbone.View.extend({
         });
         /*jslint unparam: false*/
 
-    }, 
-    renderTrashBin: function() {
+    },
+    renderTrashBin: function () {
         $(this.trashBin).on('dragover', function (ev) {ev.preventDefault(); });
         $(this.trashBin).each((function (idx, trash) {
             trash.addEventListener('drop', (function (ev) {
@@ -478,9 +472,9 @@ Views.MenuView = Backbone.View.extend({
 
 Views.AppView = Backbone.View.extend({
     class_name: 'app_view',
-    template: TH.Templates['app'], //FIXME 
+    template: TH.Templates.app, //FIXME 
     ready: false,
-    initialize: function(options) {
+    initialize: function (options) {
         // debugger;
         // _.extend(this, options);
         // this.settings = this.options.settings;
@@ -495,7 +489,7 @@ Views.AppView = Backbone.View.extend({
         // this.tagRelationship = new TH.Collections.TagRelationships();
         // this.tagRelationship.add(new Models.TagRelationship());
         // this.tagRelationship.add();
-        console.log('this line 500'); 
+        console.log('this line 500');
         options.tagRelationship = this.tagRelationship;
         this.cache = new Views.Cache(options);
     },
@@ -503,9 +497,9 @@ Views.AppView = Backbone.View.extend({
         // var startingWeekDay = this.settings.get('startingWeekDay');
         // var weekId = moment(id).past(startingWeekDay, 0).id();
         // this.updateMenuSelection(weekId)
-        return this.cache.dayView(id)
+        return this.cache.dayView(id);
     },
-    render: function() {
+    render: function () {
         // render the overall view
         var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
@@ -524,7 +518,7 @@ Views.AppView = Backbone.View.extend({
     //     });
     //     
     // },
-    renderMenu: function() {
+    renderMenu: function () {
         var menuView = new Views.MenuView({
             el: '.navigation',
             cache: this.cache,
@@ -533,8 +527,8 @@ Views.AppView = Backbone.View.extend({
         });
         menuView.render();
     },
-    getI18nValues: function() {
-        return this.t(['history_title', 'settings_link', 'tags_link'])
+    getI18nValues: function () {
+        return this.t(['history_title', 'settings_link', 'tags_link']);
     }
 });
 
