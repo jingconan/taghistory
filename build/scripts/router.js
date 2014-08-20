@@ -1,11 +1,12 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global $, TH, Backbone*/
+/*global $, TH, Backbone, moment*/
 "use strict";
 
 var AppRouter = Backbone.Router.extend({
     routes: {
         'weeks/:id': 'week',
         'days/:id': 'day',
+        'today': 'today',
         "*actions": "defaultRoute" // matches http://example.com/#anything-here
     },
     help: function () {
@@ -44,8 +45,12 @@ var AppRouter = Backbone.Router.extend({
     // @reset if location.hash == ''
 
     },
+    today: function () {
+        this.navigate('#days/' + moment(new Date()).id(), {trigger: true});
+    },
     defaultRoute: function () {
         console.log("default route");
+        this.today();
         // this.app.render();
         // main(TH);
 
