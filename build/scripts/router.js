@@ -1,6 +1,6 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global TH*/
-"use strict"; 
+/*global $, TH, Backbone*/
+"use strict";
 
 var AppRouter = Backbone.Router.extend({
     routes: {
@@ -8,21 +8,22 @@ var AppRouter = Backbone.Router.extend({
         'days/:id': 'day',
         "*actions": "defaultRoute" // matches http://example.com/#anything-here
     },
-    help: function() {
+    help: function () {
         console.log("this is help message.");
     },
-    week: function(id) {
+    week: function (id) {
         console.log("week: " + id);
     },
     day: function (id) {
+        console.log("id: " + id);
         var view = this.app.loadDay(id);
         // view.history.fetch();
         view.render();
         // view.select();
     },
-    initialize: function(options) {
-        var settings = options.settings,
-            tracker = options.tracker;
+    initialize: function (options) {
+        var settings = options.settings;
+            // tracker = options.tracker;
         this.state = options.state;
 
         this.app = new TH.Views.AppView({
@@ -43,7 +44,7 @@ var AppRouter = Backbone.Router.extend({
     // @reset if location.hash == ''
 
     },
-    defaultRoute: function() {
+    defaultRoute: function () {
         console.log("default route");
         // this.app.render();
         // main(TH);
