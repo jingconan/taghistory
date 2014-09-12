@@ -369,10 +369,10 @@ Models.DayHistory = Models.History.extend({
         return properties;
     },
     sod: function() {
-        return new Date(this.get('date').startOf('day')).getTime();
+        return new Date(moment(this.get('date')).startOf('day')).getTime();
     },
     eod: function() {
-        return new Date(this.get('date').endOf('day')).getTime();
+        return new Date(moment(this.get('date')).endOf('day')).getTime();
     },
     preparse: function (storedInfo, callback) { // namely the stored infomation
         // var options = {
@@ -470,7 +470,7 @@ Models.Day = Backbone.Model.extend({
     },
     startingWeekDate: function () {
         // return moment(this.get('date')).past(this.settings.get('startingWeekDay'), 0)
-        return this.get('date').startOf('week');
+        return moment(this.get('date')).startOf('week');
     }
 });
 
