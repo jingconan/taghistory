@@ -155,10 +155,10 @@ Views.D3Util.prettifyURL = function (url) {
 
 
 Views.D3Util.graphInit_item = function (para) {
-        $("#network_dialog_nav").html("<a class='action'>back</a>");
+        $("#network_dialog_nav").html("<button class='action'>back</button>");
         $("#network_dialog_nav").on("click", function () {
             console.log("dialog_nav is clicked!");
-            var newPara = $.extend({}, para, TH.Util.graph.tagGraph());
+            var newPara = $.extend({}, para);
             newPara.type = "tag";
             Views.D3Graph(newPara);
         });
