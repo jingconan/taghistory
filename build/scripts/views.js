@@ -504,6 +504,7 @@ Views.AppView = Backbone.View.extend({
         this.renderMenu();
         // this.renderHistory();
         TH.Views.updateInterval(TH.Para.Interval.init); //FIXME
+        this.renderTagGraph();
 
         return this;
     },
@@ -515,6 +516,12 @@ Views.AppView = Backbone.View.extend({
     //     });
     //     
     // },
+    renderTagGraph: function () {
+        var tagGraphView = new Views.TagGraphView({
+            collection: new TH.Collections.Tags(null, {settings: this.settings}),
+        });
+        tagGraphView.render();
+    },
     renderMenu: function () {
         var menuView = new Views.MenuView({
             el: '.navigation',

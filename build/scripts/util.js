@@ -105,12 +105,11 @@ Util.data_import = function () {
 
 Util.graph = {};
 
-Util.graph.tagGraph = function () {
+Util.graph.tagGraph = function (tagList) {
     // set up initial nodes and links
     //  - nodes are known by 'id', not by index in array.
     //  - reflexive edges are indicated on the node (as a bold black circle).
     //  - links are always source < target; edge directions are set by 'left' and 'right'.
-    var tagList = TH.Store.storedInfo.tagList.tagList;
     var length = tagList.length, i = 0;
     var nodes = [];
     for (i = 0; i < length; ++i) {

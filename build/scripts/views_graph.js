@@ -6,13 +6,33 @@ var Models = TH.Models;
 var Util = TH.Util;
 
 
-Views.plotGraph = function () {
+Views.TagGraphView = Backbone.View.extend({
+    // template: '',
+    render: function () {
+        console.log('run here line 13'); 
+        this.collection.fetch().then(
+            (function () { // success call back
+                console.log('fetch tags succesfully');
+                var tagList = this.collection.toTemplate().tagList;
+                $("#view_network").on("click", 
+                                      TH.Views.plotGraph.bind(undefined, tagList));
+            }).bind(this),
+            (function () { // fail call back
+                console.log('fetch fail');
+            }).bind(this)
+        );
+    }
+
+});
+
+
+Views.plotGraph = function (tagList) {
     // chrome.tabs.create({url: "network.html"});
     // var width = TH.Para.tagGraph.width,
         // height = TH.Para.tagGraph.height,
     // var contiainer = TH.Para.tagGraph.contiainer;
     var contiainer = "network_dialog",
-        tg = TH.Util.graph.tagGraph();
+        tg = TH.Util.graph.tagGraph(tagList);
     TH.Para.tagGraph.width = $(window).width() * 0.7;
     TH.Para.tagGraph.height = $(window).height() * 0.7;
     $("#" + contiainer).dialog({
