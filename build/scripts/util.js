@@ -170,7 +170,7 @@ Util.HistoryQuery = Toolbox.Base.extend({
     run: function(options, callback) {
         this.options = options;
         if (this.options.text) {
-            this.text = this.options.text;
+            // this.text = this.options.text;
             this.options.text = '';
         }
         var options = {};
@@ -184,20 +184,28 @@ Util.HistoryQuery = Toolbox.Base.extend({
         delete options.searching;
 
         this.chromeAPI.history.search(options, (function(results) {
-            this.searchHandler(results, callback);
+            callback(this._prepareResults(results));
         }).bind(this));
     },
-    searchHandler: function(results, callback) {
-        if (this.text) {
-            this.options.text = this.text;
-        }
-        var results = this._prepareResults(results);
-        callback(results);
-        // return this._sanitizeResults(results, callback);
+    _verifyDateRange: function (t) {
+        return (t < this.options.endTime && t > this.options.startTime);
     },
     _prepareResults: function (results) {
+        // XXX add date and extendedDate field to results
+        // XXX The results returned by chrome query contains
+        // only with lastVisitTime. The lastVisitTime of items many not
+        // belong to the query range if the corresponding items are visited multiple times. 
+        // This code sanitize the results: if a visit's lastVisitTime
+        // doesn't belong to the range, then we will use the time
+        // of the previous item that belongs to the range.
+        var lastDate;
         _(results).each((function (result) {
-            result.date = new Date(result.lastVisitTime)
+            if (this._verifyDateRange(result.lastVisitTime)) {
+                result.date = new Date(result.lastVisitTime);
+                lastDate = result.date;
+            } else {
+                result.date = lastDate;
+            }
             //Translate dates and times here for the search sanitizer
             result.extendedDate = moment(result.date).format(this.t('extended_formal_date'));
             result.time = moment(result.date).format(this.t('local_time'));
@@ -209,14 +217,5 @@ Util.HistoryQuery = Toolbox.Base.extend({
         maxResults: 0
     },
 
-    _sanitizeResults: function (results, callback) {
-        var options = {
-            options: this.options,
-            results: results
-        };
-        // debugger;
-
-        // this.worker('sanitizer', options, callback);
-    }
 });
 

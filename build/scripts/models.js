@@ -80,7 +80,6 @@ Models.massage = function (storedInfo, groups) {
             item = historyItems[idx];
             urlInfo = Util.parseURL(item.url);
             visitId = 'c' + i.toString() + '-' + j.toString();
-            visitTime = (new Date(item.lastVisitTime)).toLocaleString();
             vk = Models.getVisitItemKey(item);
             if (storedTags[vk] === undefined || tagSet[storedTags[vk].tag_name] !== true) {
                 tag = [];
@@ -99,7 +98,7 @@ Models.massage = function (storedInfo, groups) {
                 path: urlInfo.path,
                 id: visitId,
                 tag: tag,
-                time: visitTime,
+                time: item.time,
                 seconds: item.lastVisitTime
             };
             visits.push(visitItem);
