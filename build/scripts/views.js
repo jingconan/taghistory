@@ -519,6 +519,7 @@ Views.AppView = Backbone.View.extend({
     renderTagGraph: function () {
         var tagGraphView = new Views.TagGraphView({
             collection: new TH.Collections.Tags(null, {settings: this.settings}),
+            tagRelationship: this.tagRelationship
         });
         tagGraphView.render();
     },

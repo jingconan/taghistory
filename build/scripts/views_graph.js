@@ -8,44 +8,48 @@ var Util = TH.Util;
 
 Views.TagGraphView = Backbone.View.extend({
     // template: '',
+    initialize: function (options) {
+        this.tagRelationship = options.tagRelationship; 
+    },
     render: function () {
         console.log('run here line 13'); 
         this.collection.fetch().then(
             (function () { // success call back
-                console.log('fetch tags succesfully');
-                var tagList = this.collection.toTemplate().tagList;
-                $("#view_network").on("click", 
-                                      TH.Views.plotGraph.bind(undefined, tagList));
+                $("#view_network").on("click", this.renderTagGraph.bind(this));
             }).bind(this),
             (function () { // fail call back
                 console.log('fetch fail');
             }).bind(this)
         );
+    },
+    itemGraph: function (tag_name) {
+        // TODO need a way to calculate the link between nodes
+        var items = this.tagRelationship.getSites(tag_name);
+        var length = items.length, i = 0;
+        var nodes = [];
+        for (i = 0; i < length; ++i) {
+            nodes.push({id: items[i].id, reflexive: false, type:"item", item: items[i]})
+        }
+        return {nodes: nodes, links: []};
+    },
+    renderTagGraph: function (tagList) {
+        var tagList = this.collection.toTemplate().tagList;
+        var contiainer = "network_dialog",
+        tg = TH.Util.graph.tagGraph(tagList);
+        TH.Para.tagGraph.width = $(window).width() * 0.7;
+        TH.Para.tagGraph.height = $(window).height() * 0.7;
+        $("#" + contiainer).dialog({
+            width: TH.Para.tagGraph.width * 1.2,
+            height: TH.Para.tagGraph.height * 1.2
+        });
+
+        // Views.D3Graph.sel_elements = {};
+        Views.D3MouseVars.reset();
+        // debugger;
+        Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
     }
 
 });
-
-
-Views.plotGraph = function (tagList) {
-    // chrome.tabs.create({url: "network.html"});
-    // var width = TH.Para.tagGraph.width,
-        // height = TH.Para.tagGraph.height,
-    // var contiainer = TH.Para.tagGraph.contiainer;
-    var contiainer = "network_dialog",
-        tg = TH.Util.graph.tagGraph(tagList);
-    TH.Para.tagGraph.width = $(window).width() * 0.7;
-    TH.Para.tagGraph.height = $(window).height() * 0.7;
-    $("#" + contiainer).dialog({
-        width: TH.Para.tagGraph.width * 1.2,
-        height: TH.Para.tagGraph.height * 1.2
-    });
-
-    // Views.D3Graph.sel_elements = {};
-    Views.D3MouseVars.reset();
-    // debugger;
-    Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
-};
-
 
 // Manage cache of selected elementes. (nodes, links. etc);
 Views.D3MouseVars = {
