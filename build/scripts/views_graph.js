@@ -32,10 +32,32 @@ Views.TagGraphView = Backbone.View.extend({
         }
         return {nodes: nodes, links: []};
     },
-    renderTagGraph: function (tagList) {
+    tagGraph: function () {
         var tagList = this.collection.toTemplate().tagList;
-        var contiainer = "network_dialog",
-        tg = TH.Util.graph.tagGraph(tagList);
+        // set up initial nodes and links
+        //  - nodes are known by 'id', not by index in array.
+        //  - reflexive edges are indicated on the node (as a bold black circle).
+        //  - links are always source < target; edge directions are set by 'left' and 'right'.
+        var length = tagList.length, i = 0;
+        var nodes = [];
+        for (i = 0; i < length; ++i) {
+            nodes.push({id: tagList[i].tag_name,
+                reflexive: false, 
+            type: "tag"});
+        }
+        var links = [
+            // {source: nodes[0], target: nodes[1], left: false, right: true },
+            // {source: nodes[1], target: nodes[2], left: false, right: true }
+        ];
+
+        return {
+            nodes: nodes,
+            links: links
+        };
+    },
+    renderTagGraph: function () {
+        var contiainer = "network_dialog";
+        // tg = TH.Util.graph.tagGraph(tagList);
         TH.Para.tagGraph.width = $(window).width() * 0.7;
         TH.Para.tagGraph.height = $(window).height() * 0.7;
         $("#" + contiainer).dialog({
@@ -46,7 +68,7 @@ Views.TagGraphView = Backbone.View.extend({
         // Views.D3Graph.sel_elements = {};
         Views.D3MouseVars.reset();
         // debugger;
-        Views.D3Graph($.extend({type: "tag"}, TH.Para.tagGraph, tg));
+        Views.D3Graph($.extend({type: 'tag', 'this': this}, TH.Para.tagGraph));
     }
 
 });
@@ -122,6 +144,15 @@ Views.D3Util.removeNodes = function (nodes, keys) {
     return new_nodes;
 }
 
+Views.D3Util.prettifyURL = function (url) {
+    var url = url.replace(/.*?:\/\/(www.)?/g, "");
+    var maxLen = 20;
+    if (url.length > maxLen - 3) {
+        url = url.slice(0, maxLen - 3) + '...';
+    }
+    return url;
+}
+
 
 Views.D3Util.graphInit_item = function (para) {
         $("#network_dialog_nav").html("<a class='action'>back</a>");
@@ -132,9 +163,9 @@ Views.D3Util.graphInit_item = function (para) {
             Views.D3Graph(newPara);
         });
 
-        var default_tran = 'translate(-50, -10)';
+        var default_tran = 'translate(-75, -10)';
         var shapes = para.g.append('svg:rect')
-                        .attr('width', 100)
+                        .attr('width', 150)
                         .attr('height', 20)
                         .attr('rx', 5)
                         .attr('ry', 5)
@@ -177,8 +208,14 @@ Views.D3Graph = function (para) {
     }());
 
     var colors = d3.scale.category10();
-    var links = para.links;
-    var nodes = para.nodes;
+    var gg;
+    if (para.type === "tag") {
+        gg = para.this.tagGraph();
+    } else {
+        gg = para.this.itemGraph(para.tag);
+    }
+    var links = gg.links;
+    var nodes = gg.nodes;
 
     var svg = d3.select('#' + para.contiainer)
             .append('svg')
@@ -281,8 +318,9 @@ Views.D3Graph = function (para) {
                 }
 
                 if (para.type === "tag") {
-                    var ig = Util.graph.itemGraph(d.id);
-                    var new_para = $.extend({}, para, ig);
+                    // var ig = Util.graph.itemGraph(d.id);
+                    var new_para = $.extend({}, para);
+                    new_para.tag = d.id;
                     new_para.type = "item";
                     Views.D3Graph(new_para);
                 } else if (para.type === "item") {
@@ -301,12 +339,7 @@ Views.D3Graph = function (para) {
             .attr('class', 'id')
             .text(function (d) { 
                 if (d.type === 'item') {
-                    if (d.item.title.slice(0, 8) !== '') {
-                        return d.item.title.slice(0, 8);
-                    } else {
-                        return d.item.url.slice(0, 8);
-                    }
-                    return ; 
+                    return Views.D3Util.prettifyURL(d.item);
                 } else {
                     return d.id;
                 }
