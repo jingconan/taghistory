@@ -468,8 +468,17 @@ Views.MenuView = Backbone.View.extend({
 });
 
 Views.CalendarView = Backbone.View.extend({
+    initialize: function (options) {
+        this.appRouter = options.appRouter;
+        this.app = options.app;
+    },
     render: function () {
         this.$el.fullCalendar({
+            dayClick: (function (date, jsEvent, view) {
+                this.appRouter.navigate('#days/' + date.format("M-D-YY"), {trigger: true});
+                // var dayView = this.app.loadDay(date.format("M-D-YY"));
+                dayView.render();
+            }).bind(this)
         });
          
     },
@@ -494,11 +503,8 @@ Views.AppView = Backbone.View.extend({
         // this.collection.on('reloaded', this.onWeeksReloaded, this);
 
         // TH.Models.init();
+        this.appRouter = options.appRouter;
         this.tagRelationship = new Models.TagRelationship();
-        // this.tagRelationship = new TH.Collections.TagRelationships();
-        // this.tagRelationship.add(new Models.TagRelationship());
-        // this.tagRelationship.add();
-        console.log('this line 500');
         options.tagRelationship = this.tagRelationship;
         this.cache = new Views.Cache(options);
     },
@@ -522,18 +528,12 @@ Views.AppView = Backbone.View.extend({
     },
     renderCalendar: function () {
         var calendarView = new Views.CalendarView({
-            el: '#calendar'
+            el: '.calendar',
+            appRouter: this.appRouter,
+            app: this
         });
         calendarView.render();
     },
-    // renderHistory: function() {
-    //     var dayHistoryView = new Views.DayResultsView({
-    //         el: '#history_items',
-    //         cache: this.cache
-            // collection: new TH.Collections
-    //     });
-    //     
-    // },
     renderTagGraph: function () {
         var tagGraphView = new Views.TagGraphView({
             collection: new TH.Collections.Tags(null, {settings: this.settings}),

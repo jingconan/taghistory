@@ -13,3 +13,6 @@ build/scripts/workers.js
 build/index_back.html
 extension/templates/day_results.html_back
 build/frameworks/backbone.chromestorage.js
+build/frameworks/fullcalendar-2.1.1/fullcalendar.css
+build/frameworks/fullcalendar-2.1.1/fullcalendar.js
+build/frameworks/fullcalendar-2.1.1/fullcalendar.print.css

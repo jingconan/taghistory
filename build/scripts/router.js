@@ -32,7 +32,8 @@ var AppRouter = Backbone.Router.extend({
             el: $('.app'),
             settings: settings,
             state: this.state,
-            options: {settings: settings}
+            options: {settings: settings},
+            appRouter: this
         });
         // collection: new TH.Collections.Weeks(null, {settings: settings}),
         this.app.render();
