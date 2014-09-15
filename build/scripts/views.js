@@ -467,6 +467,18 @@ Views.MenuView = Backbone.View.extend({
     }
 });
 
+Views.CalendarView = Backbone.View.extend({
+    render: function () {
+        this.$el.fullCalendar({
+        });
+         
+    },
+    getI18nValues: function () {
+        return {};
+    }
+    
+});
+
 Views.AppView = Backbone.View.extend({
     class_name: 'app_view',
     template: TH.Templates.app, //FIXME 
@@ -507,6 +519,12 @@ Views.AppView = Backbone.View.extend({
         this.renderTagGraph();
 
         return this;
+    },
+    renderCalendar: function () {
+        var calendarView = new Views.CalendarView({
+            el: '#calendar'
+        });
+        calendarView.render();
     },
     // renderHistory: function() {
     //     var dayHistoryView = new Views.DayResultsView({

@@ -7,6 +7,7 @@ var AppRouter = Backbone.Router.extend({
         'weeks/:id': 'week',
         'days/:id': 'day',
         'today': 'today',
+        'calendar': 'calendar',
         "*actions": "defaultRoute" // matches http://example.com/#anything-here
     },
     help: function () {
@@ -47,6 +48,9 @@ var AppRouter = Backbone.Router.extend({
     },
     today: function () {
         this.navigate('#days/' + moment(new Date()).id(), {trigger: true});
+    },
+    calendar: function () {
+        this.app.renderCalendar();
     },
     defaultRoute: function () {
         console.log("default route");
