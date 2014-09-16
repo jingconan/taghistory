@@ -468,12 +468,17 @@ Views.MenuView = Backbone.View.extend({
 });
 
 Views.CalendarView = Backbone.View.extend({
+    template: TH.Templates.calendar, //FIXME 
     initialize: function (options) {
         this.appRouter = options.appRouter;
         this.app = options.app;
     },
     render: function () {
-        this.$el.fullCalendar({
+        var html = Mustache.to_html(this.template, this.getI18nValues());
+        this.$el.html(html);
+
+        // debugger;
+        this.$el.find('.calendar_panel').fullCalendar({
             dayClick: (function (date, jsEvent, view) {
                 this.appRouter.navigate('#days/' + date.format("M-D-YY"), {trigger: true});
                 // var dayView = this.app.loadDay(date.format("M-D-YY"));
@@ -489,7 +494,10 @@ Views.CalendarView = Backbone.View.extend({
          
     },
     getI18nValues: function () {
-        return {};
+        return {
+            title: 'Calendar View'
+        };
+        // return Views.DayView.getI18nValues();
     }
     
 });

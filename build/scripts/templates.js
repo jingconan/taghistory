@@ -1,4 +1,6 @@
-TH.Templates.app = "    <div class='frame'>        <div class='mainview view'>            <div class='day_view with_controls selected calendar'                style='display: block;opacity: 1;                -webkit-margin-start:0px;'>            </div>            <!-- <div id='calendar' style='opacity: 1; -webkit-margin-start:0px'></div> -->        </div>        <div class='navigation'>            </div>    </div>";
+TH.Templates.app = "    <div class='frame'>        <div class='mainview view'>            <div class='day_view with_controls selected calendar'>            </div>            <!-- <div id='calendar' style='opacity: 1; -webkit-margin-start:0px'></div> -->        </div>        <div class='navigation'>            </div>    </div>";
+
+TH.Templates.calendar = "<!-- <header> -->  <div>  <h1 class='title'>    {{{title}}}    <!-- <span class='sub_title'>{{formalDate}}</span> -->  </h1>  </div><!-- </header> --><div class='calendar_panel'></div>";
 
 TH.Templates.day = "<header>  <h1 class='title'>    {{{title}}}    <span class='sub_title'>{{formalDate}}</span>  </h1>  <div class='corner'>    <input class='search' placeholder='{{i18n_search_input_placeholder_text}}' tabindex='1' type='text' />  </div>  <div class='controls'>    <a class='text back_to_week' href='{{weekUrl}}'>      {{{i18n_back_to_week_link}}}    </a>    <div class='spacer'></div>    <button class='delete_day' disabled='disabled'>      {{i18n_delete_all_visits_for_filter_button}}    </button>  </div></header><div class='content'></div>";
 

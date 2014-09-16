@@ -691,3 +691,13 @@ body {
 .tags {
     font-size: 200%;
 }
+
+.calendar {
+    display: block;
+    opacity: 1;
+    -webkit-margin-start:0px;
+}
+
+.calendar_panel {
+    display: block;
+}
