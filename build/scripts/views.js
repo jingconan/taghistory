@@ -473,24 +473,31 @@ Views.CalendarView = Backbone.View.extend({
         this.appRouter = options.appRouter;
         this.app = options.app;
     },
-    render: function () {
+    render: function (options) {
         var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
 
-        // debugger;
-        this.$el.find('.calendar_panel').fullCalendar({
+        var calendarOptions = {
             dayClick: (function (date, jsEvent, view) {
-                this.appRouter.navigate('#days/' + date.format("M-D-YY"), {trigger: true});
-                // var dayView = this.app.loadDay(date.format("M-D-YY"));
+                var url = '#days/' + date.format("M-D-YY")
+                this.appRouter.navigate(url, {trigger: true});
                 dayView.render();
             }).bind(this),
-			header: {
-				left: 'prev,next today',
-				center: 'title',
-				right: 'month,agendaWeek,agendaDay'
-			},
-            defaultView: 'agendaWeek'
-        });
+            weekNumbers: true,
+            defaultView: 'agendaWeek',
+        };
+        if ((typeof options) !== 'undefined' && 
+            options.view === 'agendaWeek' && 
+            (typeof options.weekStartDate) !== 'undefined') {
+            calendarOptions.header = {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            };
+            calendarOptions.defaultDate = options.weekStartDate;
+        }
+        // debugger;
+        this.$el.find('.calendar_panel').fullCalendar(calendarOptions);
          
     },
     getI18nValues: function () {
@@ -540,13 +547,13 @@ Views.AppView = Backbone.View.extend({
 
         return this;
     },
-    renderCalendar: function () {
+    renderCalendar: function (options) {
         var calendarView = new Views.CalendarView({
             el: '.calendar',
             appRouter: this.appRouter,
             app: this
         });
-        calendarView.render();
+        calendarView.render(options);
     },
     renderTagGraph: function () {
         var tagGraphView = new Views.TagGraphView({

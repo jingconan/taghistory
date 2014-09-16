@@ -14,7 +14,10 @@ var AppRouter = Backbone.Router.extend({
         console.log("this is help message.");
     },
     week: function (id) {
-        console.log("week: " + id);
+        this.app.renderCalendar({
+            view: 'agendaWeek',
+            weekStartDate: moment(new Date(id)).startOf('week')
+        });
     },
     day: function (id) {
         console.log("id: " + id);
