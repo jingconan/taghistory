@@ -680,10 +680,10 @@ Models.TagRelationship = Backbone.Model.extend({
         this._save(callback);
     },
     removeSiteFromTag: function (site, tag, callback) {
-        var tagToSites = this.get('tagToSites');
-        var siteToTags = this.get('siteToTags');
+        var tagToSites = this.get('tagToSites'),
+            siteToTags = this.get('siteToTags');
 
-        tag = JSON.stringify(tag);
+        // tag = JSON.stringify(tag);
         this._remove(tagToSites[tag], site);
         this._remove(siteToTags[site], tag);
         this._save(callback);
@@ -701,8 +701,6 @@ Models.TagRelationship = Backbone.Model.extend({
         if (typeof tagList === 'undefined') {
             return [];
         }
-        console.log('getTags: '); 
-        console.dir(tagList);
         return tagList.map(function (tag) {
             return {tag_name: tag}; 
         });

@@ -251,6 +251,17 @@ Views.DayResultsView = Backbone.View.extend({
         }).bind(this);
         /*jslint unparam: false*/
         $('.interval').each(onDragStart);
+        $('.tags').click((function (ev) {
+            var tag = ev.target.textContent,
+                site = $(ev.target).parentsUntil('div .visit_item').last().attr('href'),
+                N = tag.length; 
+            ev.preventDefault();
+            if (tag.slice(N-2) === ' x') {
+                tag = tag.slice(0, N-2);
+            }
+
+            this.tagRelationship.removeSiteFromTag(site, tag, function () {});
+        }).bind(this));
     },
     render: function () {
         console.log('DayResultsView render is executed');
