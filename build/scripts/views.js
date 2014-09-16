@@ -10,7 +10,6 @@ Views.renderEvernoteExport = function (everInfo) {
     var template = TH.Templates.evernote;
     var note = Mustache.to_html(template, everInfo);
     return note;
-    // debugger;
     // return 'stub, good in renderEvernoteExport';
 };
 
@@ -224,17 +223,21 @@ Views.DayResultsView = Backbone.View.extend({
     },
     getID: function (obj) {
         // FIXME to handle drag interval case
+        // Obj is an interval
+        var tmp;
+        if ($(obj).attr('class') === 'interval highlightable') {
+            tmp = $(obj).find('ol').find('li').find('a');
+            return $.map(tmp, function (val, idx) {
+                return val.href; 
+            });
+        } 
+        //Obj is an item, link is dragged
         var t1 = $(obj).attr('href');
-        if (t1 !== undefined) {
-            console.log("t1: " + t1);
-            return t1;
+        if (typeof t1 !== 'undefined') {
+             return [t1];
         }
-        console.log("$(obj).find('a').attr('href'): " + $(obj).find('a').attr('href'));
-        return $(obj).find('a').attr('href');
-        // return {
-        //     visitID: obj.getAttribute('data-id'),
-        //     intervalID: obj.parentElement.parentElement.getAttribute('data-id')
-        // };
+        // Obj is an item, drag handle is dragged
+        return [$(obj).find('a').attr('href')];
     },
     insertTags: function () {
     },
@@ -246,7 +249,6 @@ Views.DayResultsView = Backbone.View.extend({
                 ev.dataTransfer.setData("itemID", JSON.stringify(this.getID(ev.target)));
             }).bind(this), false);
         }).bind(this);
-        // debugger;
         /*jslint unparam: false*/
         $('.interval').each(onDragStart);
     },
@@ -331,7 +333,6 @@ Views.TagView = Backbone.View.extend({
     },
     bindEvent: function () {
         console.log('run bindEvent');
-        // debugger;
         var selector = Selectors.tag;
         var onDrop = (function (ev) {
             // var massageInfo = this.cache.dayView().dayResultsView.massageInfo;
@@ -342,10 +343,7 @@ Views.TagView = Backbone.View.extend({
             // var dragItem = ev.dataTransfer.getData("dragItem");
             var tag = ev.target.textContent;
             var rect = ev.target.getBoundingClientRect();
-            // this.tagRelationship.addSiteToTag(JSON.parse(itemID), tag, (function (operations) {
-            //     this.cache.dayView().renderHistory();
-            // }).bind(this));
-            this.tagRelationship.addSiteToTag(JSON.parse(itemID), tag);
+            this.tagRelationship.addSitesToTag(JSON.parse(itemID), tag);
             // var callbackHandle = function () {};
 
             // FIXME, need to update this using the Models.Tag
@@ -417,7 +415,6 @@ Views.MenuView = Backbone.View.extend({
 
     },
     render: function () {
-        // debugger;
         var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
 
@@ -504,7 +501,6 @@ Views.CalendarView = Backbone.View.extend({
             };
             calendarOptions.defaultDate = options.weekStartDate;
         }
-        // debugger;
         this.$el.find('.calendar_panel').fullCalendar(calendarOptions);
          
     },
@@ -522,7 +518,6 @@ Views.AppView = Backbone.View.extend({
     template: TH.Templates.app, //FIXME 
     ready: false,
     initialize: function (options) {
-        // debugger;
         // _.extend(this, options);
         // this.settings = this.options.settings;
         // this.collection.reload(this.settings.get('startingWeekDay'));

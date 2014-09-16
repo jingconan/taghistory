@@ -595,26 +595,34 @@ Models.TagRelationship = Backbone.Model.extend({
     id: 'tagrelationship',
     // chromeStorage: new Backbone.ChromeStorage("TagRelationship5", "local"),
     localStorage: new Backbone.LocalStorage("TagRelationship"),
-    addSiteToTag: function (site, tag, callback) {
-        var operations = {tagCreated: false};
-        var tagToSites = this.get('tagToSites');
-        var siteToTags = this.get('siteToTags');
+    addSitesToTag: function (sites, tag, callback) {
+        var operations = {tagCreated: false},
+            tagToSites = this.get('tagToSites'),
+            siteToTags = this.get('siteToTags'),
+            i, site;
         if (typeof tagToSites[tag] === 'undefined') {
             operations.tagCreated = true;
             tagToSites[tag] = [];
         }
-        if (typeof siteToTags[site] === 'undefined') {
-            siteToTags[site] = [];
+
+        for (i = 0; i < sites.length; ++i) {
+            site = sites[i];
+            if (typeof siteToTags[site] === 'undefined') {
+                siteToTags[site] = [];
+            }
+            this._add(tagToSites[tag], site);
+            this._add(siteToTags[site], tag);
         }
-        this._add(tagToSites[tag], site);
-        this._add(siteToTags[site], tag);
-        this.operations = operations
+
         this._save((function (callback, operations) {
             if (typeof callback !== 'undefined') {
                 callback(operations);
             }
-        }).bind(undefined, callback, operations))
+        }).bind(undefined, callback, operations));
     },
+    // addSiteToTag: function (site, tag, callback) {
+    //     return this.addSitesToTag([site], tag, callback);
+    // },
     _add: function (arr, val) {
         var idx = arr.indexOf(val);
         if (idx === -1) {
