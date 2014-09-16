@@ -478,7 +478,13 @@ Views.CalendarView = Backbone.View.extend({
                 this.appRouter.navigate('#days/' + date.format("M-D-YY"), {trigger: true});
                 // var dayView = this.app.loadDay(date.format("M-D-YY"));
                 dayView.render();
-            }).bind(this)
+            }).bind(this),
+			header: {
+				left: 'prev,next today',
+				center: 'title',
+				right: 'month,agendaWeek,agendaDay'
+			},
+            defaultView: 'agendaWeek'
         });
          
     },
