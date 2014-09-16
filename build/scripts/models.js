@@ -599,15 +599,15 @@ Models.TagRelationship = Backbone.Model.extend({
         var operations = {tagCreated: false};
         var tagToSites = this.get('tagToSites');
         var siteToTags = this.get('siteToTags');
-        if (tagToSites[tag] === undefined) {
+        if (typeof tagToSites[tag] === 'undefined') {
             operations.tagCreated = true;
             tagToSites[tag] = [];
         }
-        if (siteToTags[site] === undefined) {
+        if (typeof siteToTags[site] === 'undefined') {
             siteToTags[site] = [];
         }
-        tagToSites[tag].push(site);
-        siteToTags[site].push(tag);
+        this._add(tagToSites[tag], site);
+        this._add(siteToTags[site], tag);
         this.operations = operations
         this.callback = callback
         this.save({}, {
@@ -621,8 +621,14 @@ Models.TagRelationship = Backbone.Model.extend({
         });
         callback(operations);
     },
+    _add: function (arr, val) {
+        var idx = arr.indexOf(val);
+        if (idx === -1) {
+            arr.push(val);
+        } 
+    },
     _remove: function (arr, val) {
-        if (arr === undefined) {
+        if (typeof arr === 'undefined') {
             return; 
         }
         var idx = arr.indexOf(val);
@@ -639,18 +645,21 @@ Models.TagRelationship = Backbone.Model.extend({
     },
     getSites: function (tag) {
         var siteList = this.get('tagToSites')[tag];
-        if (siteList === undefined) {
+        if (typeof siteList === 'undefined') {
             return [];
         }
+        console.dir(siteList);
         return siteList;
     },
     getTags: function (site) {
         var tagList = this.get('siteToTags')[site];
-        if (tagList === undefined) {
+        if (typeof tagList === 'undefined') {
             return [];
         }
+        console.log('getTags: '); 
+        console.dir(tagList);
         return tagList.map(function (tag) {
             return {tag_name: tag}; 
-        }); 
+        });
     }
 });
