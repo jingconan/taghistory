@@ -151,6 +151,7 @@ Views.DayView = Backbone.View.extend({
     initialize: function (options) {
         this.options = options;
         this.tagRelationship = options.tagRelationship;
+        this.id = options.id;
         // this.history.bind('change', @onDayHistoryLoaded, @)
     },
     template: TH.Templates.day,
@@ -199,6 +200,7 @@ Views.DayView = Backbone.View.extend({
         properties.i18n_back_to_week_link = this.t('back_to_week_link', [
             this.t('back_arrow')
         ]);
+        properties.weekUrl = '#weeks/' + this.id;
         return properties;
     }
 
@@ -306,7 +308,8 @@ Views.Cache = Toolbox.Base.extend({
                 model: day,
                 // history: history,
                 el: $('.day_view'),
-                tagRelationship: this.tagRelationship
+                tagRelationship: this.tagRelationship,
+                id: id
             });
         }
         return this.cache.days[id];
