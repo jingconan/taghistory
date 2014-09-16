@@ -609,17 +609,11 @@ Models.TagRelationship = Backbone.Model.extend({
         this._add(tagToSites[tag], site);
         this._add(siteToTags[site], tag);
         this.operations = operations
-        this.callback = callback
-        this.save({}, {
-            success: (function () {
-                console.log('tagRelationship has been succesfully saved!');  
-                this.callback(this.operations);
-            }).bind(this),
-            error: function (model, response, options) {
-                console.log('error happened in addSiteToTag: reponse: ' + JSON.stringify(response)); 
+        this._save((function (callback, operations) {
+            if (typeof callback !== 'undefined') {
+                callback(operations);
             }
-        });
-        callback(operations);
+        }).bind(undefined, callback, operations))
     },
     _add: function (arr, val) {
         var idx = arr.indexOf(val);
@@ -637,11 +631,54 @@ Models.TagRelationship = Backbone.Model.extend({
         } 
         arr.splice(idx, 1);
     },
+    _save: function (callback) {
+        this.save({}, {
+            success: (function (callback) {
+                console.log('tagRelationship has been succesfully saved!');  
+                this.trigger('change');
+                if (typeof callback !== 'undefined') {
+                    callback();
+                }
+            }).bind(this, callback),
+            error: function (model, response, options) {
+                console.log('error happened in addSiteToTag: reponse: ' + JSON.stringify(response)); 
+            }
+        });
+
+    },
+    removeTag: function (tag, callback) {
+    //XXX remove a tag completely
+        var tagToSites = this.get('tagToSites'),
+            siteToTags = this.get('siteToTags'),
+            siteList = tagToSites[tag],
+            i, s;
+
+        if (typeof tagToSites[tag] === 'undefined') {
+            return; 
+        }
+        if (typeof siteList === 'undefined') {
+            delete tagToSites[tag];
+            return;
+        }
+
+        for (i = 0; i < siteList.length; ++i) {
+            s = siteList[i];
+            this._remove(siteToTags[s], tag);
+            if (siteToTags[s].length === 0) {
+                delete siteToTags[s];
+            }
+        }
+        delete tagToSites[tag];
+        this._save(callback);
+    },
     removeSiteFromTag: function (site, tag, callback) {
+        var tagToSites = this.get('tagToSites');
+        var siteToTags = this.get('siteToTags');
+
         tag = JSON.stringify(tag);
         this._remove(tagToSites[tag], site);
         this._remove(siteToTags[site], tag);
-        callback();
+        this._save(callback);
     },
     getSites: function (tag) {
         var siteList = this.get('tagToSites')[tag];

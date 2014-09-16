@@ -181,6 +181,8 @@ Views.DayView = Backbone.View.extend({
                 this.tagRelationship.save(); // layze initialization.
             }).bind(this)
         );
+
+        // this.dayResultsView.listenTo(this.tagRelationship, 'change', this.dayResultsView.render());
         // this.$('.history').html(this.dayResultsView.render().el);
         // this.dayResultsView.insertTags()
         // this.dayResultsView.attachDragging()
@@ -218,6 +220,7 @@ Views.DayResultsView = Backbone.View.extend({
     // },
     initialize: function (options) {
         this.tagRelationship = options.tagRelationship;
+        this.tagRelationship.on('change', this.render, this);
     },
     getID: function (obj) {
         // FIXME to handle drag interval case
@@ -339,9 +342,10 @@ Views.TagView = Backbone.View.extend({
             // var dragItem = ev.dataTransfer.getData("dragItem");
             var tag = ev.target.textContent;
             var rect = ev.target.getBoundingClientRect();
-            this.tagRelationship.addSiteToTag(JSON.parse(itemID), tag, (function (operations) {
-                this.cache.dayView().renderHistory();
-            }).bind(this));
+            // this.tagRelationship.addSiteToTag(JSON.parse(itemID), tag, (function (operations) {
+            //     this.cache.dayView().renderHistory();
+            // }).bind(this));
+            this.tagRelationship.addSiteToTag(JSON.parse(itemID), tag);
             // var callbackHandle = function () {};
 
             // FIXME, need to update this using the Models.Tag
@@ -459,6 +463,7 @@ Views.MenuView = Backbone.View.extend({
                 ev.preventDefault();
                 var removedTag = ev.dataTransfer.getData("removedTag");
                 this.collection.remove(removedTag);
+                this.tagRelationship.removeTag(removedTag);
             }).bind(this), false);
         }).bind(this));
 
