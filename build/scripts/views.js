@@ -146,12 +146,64 @@ _.extend(Backbone.View.prototype, {
     }
 });
 
+Views.ImportView = Backbone.View.extend({
+    template: TH.Templates.import,
+    initialize: function (options) {
+        this.tagRelationship = options.tagRelationship 
+    },
+    render: function () {
+        this.$el.dialog({
+            width: 500,
+            height: 500
+        }); 
+        this.$el.html(this.template);
+        this.$el.find('#data_import').click((function (ev) {
+            var url = $("#json_file")[0].value,
+            xhr = new XMLHttpRequest();
+            try {
+                this.storeArchiveTags(url);
+            } catch (e) {
+                xhr.onreadystatechange = function(){
+                    if (xhr.readyState==4 && xhr.status==200) {
+                        this.storeArchiveTags(xhr.responseText);
+                    }
+                };
+                xhr.open("GET", url); 
+                xhr.send();
+            }
+        }).bind(this));
+    },
+    storeArchiveTags: function (jsonText) {
+        var obj = JSON.parse(jsonText);
+        debugger;
+        this.tagRelationship.importData(obj, function () {
+             alert('your data has been imported!');
+        })
+    }
+});
+
 Views.MoreActionButtonView = Backbone.View.extend({
     template: TH.Templates.more_action,
+    initialize: function (options) {
+        this.tagRelationship = options.tagRelationship 
+    },
     render: function () {
         var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
         this.$el.dropit();
+        this.$el.find('#more_action_import').click((function (ev) {
+            // this.tagRelationship.importData(TH.Util.dataImport(), function () {
+            //     alert('import finished');
+            // });
+            var importView = new TH.Views.ImportView({
+                el: $('#network_dialog'),
+                tagRelationship: this.tagRelationship
+            });
+            importView.render();
+        }).bind(this));
+        this.$el.find('#more_action_export').click((function (ev) {
+             TH.Util.dataExport(this.tagRelationship.toTemplate());
+        }).bind(this));
     },
     getI18nValues: function () {
         return {};
@@ -176,7 +228,8 @@ Views.DayView = Backbone.View.extend({
     },
     renderMoreActionButton: function () {
         this.moreActionButtonView = new TH.Views.MoreActionButtonView({
-            el: $('.more_action_menu')
+            el: $('.more_action_menu'),
+            tagRelationship: this.tagRelationship
         });
         this.moreActionButtonView.render();
     },

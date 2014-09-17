@@ -704,5 +704,36 @@ Models.TagRelationship = Backbone.Model.extend({
         return tagList.map(function (tag) {
             return {tag_name: tag}; 
         });
+    },
+    toTemplate: function () {
+        return {
+            tagToSites: this.get('tagToSites'),
+            siteToTags: this.get('siteToTags')
+        };
+    },
+    importData: function (data, callback) {
+        //XXX pay attention to security issues
+        $.extend(this.get('tagToSites'), data.tagToSites);
+        $.extend(this.get('siteToTags'), data.siteToTags);
+        this._save(callback);
+        // var tagToSites = data.tagToSites,
+        //     p, pendingNum = 0, tagList = [];
+
+        // var finished = (function (pendingNum, callback) {
+        //     --pendingNum;
+        //     if (pendingNum === 0) {
+        //         callback();
+        //     }
+        // }).bind(this, pendingNum, callback);
+
+        // for (p in tagToSites) {
+        //     if (tagToSites.hasOwnProperty(p)) {
+        //         ++pendingNum;
+        //         tagList.push(p);
+        //     }
+        // }
+        // $.each(tagList, function (idx, p) {
+        //     this.addSitesToTag(tagToSites[p], p, finished);
+        // });
     }
 });

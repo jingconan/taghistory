@@ -82,25 +82,9 @@ Util.tag_animate = function (target) {
 };
 
 // Data exporter
-Util.data_export = function () {
-    var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
-    var searchQuery = {
-        'text': '',
-        'startTime': oneWeekAgo,
-    };
-
-
-    Models.fetchAllData(searchQuery, function (storedInfo) {
-        TH.Store.storedInfo = storedInfo;
-        var blob = new Blob([JSON.stringify(storedInfo)], {type: "text/plain;charset=utf-8"});
-        saveAs(blob, "taghistory-data.txt");
-    });
-
-
-};
-
-Util.data_import = function () {
-    chrome.tabs.create({ url: "import.html"});
+Util.dataExport = function (info) {
+    var blob = new Blob([JSON.stringify(info)], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, "taghistory-data.txt");
 };
 
 Util.graph = {};
