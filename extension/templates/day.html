@@ -6,14 +6,16 @@
   <div class='corner'>
     <input class='search' placeholder='{{i18n_search_input_placeholder_text}}' tabindex='1' type='text' />
   </div>
-  <div class='controls'>
+  <div class='controls' style='overflow:visible'>
     <a class='text back_to_week' href='{{weekUrl}}'>
       {{{i18n_back_to_week_link}}}
     </a>
     <div class='spacer'></div>
-    <button class='delete_day' disabled='disabled'>
-      {{i18n_delete_all_visits_for_filter_button}}
-    </button>
+    <!-- <button class='delete_day' disabled='disabled'> -->
+    <!--   {{i18n_delete_all_visits_for_filter_button}} -->
+    <!-- </button> -->
+    <ul class="more_action_menu"></ul>
+
   </div>
 </header>
 <div class='content'></div>

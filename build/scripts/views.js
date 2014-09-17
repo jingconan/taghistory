@@ -146,6 +146,19 @@ _.extend(Backbone.View.prototype, {
     }
 });
 
+Views.MoreActionButtonView = Backbone.View.extend({
+    template: TH.Templates.more_action,
+    render: function () {
+        var html = Mustache.to_html(this.template, this.getI18nValues());
+        this.$el.html(html);
+        this.$el.dropit();
+    },
+    getI18nValues: function () {
+        return {};
+    }
+
+});
+
 Views.DayView = Backbone.View.extend({
     initialize: function (options) {
         this.options = options;
@@ -159,6 +172,13 @@ Views.DayView = Backbone.View.extend({
         var html = Mustache.to_html(this.template, properties);
         this.$el.html(html);
         this.renderHistory();
+        this.renderMoreActionButton();
+    },
+    renderMoreActionButton: function () {
+        this.moreActionButtonView = new TH.Views.MoreActionButtonView({
+            el: $('.more_action_menu')
+        });
+        this.moreActionButtonView.render();
     },
     renderHistory: function () {
         var options = {
