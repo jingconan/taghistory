@@ -38,7 +38,7 @@ Models.massage = function (storedInfo, groups) {
     var firstTimeInGroup;
     var groupDate;
 
-    var IDMap = {};
+    // var IDMap = {};
     var visitId, groupID, visitTime, tag, vk;
     var visitItem;
     var groupItem;
@@ -80,7 +80,7 @@ Models.massage = function (storedInfo, groups) {
                 seconds: item.lastVisitTime
             };
             visits.push(visitItem);
-            IDMap[visitId] = visitItem;
+            // IDMap[visitId] = visitItem;
         }
 
         firstTimeInGroup = historyItems[group[0]].lastVisitTime;
@@ -94,14 +94,14 @@ Models.massage = function (storedInfo, groups) {
             interval_id: groupID,
         };
         history.push(groupItem);
-        IDMap[groupID] = groupItem;
+        // IDMap[groupID] = groupItem;
     }
 
 
     history.sort(function (a, b) {return b.timeStamp - a.timeStamp; });
     return {
-        history: history,
-        IDMap: IDMap
+        history: history
+        // IDMap: IDMap
     };
 };
 
