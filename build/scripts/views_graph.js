@@ -57,7 +57,6 @@ Views.TagGraphView = Backbone.View.extend({
     },
     renderTagGraph: function () {
         var contiainer = "network_dialog";
-        // tg = TH.Util.graph.tagGraph(tagList);
         TH.Para.tagGraph.width = $(window).width() * 0.7;
         TH.Para.tagGraph.height = $(window).height() * 0.7;
         $("#" + contiainer).dialog({
@@ -318,7 +317,6 @@ Views.D3Graph = function (para) {
                 }
 
                 if (para.type === "tag") {
-                    // var ig = Util.graph.itemGraph(d.id);
                     var new_para = $.extend({}, para);
                     new_para.tag = d.id;
                     new_para.type = "item";

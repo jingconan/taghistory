@@ -1,5 +1,5 @@
 /*jslint browser: true, vars:true, plusplus:true*/
-/*global TH, Blob, saveAs, chrome, FileReader, $*/
+/*global TH, Blob, saveAs, chrome, FileReader, $, _, Toolbox, moment*/
 "use strict";
 var Util = TH.Util;
 var Models = TH.Models;
@@ -69,9 +69,6 @@ Util.getTimeStamps = function (historyItems, type) {
     return timeStamps;
 };
 
-
-
-// function tag_animate() {
 Util.tag_animate = function (target) {
     var orig_style = target.style;
     target.setAttribute('style', 'background: #8AAAED; color: white;');
@@ -87,78 +84,21 @@ Util.dataExport = function (info) {
     saveAs(blob, "taghistory-data.txt");
 };
 
-Util.graph = {};
-
-Util.graph.tagGraph = function (tagList) {
-    // set up initial nodes and links
-    //  - nodes are known by 'id', not by index in array.
-    //  - reflexive edges are indicated on the node (as a bold black circle).
-    //  - links are always source < target; edge directions are set by 'left' and 'right'.
-    var length = tagList.length, i = 0;
-    var nodes = [];
-    for (i = 0; i < length; ++i) {
-        nodes.push({id: tagList[i].tag_name,
-                    reflexive: false, 
-                    type: "tag"});
-    }
-    var links = [
-            // {source: nodes[0], target: nodes[1], left: false, right: true },
-            // {source: nodes[1], target: nodes[2], left: false, right: true }
-        ];
-
-    return {
-        nodes: nodes,
-        links: links
-    };
-};
-
-Util.graph.itemGraph = function (tag_name) {
-    // TODO need a way to calculate the link between nodes
-    var items = Models.getItemsWithTag(tag_name);
-    var length = items.length, i = 0;
-    var nodes = [];
-    for (i = 0; i < length; ++i) {
-        nodes.push({id: items[i].id, reflexive: false, type:"item", item: items[i]})
-    }
-    return {nodes: nodes, links: []};
-};
-
-// Util.HistoryQuery = _.extend({}, function() {
-//     
-// });
-// Util.HistoryQuery = function() {
-//     this.chromeAPI = chrome;
-//     this.run = function(options, callback) {
-//         this.options = options;
-//         if (this.options.text) {
-//             this.text = this.options.text;
-//             this.options.text = '';
-//         }
-//         var options = {};
-//         _.extend(options, this.options);
-//         if (this.options.searching)
-//     }
-// }
-//
-Util.isDefined = function() {
-    return (typeof MyVariable !== "undefined" && MyVariable !== null);
-};
-
 _.extend(Toolbox.Base.prototype, TH.Modules.I18n);
 
 Util.HistoryQuery = Toolbox.Base.extend({
-    constructor: function() {
+    constructor: function () {
         this.chromeAPI = chrome;
     },
-    run: function(options, callback) {
-        this.options = options;
+    // FIXME this Query function is problematic
+    run: function (opts, callback) {
+        var options = {};
+        this.options = opts;
         if (this.options.text) {
             // this.text = this.options.text;
             this.options.text = '';
         }
-        var options = {};
         _.extend(options, this.options);
-        // FIXME plase comment this part
         if (typeof this.options.searching !== 'undefined') {
             _.extend(options, this.searchOptions);
         } else {
@@ -166,7 +106,7 @@ Util.HistoryQuery = Toolbox.Base.extend({
         }
         delete options.searching;
 
-        this.chromeAPI.history.search(options, (function(results) {
+        this.chromeAPI.history.search(options, (function (results) {
             callback(this._prepareResults(results));
         }).bind(this));
     },
