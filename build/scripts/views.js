@@ -196,7 +196,7 @@ Views.MoreActionButtonView = Backbone.View.extend({
             //     alert('import finished');
             // });
             var importView = new TH.Views.ImportView({
-                el: $('#network_dialog'),
+                el: $('#import_dialog'),
                 tagRelationship: this.tagRelationship
             });
             importView.render();
