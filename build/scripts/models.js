@@ -5,28 +5,6 @@ var Util = TH.Util;
 var Models = TH.Models;
 _.extend(Backbone.Model.prototype, TH.Modules.I18n);
 
-Models.sortByTags = function (historyItems, storedTags, tags) {
-    var i = 0, N, item, tstr, item_key;
-    var tg = '', tagsInfo = {};
-    N = tags.length;
-    for (i = 0; i < N; ++i) {
-        tagsInfo[tags[i]] = [];
-    }
-
-    N = historyItems.length;
-    for (i = 0; i < N; ++i) {
-        item = historyItems[i];
-        tstr = (new Date(item.lastVisitTime)).toLocaleString();
-        item.tstr = tstr;
-        item_key = Models.getVisitItemKey(item);
-        tg = storedTags[item_key];
-        if (tg !== undefined) {
-            tagsInfo[tg.tag_name].push(item);
-        }
-    }
-    return tagsInfo;
-};
-
 Models.massage = function (storedInfo, groups) {
 // function massage(historyItems, groups, storedTags) {
 // Massage the history data into format required by Mustache
@@ -81,7 +59,7 @@ Models.massage = function (storedInfo, groups) {
             urlInfo = Util.parseURL(item.url);
             visitId = 'c' + i.toString() + '-' + j.toString();
             vk = Models.getVisitItemKey(item);
-            if (storedTags[vk] === undefined || tagSet[storedTags[vk].tag_name] !== true) {
+            if (typeof storedTags[vk] === 'undefined' || tagSet[storedTags[vk].tag_name] !== true) {
                 tag = [];
             } else {
                 tag = storedTags[vk];
@@ -127,49 +105,7 @@ Models.massage = function (storedInfo, groups) {
     };
 };
 
-
-// search dataset.id recursively. At most 2 levels.
-// function searchDatasetID(target, i) {
-Models.searchDatasetID = function (target, i) {
-    var id = target.dataset.id;
-    if ((id === undefined) && (i <= 2)) {
-        return Models.searchDatasetID(target.parentElement, i + 1);
-    }
-    console.log("id: " + id);
-    return id;
-};
-
-
-
-
 /*jslint unparam: false*/
-
-// fetchAllData Required
-// function fetchAllData(searchQuery, callback, paras) {
-Models.fetchAllData = function (searchQuery, callback, paras) {
-    chrome.history.search(searchQuery, function (historyItems) {
-        var i = 0,
-            k = "",
-            keys = [],
-            N = historyItems.length;
-        for (i = 0; i < N; ++i) {
-            k = Models.getVisitItemKey(historyItems[i]);
-            keys.push(k);
-        }
-        chrome.storage.sync.get(keys, function (storedTags) {
-
-            chrome.storage.sync.get('tagList', function (tagList) {
-                if (undefined === tagList.tagList) {
-                    tagList.tagList = [];
-                }
-                callback({historyItems: historyItems,
-                          storedTags: storedTags,
-                          tagList: tagList}, paras);
-            });
-        });
-    });
-};
-
 
 Models.getVisitItemKey = function (visit) {
     // return timeStamp;
@@ -195,106 +131,6 @@ Models.getVisitItemKey = function (visit) {
     return visit.url.split("#")[0].split("&")[0].split('?')[0];
     // return GetBaseUrl(visit.url);
 };
-
-Models.addTag = function (visit, tag, callback) {
-    visit.tag = {tag_name: tag}; // Only allow one tag for each visit
-    // debugger;
-
-    var obj = {};
-    var key = Models.getVisitItemKey(visit);
-    console.log("store: k: " + key + " val: " + visit.tag);
-    obj[key] = visit.tag;
-    ++Models.addTag.prototype.visitNum;
-    chrome.storage.sync.set(obj, function () {
-        --Models.addTag.prototype.visitNum;
-        console.log("addTag.prototype.visitNum: " + Models.addTag.prototype.visitNum);
-        if (Models.addTag.prototype.visitNum === 0) {
-            console.log("run callback");
-            callback();
-            // callbackHandle();
-        }
-    });
-    console.log("addTag.prototype.visitNum: " + Models.addTag.prototype.visitNum);
-};
-
-Models.divideData = function (storedInfo, interval) {
-    var groups = Util.groupItems(Util.getTimeStamps(storedInfo.historyItems, 0),
-                                 interval);
-    return Models.massage(storedInfo, groups);
-};
-
-// function init(TH) {
-Models.init = function () {
-    // var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
-    var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
-    var searchQuery = {
-        'text': '',
-        'startTime': oneWeekAgo,
-    };
-
-
-    Models.fetchAllData(searchQuery, function (storedInfo) {
-        var interval = TH.Views.intervalValue();
-        console.log("interval: " + interval);
-        var massageInfo = TH.Models.divideData(storedInfo, interval);
-        Models.massageInfo = massageInfo;
-        TH.Store.storedInfo = storedInfo;
-
-        TH.Views.renderHistory(massageInfo);
-        TH.Views.renderTagsMenu(massageInfo, storedInfo.tagList.tagList,
-                                function () { TH.Views.renderHistory(massageInfo); });
-    });
-
-
-};
-
-Models.updateTagList = function (tagList, callback) {
-    chrome.storage.sync.set({tagList: tagList}, callback);
-};
-
-Models.deleteTag = function (tag) {
-    chrome.storage.sync.get('tagList', function (obj) {
-        if (undefined === obj.tagList) {
-            obj.tagList = [];
-        }
-
-            // debugger;
-        // remove tags from an array
-        var newTagList = [];
-        var tagListLen = obj.tagList.length;
-        var tl;
-        var i;
-        for (i = 0; i < tagListLen; ++i) {
-            tl = obj.tagList[i];
-            if (tl.tag_name !== tag) {
-                newTagList.push(tl);
-            }
-        }
-        // update tag
-        console.log("remove tag: " + tag);
-        Models.updateTagList(newTagList);
-        // TH.Views.refreshTagsMenu(newTagList);
-        TH.Views.renderTagsMenu(Models.massageInfo, newTagList);
-    });
-};
-
-Models.getItemsWithTag = function (tag) {
-    //TODO Now it is to check each item using brute foce. Need to revise
-    //it to better data structure (like LRU cache) to reduce time
-    //complexity
-    var storedInfo = TH.Store.storedInfo;
-    var hLen = storedInfo.historyItems.length;
-    var i = 0, key, tag ;
-    var res = [], tag_tmp;
-    for (i = 0; i < hLen; ++i) {
-        key = Models.getVisitItemKey(storedInfo.historyItems[i]);
-        tag_tmp = storedInfo.storedTags[key];
-        if (tag_tmp !== undefined && tag_tmp.tag_name === tag) {
-            res.push(storedInfo.historyItems[i]);
-        }
-    }
-    return res;
-}
 
 Models.History = Backbone.Model.extend({
     defaults: {
@@ -341,22 +177,6 @@ Models.DayHistory = Models.History.extend({
             })
         };
     },
-    // toTemplate: function () {
-    //     return this.info;
-    // },
-    // fetch: function (callback) {
-    //     if (typeof callback === 'undefined') {
-    //         callback = (function (info) {
-    //             this.info = info;
-    //         }).bind(this);
-    //     }
-    //     Models.fetchAllData(this.toChrome(true), function (storedInfo) {
-    //         var interval = TH.Views.intervalValue();
-    //         console.log("interval: " + interval);
-    //         var massageInfo = TH.Models.divideData(storedInfo, interval); 
-    //         callback(massageInfo);
-    //     });
-    // },
     toChrome: function(reading) {
         var properties = {
             startTime: this.sod(),
