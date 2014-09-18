@@ -21,54 +21,35 @@ Evernote.fmtItem = function (item, tag) {
     return head + item.title + ' ' + item.visitCount + '<br/>\n';
 };
 
-//XXX need to fix this function to fit the tested format for Mustache. 
 Evernote.format = function (storedInfo) {
-    // inptut is the info from the chrome storage
-    // output is the formatted note string
-    // FIXME this is a stub, need to be finished
-    // [2013-11-22 11:55:51]
-    // var historyItems = storedInfo.historyItems;
-    // var storedTags = storedInfo.storedTags;
-    var i,  N;
-    var tagList = storedInfo.tagList.tagList;
-    var sKey = Object.keys(storedInfo.storedTags);
-    if (sKey.length === 0) {
-        console.log("No Tags Stored\n");
-        return;
+    var tagList = Object.keys(storedInfo.tagToSites),
+        res = {},
+        i, sites;
+    res.tagToSites = [];
+    console.dir(tagList);
+    for (i = 0; i < tagList.length; ++i) {
+        sites = storedInfo.tagToSites[tagList[i]];
+        console.dir(sites);
+        res.tagToSites.push({
+            tag_name: tagList[i],
+            sites: sites.map(function (url) {
+                return {site_url: url};
+            })
+        });
     }
-    // get tagNameArray from tagList
-    N = tagList.length;
-    var tagNameArray = [];
-    for (i = 0; i < N; ++i) {
-        tagNameArray.push(tagList[i].tag_name);
-    }
-    var tagsInfo = TH.Models.sortByTags(storedInfo.historyItems,
-                                        storedInfo.storedTags,
-                                        tagNameArray);
-    // change the format to be suitable for mustache
-    i = 0;
-    N = tagNameArray.length;
-    var info = [];
-    for (i = 0; i < N; ++i) {
-        info.push({'tag_name': tagNameArray[i],
-                       'items': tagsInfo[tagNameArray[i]]});
-
-    }
-    var out = TH.Views.renderEvernoteExport(info);
-    console.log("out: " + out);
-    return out;
+    return res;
 };
 
 Evernote.getToken = function (callback) {
-    if (Evernote.evernoteToken !== undefined) {
+    if (typeof Evernote.evernoteToken !== 'undefined') {
         callback({'evernoteToken': Evernote.evernoteToken,
                   'notestoreUrl': Evernote.notestoreUrl
                  });
     }
-    chrome.storage.sync.get('evernoteOAuth', function (res) {
-        var oAuth = res.evernoteOAuth;
-        var evernoteToken = oAuth.evernoteToken;
-        var notestoreUrl = oAuth.notestoreUrl;
+    chrome.storage.sync.get('evernoteOAuth', (function (callback, res) {
+        var oAuth = res.evernoteOAuth,
+            evernoteToken = oAuth.evernoteToken,
+            notestoreUrl = oAuth.notestoreUrl;
         if (typeof evernoteToken === 'string') {
             Evernote.evernoteToken = evernoteToken;
             Evernote.notestoreUrl = notestoreUrl;
@@ -77,10 +58,8 @@ Evernote.getToken = function (callback) {
         }
         // Evernote.updateToken(callback);
         alert("You must update Evernote oAuth information first");
-    });
+    }).bind(undefined, callback));
 };
-
-
 
 Evernote.promptUpdateToken = function (callback) {
     window.open(Evernote.evernoteHost + "/api/DeveloperToken.action",
@@ -96,24 +75,14 @@ Evernote.sync = function (storedInfo) {
         Evernote.init(oAuth.notestoreUrl);
         var note = new Note();
 
-        // Evernote.noteStore.listNotebooks(
-        //     oAuth.evernoteToken,
-        //     function (notebooks) { console.log(notebooks); },
-        //     function onerror(error) { console.log(error); }
-        // );
-
         note.title = "Note Export Record";
-        // note.content = '<?xml version="1.0" encoding="UTF-8"?>';
-        // note.content += Evernote.format(storedInfo);
         note.content = Mustache.to_html(
             TH.Templates.evernote_export, 
             Evernote.format(storedInfo)
         );
 
-
-        // debugger;
         Evernote.noteStore.createNote(oAuth.evernoteToken, note, function (res) {
-            if (res.guid !== undefined) {
+            if (typeof res.guid !== 'undefined') {
                 console.log("Creating a new note in the default notebook");
                 console.log("Successfully created a new note with GUID: " + res.guid);
                 alert("Successfully synchronize the tagged notes to Evernote!");
@@ -123,7 +92,7 @@ Evernote.sync = function (storedInfo) {
             console.log(res);
         });
 
-    }).bind(storedInfo);
+    }).bind(undefined, storedInfo);
     Evernote.getToken(syncFunc);
 
 };

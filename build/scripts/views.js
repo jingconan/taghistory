@@ -188,8 +188,7 @@ Views.MoreActionButtonView = Backbone.View.extend({
         this.tagRelationship = options.tagRelationship 
     },
     render: function () {
-        var html = Mustache.to_html(this.template, this.getI18nValues()),
-            evernote = TH.Services.Evernote;
+        var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
         this.$el.dropit();
         this.$el.find('#more_action_import').click((function (ev) {
@@ -208,10 +207,10 @@ Views.MoreActionButtonView = Backbone.View.extend({
         }).bind(this));
 
         this.$el.find('#more_action_evernote').click((function (ev) {
-            evernote.sync(this.tagRelationship.toTemplate());
+            TH.Services.Evernote.sync(this.tagRelationship.toTemplate());
         }).bind(this));
 
-        this.$el.find('#update_evernote_token').click(evernote.promptUpdateToken);
+        this.$el.find('#update_evernote_token').click(TH.Services.Evernote.promptUpdateToken);
     },
     getI18nValues: function () {
         return {};
