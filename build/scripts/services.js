@@ -21,6 +21,7 @@ Evernote.fmtItem = function (item, tag) {
     return head + item.title + ' ' + item.visitCount + '<br/>\n';
 };
 
+//XXX need to fix this function to fit the tested format for Mustache. 
 Evernote.format = function (storedInfo) {
     // inptut is the info from the chrome storage
     // output is the formatted note string
@@ -90,51 +91,41 @@ Evernote.promptUpdateToken = function (callback) {
                 "left=700,width=700, height=600");
 }
 
-Evernote.sync = function () {
-    var oneWeekAgo = (new Date()).getTime() - TH.Para.query_time;
-    var searchQuery = {
-        'text': '',
-        'startTime': oneWeekAgo,
-    };
+Evernote.sync = function (storedInfo) {
+    var syncFunc = (function (storedInfo, oAuth) {
+        Evernote.init(oAuth.notestoreUrl);
+        var note = new Note();
+
+        // Evernote.noteStore.listNotebooks(
+        //     oAuth.evernoteToken,
+        //     function (notebooks) { console.log(notebooks); },
+        //     function onerror(error) { console.log(error); }
+        // );
+
+        note.title = "Note Export Record";
+        // note.content = '<?xml version="1.0" encoding="UTF-8"?>';
+        // note.content += Evernote.format(storedInfo);
+        note.content = Mustache.to_html(
+            TH.Templates.evernote_export, 
+            Evernote.format(storedInfo)
+        );
 
 
-    TH.Models.fetchAllData(searchQuery, function (storedInfo) {
-        Evernote.getToken(function (oAuth) {
-            Evernote.init(oAuth.notestoreUrl);
-            var note = new Note();
-
-            Evernote.noteStore.listNotebooks(oAuth.evernoteToken,
-                function (notebooks) {
-                    console.log(notebooks);
-                },
-                function onerror(error) {
-                    console.log(error);
-                }
-                );
-
-            note.title = "Note Export Record";
-            note.content = '<?xml version="1.0" encoding="UTF-8"?>';
-            note.content += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">';
-            note.content += '<en-note>Exported by Tag-History<br/>';
-            note.content += Evernote.format(storedInfo);
-            note.content += '</en-note>';
-
-            // debugger;
-            Evernote.noteStore.createNote(oAuth.evernoteToken, note, function (res) {
-                if (res.guid !== undefined) {
-                    console.log("Creating a new note in the default notebook");
-                    console.log("Successfully created a new note with GUID: " +
-                                res.guid);
-                    alert("Successfully synchronize the tagged notes to Evernote!");
-                    return;
-                }
-                console.log("Error");
-                console.log(res);
-            });
-
+        // debugger;
+        Evernote.noteStore.createNote(oAuth.evernoteToken, note, function (res) {
+            if (res.guid !== undefined) {
+                console.log("Creating a new note in the default notebook");
+                console.log("Successfully created a new note with GUID: " + res.guid);
+                alert("Successfully synchronize the tagged notes to Evernote!");
+                return;
+            }
+            console.log("Error");
+            console.log(res);
         });
 
-    });
+    }).bind(storedInfo);
+    Evernote.getToken(syncFunc);
+
 };
 
 // Evernote.oauth = function (req, res) {
