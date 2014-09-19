@@ -557,3 +557,59 @@ Models.TagRelationship = Backbone.Model.extend({
         // });
     }
 });
+
+
+Models.Search = Backbone.Model.extend({
+    defaults: {
+        query: ''
+    },
+    toTemplate: function () {
+        this.terms = this.get('query').split(' ');
+
+        var joined = this.t('searching_title') + ' ',
+            N = this.terms.length, 
+            i, term;
+
+        for (i = 0; i < N; ++i) {
+            term = this.terms[i];
+            joined += ('"' + term + '"');
+            if (i !== (N - 1)) {
+                joined +=  (" " + this.t('and') + " ");
+            }
+        }
+
+        return _.extend(this.toJSON(), {title: joined});
+    },
+    toHistory: function () {
+        return {query: this.get('query')};
+    }
+});
+
+
+Models.SearchHistory = Models.DayHistory.extend({
+    preparse: function (historyItems, callback) { // namely the stored infomation
+        callback(historyItems);
+    },
+    parse: function (historyItems) {
+        var visits = new TH.Collections.Visits(),
+            N = historyItems.length,
+            i, visit;
+        for (i = 0; i < N; ++i) {
+            visit = historyItems[i];
+            visit.tag = this.tagRelationship.getTags(visit.url);
+            visits.add(new TH.Models.Visit(visit));
+        }
+        return {history: visits};
+    },
+    // XXX need to revise toChrome later
+    toChrome: function(reading) {
+        return {
+            text: this.get('query'),
+            maxResults: 100 // XXX change value
+        };
+    },
+    toTemplate: function (start, end) {
+        return this.get('history').toTemplate(start, end);
+    }
+
+});

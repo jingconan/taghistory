@@ -321,16 +321,21 @@ Views.Cache = Toolbox.Base.extend({
         return this.cache.days[id];
     },
     searchView: function (options) {
-        var search;
+        var search, searchHistory;
         if (typeof options === 'undefined') {
             options = {query: '', expired: true, page: '1'};
         }
         if (typeof this.cache.search === 'undefined' || options.expired) {
             search = new TH.Models.Search({query: options.query}, {settings: this.settings});
+            searchHistory = new Models.SearchHistory(
+                search.toHistory(), 
+                {settings: this.settings, tagRelationship: this.tagRelationship}
+            );
             this.cache.search = new TH.Views.SearchView({
                 model: search,
                 el: $('.day_view'),
                 moreModel: {
+                    resultHistory: searchHistory,
                     tagRelationship: this.tagRelationship,
                     page: new Backbone.Model({page: options.page})
                 }

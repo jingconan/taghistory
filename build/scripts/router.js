@@ -8,6 +8,8 @@ var AppRouter = Backbone.Router.extend({
         'days/:id': 'day',
         'today': 'today',
         'calendar': 'calendar',
+        'search': 'search',
+        'search/*query(/p:page)': 'search',
         "*actions": "defaultRoute" // matches http://example.com/#anything-here
     },
     help: function () {
@@ -55,6 +57,37 @@ var AppRouter = Backbone.Router.extend({
     },
     calendar: function () {
         this.app.renderCalendar();
+    },
+
+    search: function (query, page) {
+        // Load a fresh search view when the query is empty to
+        // ensure a new WeekHistory instance is created because
+        // this usually means a search has been canceled
+        var expired = true, view;
+        if (typeof query === 'undefined' || query === null) {
+            query = '';
+            expired = true;
+        }
+        // XXX be careful about expired
+        if (typeof page !== 'undefined') {
+            page = '1';
+        }
+        
+        // if (typeof page !== 'undefined') {
+        //     expired = true; 
+        // } else {
+        //     page = '1';
+        // }
+        view = this.app.loadSearch({
+            query: query, 
+            expired: expired,
+            page: parseInt(page, 10)
+        });
+        view.render();
+        // view.model.set({query: decodeURIComponent(query)});
+        // view.select();
+        // @_delay ->
+        //   view.history.fetch() if view.model.validQuery()
     },
     defaultRoute: function () {
         console.log("default route");

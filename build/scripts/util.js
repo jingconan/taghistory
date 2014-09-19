@@ -91,20 +91,20 @@ Util.HistoryQuery = Toolbox.Base.extend({
         this.chromeAPI = chrome;
     },
     // FIXME this Query function is problematic
-    run: function (opts, callback) {
-        var options = {};
-        this.options = opts;
-        if (this.options.text) {
+    run: function (options, callback) {
+        // var options = {};
+        this.options = options;
+        // if (this.options.text) {
             // this.text = this.options.text;
-            this.options.text = '';
-        }
-        _.extend(options, this.options);
-        if (typeof this.options.searching !== 'undefined') {
-            _.extend(options, this.searchOptions);
-        } else {
-            options.maxResults = 5000;
-        }
-        delete options.searching;
+            // this.options.text = '';
+        // }
+        // _.extend(options, this.options);
+        // if (typeof this.options.searching !== 'undefined') {
+        //     _.extend(options, this.searchOptions);
+        // } else {
+        //     options.maxResults = 5000;
+        // }
+        // delete options.searching;
 
         this.chromeAPI.history.search(options, (function (results) {
             callback(this._prepareResults(results));
