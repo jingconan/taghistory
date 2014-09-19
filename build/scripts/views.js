@@ -208,8 +208,24 @@ Views.DayResultsView = Backbone.View.extend({
     }
 });
 
-Views.DayView = Backbone.View.extend({
+Views.MainView = Backbone.View.extend({
+    onSearchTyped: function (ev) {
+        var term = this.trimedSearchTerm()
+        if (ev.keyCode === 13 && term !== '') {
+            router.navigate('search/' + term, true)
+        }
+    },
+    trimedSearchTerm: function () {
+        return $.trim(this.$el.find('.search').val());
+    }
+
+});
+
+Views.DayView = Views.MainView.extend({
     template: TH.Templates.day,
+    events: {
+        'keyup .search': 'onSearchTyped'
+    },
     ResultView: TH.Views.DayResultsView,
     initialize: function (options) {
         this.options = options;
@@ -610,12 +626,6 @@ Views.AppView = Backbone.View.extend({
 
 Views.SearchResultsView = Views.DayResultsView.extend({
     template: TH.Templates.search_results,
-    // render: function () {
-    //     var collectionToTemplate = this.model.toTemplate(start, end),
-    //         properties = _.extend(this.getI18nValues(), this.model.toTemplate());
-    //         html = Mustache.to_html(this.template, properties);
-    //     this.el.html(html);
-    // },
     getI18nValues: function () {
         return this.t(['no_visits_found']);
     }
@@ -623,6 +633,9 @@ Views.SearchResultsView = Views.DayResultsView.extend({
 
 Views.SearchView = Views.DayView.extend({
     template: TH.Templates.search,
+    events: {
+        'keyup .search': 'onSearchTyped'
+    },
     ResultView: TH.Views.SearchResultsView,
     onPageChanged: this.render,
     renderMore: function () {

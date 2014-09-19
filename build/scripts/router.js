@@ -104,6 +104,7 @@ var app_router = new AppRouter({
     state: {}
     // tracker: analyticsTracker
 });
+window.router = app_router;
 
 
 
