@@ -57,7 +57,13 @@ _.extend(Backbone.View.prototype, {
         var html = Mustache.to_html(this.template, properties);
         this.$el.html(html);
         this.renderMore();
-    }
+    },
+    initialize: function (options) {
+        this.options = options;
+        if (typeof options.moreModel !== 'undefined') {
+            _.extend(this, options.moreModel)
+        }
+    },
 });
 
 Views.ImportView = Backbone.View.extend({
@@ -98,9 +104,6 @@ Views.ImportView = Backbone.View.extend({
 
 Views.MoreActionButtonView = Backbone.View.extend({
     template: TH.Templates.more_action,
-    initialize: function (options) {
-        this.tagRelationship = options.tagRelationship 
-    },
     render: function () {
         var html = Mustache.to_html(this.template, this.getI18nValues());
         this.$el.html(html);
@@ -134,18 +137,6 @@ Views.MoreActionButtonView = Backbone.View.extend({
 
 Views.DayResultsView = Backbone.View.extend({
     template: TH.Templates.day_results,
-    // events: {
-    //     'click .delete_visit': 'deleteVisitClicked',
-    //     'click .delete_grouped_visit': 'deleteGroupedVisitClicked',
-    //     'click .delete_interval': 'deleteIntervalClicked',
-    //     'click .show_visits': 'toggleGroupedVisitsClicked',
-    //     'click .hide_visits': 'toggleGroupedVisitsClicked',
-    //     'click .visit > a': 'visitClicked'
-    // },
-    initialize: function (options) {
-        this.tagRelationship = options.tagRelationship;
-        // this.tagRelationship.on('change', this.render, this);
-    },
     getID: function (obj) {
         // FIXME to handle drag interval case
         // Obj is an interval
@@ -224,7 +215,6 @@ Views.DayView = Backbone.View.extend({
         this.options = options;
         _.extend(this, options.moreModel)
         this.modelName = Object.keys(options.moreModel);
-        // this.history.bind('change', @onDayHistoryLoaded, @)
         this.addEventListener(this.modelName, 'change');
     },
     onTagRelationshipChanged: function () {
@@ -237,19 +227,15 @@ Views.DayView = Backbone.View.extend({
     renderMoreActionButton: function () {
         this.moreActionButtonView = new TH.Views.MoreActionButtonView({
             el: $('.more_action_menu'),
-            tagRelationship: this.tagRelationship
+            moreModel: {tagRelationship: this.tagRelationship}
         });
         this.moreActionButtonView.render();
     },
     renderHistory: function () {
-        var options = {
-            settings: this.settings,
-            tagRelationship: this.tagRelationship
-        };
         this.resultView = new this.ResultView({
-            model: new Models.DayHistory(this.model.toHistory(), options),
+            model: this.resultHistory,
             el: $('.content'),
-            tagRelationship: this.tagRelationship
+            moreModel: {tagRelationship: this.tagRelationship}
         });
         this.tagRelationship.fetch().then(
             (function () {
@@ -312,15 +298,22 @@ Views.Cache = Toolbox.Base.extend({
         } else {
             this.dayID = id;
         }
-        var day;
+        var day, dayHistory;
         if (!this.cache.days[id]) {
-            day = new Models.Day({date: moment(new Date(id))},
-                                 {settings: this.settings});
+            day = new Models.Day(
+                {date: moment(new Date(id))},
+                {settings: this.settings}
+            );
+            dayHistory = new Models.DayHistory(
+                day.toHistory(), 
+                {settings: this.settings, tagRelationship: this.tagRelationship}
+            );
             this.cache.days[id] = new Views.DayView({
                 model: day,
                 el: $('.day_view'),
                 id: id,
                 moreModel: {
+                    resultHistory: dayHistory,
                     tagRelationship: this.tagRelationship,
                 }
             });
@@ -330,14 +323,17 @@ Views.Cache = Toolbox.Base.extend({
     searchView: function (options) {
         var search;
         if (typeof options === 'undefined') {
-            options = {query: ''};
+            options = {query: '', expired: true, page: '1'};
         }
         if (typeof this.cache.search === 'undefined' || options.expired) {
             search = new TH.Models.Search({query: options.query}, {settings: this.settings});
             this.cache.search = new TH.Views.SearchView({
                 model: search,
                 el: $('.day_view'),
-                tagRelationship: this.tagRelationship,
+                moreModel: {
+                    tagRelationship: this.tagRelationship,
+                    page: new Backbone.Model({page: options.page})
+                }
             });
 
         } 
@@ -609,12 +605,12 @@ Views.AppView = Backbone.View.extend({
 
 Views.SearchResultsView = Views.DayResultsView.extend({
     template: TH.Templates.search_results,
-    render: function () {
-        var collectionToTemplate = this.model.toTemplate(start, end),
-            properties = _.extend(this.getI18nValues(), this.model.toTemplate());
-            html = Mustache.to_html(this.template, properties);
-        this.el.html(html);
-    },
+    // render: function () {
+    //     var collectionToTemplate = this.model.toTemplate(start, end),
+    //         properties = _.extend(this.getI18nValues(), this.model.toTemplate());
+    //         html = Mustache.to_html(this.template, properties);
+    //     this.el.html(html);
+    // },
     getI18nValues: function () {
         return this.t(['no_visits_found']);
     }
@@ -623,12 +619,9 @@ Views.SearchResultsView = Views.DayResultsView.extend({
 Views.SearchView = Views.DayView.extend({
     template: TH.Templates.search,
     ResultView: TH.Views.SearchResultsView,
-    initialize: function (options) {
-        this.options = options;
-        this.tagRelationship = options.tagRelationship;
-        // var para = options.para;
-        // var Object.keys(para)
-        this.page = new Backbone.Model({page: 1});
+    onPageChanged: this.render,
+    renderMore: function () {
+        this.renderHistory();
     },
     getI18nValues: function () {
         return this.t([
