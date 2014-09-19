@@ -38,6 +38,25 @@ _.extend(Backbone.View.prototype, TH.Modules.I18n);
 _.extend(Backbone.View.prototype, {
     getI18nValues: function () {
         return this.t([]);
+    },
+    addEventListener: function(names, event) {
+        // the change event of more models
+        var N = names.length,
+            i, name, trigger;
+        for (i = 0; i < N; ++i) {
+            name =  names[i];
+            trigger = this['on' + TH.Util.capitaliseFirstLetter(name) + 'Changed'];
+            if (typeof trigger !== 'undefined') {
+                // this[name].on(event, trigger, this);
+                this.listenTo(this[name], event, trigger);
+            }
+        }
+    },
+    render: function () {
+        var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
+        var html = Mustache.to_html(this.template, properties);
+        this.$el.html(html);
+        this.renderMore();
     }
 });
 
@@ -113,75 +132,6 @@ Views.MoreActionButtonView = Backbone.View.extend({
 
 });
 
-Views.DayView = Backbone.View.extend({
-    initialize: function (options) {
-        this.options = options;
-        this.tagRelationship = options.tagRelationship;
-        this.id = options.id;
-        // this.history.bind('change', @onDayHistoryLoaded, @)
-    },
-    template: TH.Templates.day,
-    render: function () {
-        var properties = _.extend(this.getI18nValues(), this.model.toTemplate());
-        var html = Mustache.to_html(this.template, properties);
-        this.$el.html(html);
-        this.renderHistory();
-        this.renderMoreActionButton();
-    },
-    renderMoreActionButton: function () {
-        this.moreActionButtonView = new TH.Views.MoreActionButtonView({
-            el: $('.more_action_menu'),
-            tagRelationship: this.tagRelationship
-        });
-        this.moreActionButtonView.render();
-    },
-    renderHistory: function () {
-        var options = {
-            settings: this.settings,
-            tagRelationship: this.tagRelationship
-        };
-        this.dayResultsView = new TH.Views.DayResultsView({
-            model: new Models.DayHistory(this.model.toHistory(), options),
-            el: $('.content'),
-            tagRelationship: this.tagRelationship
-        });
-        this.tagRelationship.fetch().then(
-            (function () {
-                console.log('tagRelationship fetch succeed');
-                this.dayResultsView.render();
-            }).bind(this),
-            (function (collection, response, options) { // fail call back
-                console.log('There is not remote storage. Initialize now:');
-                this.tagRelationship.save(); // layze initialization.
-            }).bind(this)
-        );
-
-        // this.dayResultsView.listenTo(this.tagRelationship, 'change', this.dayResultsView.render());
-        // this.$('.history').html(this.dayResultsView.render().el);
-        // this.dayResultsView.insertTags()
-        // this.dayResultsView.attachDragging()
-    },
-    updateInterval: function (val) {
-        $(Selectors.interval_value).text(val + ' s');
-        $(Selectors.interval_value).css('margin-left', val / TH.Para.Interval.max * 100 + '%');
-    },
-    getI18nValues: function () {
-        var properties = this.t([
-            'collapse_button',
-            'expand_button',
-            'delete_all_visits_for_filter_button',
-            'no_visits_found',
-            'search_input_placeholder_text',
-        ]);
-        properties.i18n_back_to_week_link = this.t('back_to_week_link', [
-            this.t('back_arrow')
-        ]);
-        properties.weekUrl = '#weeks/' + this.id;
-        return properties;
-    }
-
-});
-
 Views.DayResultsView = Backbone.View.extend({
     template: TH.Templates.day_results,
     // events: {
@@ -194,7 +144,7 @@ Views.DayResultsView = Backbone.View.extend({
     // },
     initialize: function (options) {
         this.tagRelationship = options.tagRelationship;
-        this.tagRelationship.on('change', this.render, this);
+        // this.tagRelationship.on('change', this.render, this);
     },
     getID: function (obj) {
         // FIXME to handle drag interval case
@@ -267,6 +217,77 @@ Views.DayResultsView = Backbone.View.extend({
     }
 });
 
+Views.DayView = Backbone.View.extend({
+    template: TH.Templates.day,
+    ResultView: TH.Views.DayResultsView,
+    initialize: function (options) {
+        this.options = options;
+        _.extend(this, options.moreModel)
+        this.modelName = Object.keys(options.moreModel);
+        // this.history.bind('change', @onDayHistoryLoaded, @)
+        this.addEventListener(this.modelName, 'change');
+    },
+    onTagRelationshipChanged: function () {
+        this.resultView.render();
+    },
+    renderMore: function () {
+        this.renderHistory();
+        this.renderMoreActionButton();
+    },
+    renderMoreActionButton: function () {
+        this.moreActionButtonView = new TH.Views.MoreActionButtonView({
+            el: $('.more_action_menu'),
+            tagRelationship: this.tagRelationship
+        });
+        this.moreActionButtonView.render();
+    },
+    renderHistory: function () {
+        var options = {
+            settings: this.settings,
+            tagRelationship: this.tagRelationship
+        };
+        this.resultView = new this.ResultView({
+            model: new Models.DayHistory(this.model.toHistory(), options),
+            el: $('.content'),
+            tagRelationship: this.tagRelationship
+        });
+        this.tagRelationship.fetch().then(
+            (function () {
+                console.log('tagRelationship fetch succeed');
+                this.resultView.render();
+            }).bind(this),
+            (function (collection, response, options) { // fail call back
+                console.log('There is not remote storage. Initialize now:');
+                this.tagRelationship.save(); // layze initialization.
+            }).bind(this)
+        );
+
+        // this.dayResultsView.listenTo(this.tagRelationship, 'change', this.dayResultsView.render());
+        // this.$('.history').html(this.dayResultsView.render().el);
+        // this.dayResultsView.insertTags()
+        // this.dayResultsView.attachDragging()
+    },
+    updateInterval: function (val) {
+        $(Selectors.interval_value).text(val + ' s');
+        $(Selectors.interval_value).css('margin-left', val / TH.Para.Interval.max * 100 + '%');
+    },
+    getI18nValues: function () {
+        var properties = this.t([
+            'collapse_button',
+            'expand_button',
+            'delete_all_visits_for_filter_button',
+            'no_visits_found',
+            'search_input_placeholder_text',
+        ]);
+        properties.i18n_back_to_week_link = this.t('back_to_week_link', [
+            this.t('back_arrow')
+        ]);
+        properties.weekUrl = '#weeks/' + this.options.id;
+        return properties;
+    }
+
+});
+
 
 Views.Cache = Toolbox.Base.extend({
     constructor: function (options) {
@@ -297,14 +318,32 @@ Views.Cache = Toolbox.Base.extend({
                                  {settings: this.settings});
             this.cache.days[id] = new Views.DayView({
                 model: day,
-                // history: history,
                 el: $('.day_view'),
-                tagRelationship: this.tagRelationship,
-                id: id
+                id: id,
+                moreModel: {
+                    tagRelationship: this.tagRelationship,
+                }
             });
         }
         return this.cache.days[id];
+    },
+    searchView: function (options) {
+        var search;
+        if (typeof options === 'undefined') {
+            options = {query: ''};
+        }
+        if (typeof this.cache.search === 'undefined' || options.expired) {
+            search = new TH.Models.Search({query: options.query}, {settings: this.settings});
+            this.cache.search = new TH.Views.SearchView({
+                model: search,
+                el: $('.day_view'),
+                tagRelationship: this.tagRelationship,
+            });
+
+        } 
+        return this.cache.search;
     }
+
 
 });
 
@@ -321,7 +360,6 @@ Views.TagView = Backbone.View.extend({
         console.log('run bindEvent');
         var selector = Selectors.tag;
         var onDrop = (function (ev) {
-            // var massageInfo = this.cache.dayView().dayResultsView.massageInfo;
             ev.preventDefault();
             console.log("run on Drop");
             var itemID = ev.dataTransfer.getData("itemID");
@@ -524,6 +562,9 @@ Views.AppView = Backbone.View.extend({
         // this.updateMenuSelection(weekId)
         return this.cache.dayView(id);
     },
+    loadSearch: function (options) {
+        return this.cache.searchView(options);
+    },
     render: function () {
         // render the overall view
         var html = Mustache.to_html(this.template, this.getI18nValues());
@@ -565,3 +606,37 @@ Views.AppView = Backbone.View.extend({
     }
 });
 
+
+Views.SearchResultsView = Views.DayResultsView.extend({
+    template: TH.Templates.search_results,
+    render: function () {
+        var collectionToTemplate = this.model.toTemplate(start, end),
+            properties = _.extend(this.getI18nValues(), this.model.toTemplate());
+            html = Mustache.to_html(this.template, properties);
+        this.el.html(html);
+    },
+    getI18nValues: function () {
+        return this.t(['no_visits_found']);
+    }
+});
+
+Views.SearchView = Views.DayView.extend({
+    template: TH.Templates.search,
+    ResultView: TH.Views.SearchResultsView,
+    initialize: function (options) {
+        this.options = options;
+        this.tagRelationship = options.tagRelationship;
+        // var para = options.para;
+        // var Object.keys(para)
+        this.page = new Backbone.Model({page: 1});
+    },
+    getI18nValues: function () {
+        return this.t([
+            'search_time_frame',
+            'search_input_placeholder_text',
+            'delete_all_visits_for_search_button',
+            'no_visits_found'
+        ]);
+    }
+
+});
