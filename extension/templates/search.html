@@ -10,9 +10,15 @@
     <div class='spinner'></div>
     <div class='pagination' style='margin: 0; position: relative;'></div>
     <div class='spacer'></div>
-    <button class='delete_all'>
-      {{i18n_delete_all_visits_for_search_button}}
-    </button>
+    <!-- <button class='delete_all'> -->
+    <!--   {{i18n_delete_all_visits_for_search_button}} -->
+    <!-- </button> -->
+    {{#prev_button}}
+    <button class='prev_button'>Prev</button>
+    {{/prev_button}}
+    {{#next_button}}
+    <button class='next_button'>Next</button>
+    {{/next_button}}
   </div>
 </header>
 <div class='fade'></div>

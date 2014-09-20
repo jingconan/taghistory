@@ -630,7 +630,12 @@ Views.SearchResultsView = Views.DayResultsView.extend({
         'click .next_button': 'onNext'
     },
     getI18nValues: function () {
-        return this.t(['no_visits_found']);
+        var properties = this.t(['no_visits_found']);
+        var page = this.page.get('page');
+        var pageNum = TH.Util.pagination.calculatePages(this.model.get('history').length);
+        properties.prev_button = (page === 1) ? false : true;
+        properties.next_button = (page === pageNum) ? false : true;
+        return properties
     },
     onPrev: function () {
         router.navigate('search/' + this.model.get('query') + '/p' + (this.page.get('page') - 1), true)
@@ -641,13 +646,10 @@ Views.SearchResultsView = Views.DayResultsView.extend({
     render: function () {
         // XXX add code here to highlight search
         var onSucess = (function () {
-            var pageNum = TH.Util.pagination.calculatePages(this.model.get('history').length);
             var page = this.page.get('page');
             var bd = TH.Util.pagination.calculateBounds(page - 1);
             var collectionToTemplate = this.model.toTemplate(bd.start, bd.end);
             var properties = _.extend(this.getI18nValues(), collectionToTemplate);
-            properties.prev_button = (page === 1) ? false : true;
-            properties.next_button = (page === pageNum) ? false : true;
             var html = Mustache.to_html(this.template, properties);
             this.$el.html(html);
             this.bindEvent();
