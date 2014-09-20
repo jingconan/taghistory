@@ -158,7 +158,6 @@ Models.DayHistory = Models.History.extend({
             this.set({history: []}, {silent: false});
             this.setOptions = options;
             this.historyQuery.run(this.toChrome(true), (function(history) {
-                console.log("options: ");
                 this.preparse(history, this.setOptions.success);
             }).bind(this));
             console.log("read is exec: ");
@@ -605,6 +604,9 @@ Models.SearchHistory = Models.DayHistory.extend({
     toChrome: function(reading) {
         return {
             text: this.get('query'),
+            startTime: 0,
+            endTime: new Date().getTime(),
+            maxResults: 5000
         };
     },
     toTemplate: function (start, end) {
