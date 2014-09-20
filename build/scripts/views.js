@@ -137,6 +137,19 @@ Views.MoreActionButtonView = Backbone.View.extend({
 
 Views.DayResultsView = Backbone.View.extend({
     template: TH.Templates.day_results,
+    events: {
+        'click .tags': 'onTagClicked'
+    },
+    onTagClicked: function (ev) {
+        var tag = ev.target.textContent,
+        site = $(ev.target).parentsUntil('div .visit_item').last().attr('href'),
+        N = tag.length; 
+        ev.preventDefault();
+        if (tag.slice(N-2) === ' x') {
+            tag = tag.slice(0, N-2);
+        }
+        this.tagRelationship.removeSiteFromTag(site, tag, function () {});
+    },
     getID: function (obj) {
         // FIXME to handle drag interval case
         // Obj is an interval
@@ -155,29 +168,13 @@ Views.DayResultsView = Backbone.View.extend({
         // Obj is an item, drag handle is dragged
         return [$(obj).find('a').attr('href')];
     },
-    insertTags: function () {
+    onDragItemStart: function (i, visit) {
+        visit.addEventListener('dragstart', (function (ev) {
+            ev.dataTransfer.setData("itemID", JSON.stringify(this.getID(ev.target)));
+        }).bind(this), false);
     },
     bindEvent: function () {
-        // Add EventListeners
-        /*jslint unparam: true*/
-        var onDragStart = (function (i, visit) {
-            visit.addEventListener('dragstart', (function (ev) {
-                ev.dataTransfer.setData("itemID", JSON.stringify(this.getID(ev.target)));
-            }).bind(this), false);
-        }).bind(this);
-        /*jslint unparam: false*/
-        $('.interval').each(onDragStart);
-        $('.tags').click((function (ev) {
-            var tag = ev.target.textContent,
-                site = $(ev.target).parentsUntil('div .visit_item').last().attr('href'),
-                N = tag.length; 
-            ev.preventDefault();
-            if (tag.slice(N-2) === ' x') {
-                tag = tag.slice(0, N-2);
-            }
-
-            this.tagRelationship.removeSiteFromTag(site, tag, function () {});
-        }).bind(this));
+        $('.interval').each(this.onDragItemStart.bind(this));
     },
     render: function () {
         console.log('DayResultsView render is executed');
@@ -627,7 +624,8 @@ Views.SearchResultsView = Views.DayResultsView.extend({
     template: TH.Templates.search_results,
     events: {
         'click .prev_button': 'onPrev',
-        'click .next_button': 'onNext'
+        'click .next_button': 'onNext',
+        'click .tags': 'onTagClicked'
     },
     getI18nValues: function () {
         var properties = this.t(['no_visits_found']);
@@ -660,6 +658,9 @@ Views.SearchResultsView = Views.DayResultsView.extend({
             error: function () { console.error('error happens in fetch'); }
         });
         return this;
+    },
+    bindEvent: function () {
+        $('.visit').each(this.onDragItemStart.bind(this));
     }
 });
 
