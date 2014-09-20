@@ -150,7 +150,7 @@ Util.capitaliseFirstLetter = function (string) {
 
 
 Util.Pagination = Toolbox.Base.extend({
-  RESULTS_PER_PAGE: 50,
+  RESULTS_PER_PAGE: 5,
   calculatePages: function (resultAmount) {
     return Math.ceil(resultAmount / this.RESULTS_PER_PAGE);
   },

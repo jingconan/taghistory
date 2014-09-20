@@ -631,9 +631,13 @@ Views.SearchResultsView = Views.DayResultsView.extend({
     render: function () {
         // XXX add code here to highlight search
         var onSucess = (function () {
-            var bd = TH.Util.pagination.calculateBounds(this.page.get('page') - 1);
+            var pageNum = TH.Util.pagination.calculatePages(this.model.get('history').length);
+            var page = this.page.get('page');
+            var bd = TH.Util.pagination.calculateBounds(page - 1);
             var collectionToTemplate = this.model.toTemplate(bd.start, bd.end);
             var properties = _.extend(this.getI18nValues(), collectionToTemplate);
+            properties.prev_button = (page === 1) ? false : true;
+            properties.next_button = (page === pageNum) ? false : true;
             var html = Mustache.to_html(this.template, properties);
             this.$el.html(html);
             this.bindEvent();

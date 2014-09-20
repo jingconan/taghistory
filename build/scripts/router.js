@@ -69,7 +69,7 @@ var AppRouter = Backbone.Router.extend({
             expired = true;
         }
         // XXX be careful about expired
-        if (typeof page !== 'undefined') {
+        if (typeof page === 'undefined') {
             page = '1';
         }
         
