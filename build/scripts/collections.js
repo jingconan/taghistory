@@ -10,8 +10,6 @@ _.extend(Backbone.Collection.prototype, {
             console.warn('the number of models you want is greater than what I have');
             end = this.models.length;
         }
-        console.log("start: " + start);
-        console.log("end: " + end);
         var templates = [], i, res = {};
         for (i = start; i < end; ++i) {
             templates.push(this.models[i].toTemplate());

@@ -630,18 +630,18 @@ Views.SearchResultsView = Views.DayResultsView.extend({
     },
     render: function () {
         // XXX add code here to highlight search
+        var onSucess = (function () {
+            var bd = TH.Util.pagination.calculateBounds(this.page.get('page') - 1);
+            var collectionToTemplate = this.model.toTemplate(bd.start, bd.end);
+            var properties = _.extend(this.getI18nValues(), collectionToTemplate);
+            var html = Mustache.to_html(this.template, properties);
+            this.$el.html(html);
+            this.bindEvent();
+        }).bind(this);
+
         this.model.fetch({
-            success: (function () {
-                var bd = TH.Util.pagination.calculateBounds(this.page.get('page') - 1);
-                var collectionToTemplate = this.model.toTemplate(bd.start, bd.end);
-                var properties = _.extend(this.getI18nValues(), collectionToTemplate);
-                var html = Mustache.to_html(this.template, properties);
-                this.$el.html(html);
-                this.bindEvent();
-            }).bind(this),
-            error: function () {
-                console.log('error happens in fetch');
-            }
+            success: onSucess,
+            error: function () { console.error('error happens in fetch'); }
         });
         return this;
     }
