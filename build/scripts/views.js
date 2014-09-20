@@ -625,8 +625,18 @@ Views.AppView = Backbone.View.extend({
 
 Views.SearchResultsView = Views.DayResultsView.extend({
     template: TH.Templates.search_results,
+    events: {
+        'click .prev_button': 'onPrev',
+        'click .next_button': 'onNext'
+    },
     getI18nValues: function () {
         return this.t(['no_visits_found']);
+    },
+    onPrev: function () {
+        router.navigate('search/' + this.model.get('query') + '/p' + (this.page.get('page') - 1), true)
+    },
+    onNext: function () {
+        router.navigate('search/' + this.model.get('query') + '/p' + (this.page.get('page') + 1), true)
     },
     render: function () {
         // XXX add code here to highlight search
