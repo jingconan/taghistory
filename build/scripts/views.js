@@ -251,11 +251,10 @@ Views.DayView = Views.MainView.extend({
         this.resultView = new this.ResultView({
             model: this.resultHistory,
             el: $('.content'),
-            moreModel: {tagRelationship: this.tagRelationship}
+            moreModel: this.options.moreModel
         });
         this.tagRelationship.fetch().then(
             (function () {
-                console.log('tagRelationship fetch succeed');
                 this.resultView.render();
             }).bind(this),
             (function (collection, response, options) { // fail call back
@@ -628,6 +627,23 @@ Views.SearchResultsView = Views.DayResultsView.extend({
     template: TH.Templates.search_results,
     getI18nValues: function () {
         return this.t(['no_visits_found']);
+    },
+    render: function () {
+        // XXX add code here to highlight search
+        this.model.fetch({
+            success: (function () {
+                var bd = TH.Util.pagination.calculateBounds(this.page.get('page') - 1);
+                var collectionToTemplate = this.model.toTemplate(bd.start, bd.end);
+                var properties = _.extend(this.getI18nValues(), collectionToTemplate);
+                var html = Mustache.to_html(this.template, properties);
+                this.$el.html(html);
+                this.bindEvent();
+            }).bind(this),
+            error: function () {
+                console.log('error happens in fetch');
+            }
+        });
+        return this;
     }
 });
 

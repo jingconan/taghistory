@@ -605,7 +605,6 @@ Models.SearchHistory = Models.DayHistory.extend({
     toChrome: function(reading) {
         return {
             text: this.get('query'),
-            maxResults: 100 // XXX change value
         };
     },
     toTemplate: function (start, end) {

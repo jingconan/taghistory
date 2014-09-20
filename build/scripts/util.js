@@ -146,3 +146,19 @@ Util.HistoryQuery = Toolbox.Base.extend({
 Util.capitaliseFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+
+
+Util.Pagination = Toolbox.Base.extend({
+  RESULTS_PER_PAGE: 50,
+  calculatePages: function (resultAmount) {
+    return Math.ceil(resultAmount / this.RESULTS_PER_PAGE);
+  },
+  calculateBounds: function (page) {
+    var start = page * this.RESULTS_PER_PAGE,
+        end = page * this.RESULTS_PER_PAGE + this.RESULTS_PER_PAGE;
+    return {start:start, end:end};
+  }
+});
+Util.pagination = new Util.Pagination();
+

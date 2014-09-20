@@ -4,16 +4,22 @@
 
 _.extend(Backbone.Collection.prototype, {
     toTemplate: function (start, end) {
-        start = (start !== undefined) ? start : 0;
-        end = (end !== undefined) ? end : (this.models.length);
+        start = (typeof start !== 'undefined') ? start : 0;
+        end = (typeof end !== 'undefined') ? end : (this.models.length);
+        if (end > this.models.length) {
+            console.warn('the number of models you want is greater than what I have');
+            end = this.models.length;
+        }
+        console.log("start: " + start);
+        console.log("end: " + end);
         var templates = [], i, res = {};
         for (i = start; i < end; ++i) {
             templates.push(this.models[i].toTemplate());
         }
-        res[this.modelName] = templates;
-        if (this.modelName === undefined) {
+        if (typeof this.modelName === 'undefined') {
             return templates;
         }
+        res[this.modelName] = templates;
         return res;
     },
     destroyAll: function (options) {
