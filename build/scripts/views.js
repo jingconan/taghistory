@@ -178,7 +178,6 @@ Views.DayResultsView = Backbone.View.extend({
     },
     render: function () {
         console.log('DayResultsView render is executed');
-        debugger;
         this.model.fetch({
             success: (function () {
                 console.log('views render succeed');
