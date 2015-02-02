@@ -52,3 +52,8 @@ TH.Collections.Visits = Backbone.Collection.extend({
 TH.Collections.GroupedVisits = Backbone.Collection.extend({
     model: TH.Models.Visit,
 });
+
+TH.Collections.CalendarEvents = Backbone.Collection.extend({
+    model: TH.Models.CalendarEvent,
+    modelName: 'calendarEvents'
+});

@@ -539,8 +539,18 @@ Views.CalendarView = Backbone.View.extend({
             };
             calendarOptions.defaultDate = options.weekStartDate;
         }
-        this.$el.find('.calendar_panel').fullCalendar(calendarOptions);
-         
+        this.model.fetch({
+            success: (function () {
+                console.log('test. this model has succeed');
+                calendarOptions.events = this.model.toTemplate().calendarEvents;
+                console.dir(calendarOptions.events);
+                this.$el.find('.calendar_panel').fullCalendar(calendarOptions);
+            }).bind(this),
+            error: function () {
+                console.log('error happens in fetch');
+            }
+        });
+
     },
     getI18nValues: function () {
         return {
@@ -595,7 +605,13 @@ Views.AppView = Backbone.View.extend({
         var calendarView = new Views.CalendarView({
             el: '.calendar',
             appRouter: this.appRouter,
-            app: this
+            app: this,
+            model: new TH.Models.WeekHistory({
+                date: options.weekStartDate
+            },{
+                settings: this.settings, 
+                tagRelationship: this.tagRelationship
+            })
         });
         calendarView.render(options);
     },

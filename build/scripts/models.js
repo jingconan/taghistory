@@ -614,3 +614,67 @@ Models.SearchHistory = Models.DayHistory.extend({
     }
 
 });
+
+Models.WeekHistory = Models.DayHistory.extend({
+    toChrome: function(reading) {
+        var properties = {
+            startTime: this.sow(),
+            endTime: this.eow()
+        };
+        if (reading) {
+            properties.text = '';
+        }
+        return properties;
+    },
+    sow: function() {
+        return new Date(moment(this.get('date')).startOf('week')).getTime();
+    },
+    eow: function() {
+        return new Date(moment(this.get('date')).endOf('week')).getTime();
+    },
+    preparse: function (storedInfo, callback) { // namely the stored infomation
+        var interval = Views.intervalValue();
+        var timeStamps = Util.getTimeStamps(storedInfo, 0);
+        var groups = Util.groupItems(timeStamps, interval);
+        callback({
+            timeGroups: groups, 
+            timeStamps: timeStamps
+        });
+    },
+    parse: function (data) {
+        var i, 
+            events = new TH.Collections.CalendarEvents(),
+            timeGroup;
+
+        for (i = 0; i < data.timeGroups.length; ++i) {
+            timeGroup = data.timeGroups[i];
+            events.add({
+                start: data.timeStamps[timeGroup[0]],
+                end: data.timeStamps[timeGroup[timeGroup.length - 1]],
+                title: 'busy', //TODO need to change name according to urls later
+                description: '' //TODO need to add description later
+            }, {settings: this.settings});
+
+        }
+        return {calendarEvents: events};
+        
+    },
+    toTemplate: function () {
+        return {
+            calendarEvents: this.get('calendarEvents').map(function (it) {
+                return it.toTemplate();
+            })
+        };
+    },
+});
+
+Models.CalendarEvent = Backbone.Model.extend({
+    toTemplate: function () {
+        return {
+            start: this.get('start'),
+            end: this.get('end'),
+            title: this.get('title')
+        }
+    }
+});
+
