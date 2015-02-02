@@ -11,7 +11,7 @@ TH.Modules.I18n = {
             var lookup = {};
             var i;
             for(i = 0; i < keys.length; ++i) {
-                lookup["i18n_#{key}"] = this.chromeAPI.i18n.getMessage(key.toString());
+                lookup["i18n_" + key[i]] = this.chromeAPI.i18n.getMessage(key[i].toString());
             }
             return lookup;
         } else {
