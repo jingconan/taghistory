@@ -405,6 +405,7 @@ Views.TagView = Backbone.View.extend({
         });
         $(selector + ' #create_new_tag').on('dragover', function (ev) {ev.preventDefault(); });
         $(selector + ' #create_new_tag').on('drop click', (function (ev) {
+            ev.preventDefault();
             var newTagName = window.prompt("New tag name", "");
             if (!newTagName) {
                 return;
