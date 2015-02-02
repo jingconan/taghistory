@@ -32,10 +32,6 @@ _.extend(Backbone.Collection.prototype, {
     }
 });
 
-TH.Collections.Intervals = Backbone.Collection.extend({
-    model: TH.Models.Interval,
-});
-
 TH.Collections.Tags = Backbone.Collection.extend({
     model: TH.Models.Tag,
     modelName: 'tagList',
