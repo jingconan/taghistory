@@ -15,7 +15,7 @@ TH = {
     Persistence: {},
     Para: {
         Interval: {
-            init: 100,
+            init: 1000,
             min: 0,
             max: 3600,
             step: 10,
