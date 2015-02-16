@@ -12,6 +12,9 @@ Util.groupItemsByDescendingTimestamps = function (timeStamps, delta) {
     var groups = [], group = [];
     var interval = 0;
     var i = 0, j = 0, N = timeStamps.length;
+    if (N === 0) {
+        return groups;
+    }
     // Set last time to be the smallest timestamps so that in the first
     // step, a group is always created
     var lastTime = timeStamps[N - 1];
