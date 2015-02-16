@@ -618,24 +618,20 @@ Models.SearchHistory = Models.DayHistory.extend({
 Models.WeekHistory = Models.DayHistory.extend({
     toChrome: function(reading) {
         var properties = {
-            startTime: this.sow(),
-            endTime: this.eow()
+            startTime: this.get('startTime'),
+            endTime: this.get('endTime'),
         };
         if (reading) {
             properties.text = '';
         }
+        console.log('fetch data for start time: ' + properties.startTime + ' end time: ' + properties.endTime);
         return properties;
-    },
-    sow: function() {
-        return new Date(moment(this.get('date')).startOf('week')).getTime();
-    },
-    eow: function() {
-        return new Date(moment(this.get('date')).endOf('week')).getTime();
     },
     preparse: function (storedInfo, callback) { // namely the stored infomation
         var interval = Views.intervalValue();
         // timeStamps here are in descending order
         var timeStamps = Util.getTimeStamps(storedInfo, 0);
+        console.log('no. of timeStamps fetched is: ' + timeStamps.length);
         var groups = Util.groupItemsByDescendingTimestamps(timeStamps, interval);
         callback({
             timeGroups: groups, 

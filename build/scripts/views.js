@@ -539,17 +539,25 @@ Views.CalendarView = Backbone.View.extend({
             };
             calendarOptions.defaultDate = options.weekStartDate;
         }
-        this.model.fetch({
-            success: (function () {
-                console.log('test. this model has succeed');
-                calendarOptions.events = this.model.toTemplate().calendarEvents;
-                console.dir(calendarOptions.events);
-                this.$el.find('.calendar_panel').fullCalendar(calendarOptions);
-            }).bind(this),
-            error: function () {
-                console.log('error happens in fetch');
-            }
-        });
+
+        calendarOptions.events = (function(start, end, timezone, callback) {
+            this.model.set({
+                startTime: new Date(start).getTime(),
+                endTime: new Date(end).getTime(),
+            });
+            this.model.fetch({
+                success: (function () {
+                    console.log('test. this model has been fetched');
+                    console.dir(this.model.toTemplate().calendarEvents);
+                    callback(this.model.toTemplate().calendarEvents)
+                }).bind(this),
+                error: function () {
+                    console.log('error happens in fetch');
+                }
+            });
+        }).bind(this);
+
+        this.$el.find('.calendar_panel').fullCalendar(calendarOptions);
 
     },
     getI18nValues: function () {
@@ -602,6 +610,8 @@ Views.AppView = Backbone.View.extend({
         return this;
     },
     renderCalendar: function (options) {
+        var sow = new Date(moment(options.weekStartDate).startOf('week')).getTime();
+        var eow = new Date(moment(options.weekStartDate).endOf('week')).getTime();
         var calendarView = new Views.CalendarView({
             el: '.calendar',
             appRouter: this.appRouter,
