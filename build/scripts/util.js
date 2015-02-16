@@ -4,8 +4,7 @@
 var Util = TH.Util;
 var Models = TH.Models;
 
-// function groupItems(timeStamps, delta) {
-Util.groupItems = function (timeStamps, delta) {
+Util.groupItemsByDescendingTimestamps = function (timeStamps, delta) {
 // group items according the timestamps for each item.
 // item (i) and (i+1) belongs to different groups if t[i+1]  - t[i] > delta
 // UNIT: the unit of delta is milliseconds
