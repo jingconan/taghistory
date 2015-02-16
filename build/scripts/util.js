@@ -13,6 +13,8 @@ Util.groupItems = function (timeStamps, delta) {
     var groups = [], group = [];
     var interval = 0;
     var i = 0, j = 0, N = timeStamps.length;
+    // Set last time to be the smallest timestamps so that in the first
+    // step, a group is always created
     var lastTime = timeStamps[N - 1];
     // for (i = N; i >= 0; --i) {
     for (i = 0; i < N; ++i) {
