@@ -634,6 +634,7 @@ Models.WeekHistory = Models.DayHistory.extend({
     },
     preparse: function (storedInfo, callback) { // namely the stored infomation
         var interval = Views.intervalValue();
+        // timeStamps here are in descending order
         var timeStamps = Util.getTimeStamps(storedInfo, 0);
         var groups = Util.groupItemsByDescendingTimestamps(timeStamps, interval);
         callback({
@@ -649,8 +650,8 @@ Models.WeekHistory = Models.DayHistory.extend({
         for (i = 0; i < data.timeGroups.length; ++i) {
             timeGroup = data.timeGroups[i];
             events.add({
-                start: data.timeStamps[timeGroup[0]],
-                end: data.timeStamps[timeGroup[timeGroup.length - 1]],
+                start: data.timeStamps[timeGroup[timeGroup.length - 1]],
+                end: data.timeStamps[timeGroup[0]],
                 title: 'busy', //TODO need to change name according to urls later
                 description: '' //TODO need to add description later
             }, {settings: this.settings});
@@ -659,12 +660,8 @@ Models.WeekHistory = Models.DayHistory.extend({
         return {calendarEvents: events};
         
     },
-    toTemplate: function () {
-        return {
-            calendarEvents: this.get('calendarEvents').map(function (it) {
-                return it.toTemplate();
-            })
-        };
+    toTemplate: function (start, end) {
+        return this.get('calendarEvents').toTemplate(start, end);
     },
 });
 
