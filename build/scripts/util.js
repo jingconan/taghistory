@@ -6,7 +6,7 @@ var Models = TH.Models;
 
 Util.groupItemsByDescendingTimestamps = function (timeStamps, delta) {
 // group items according the timestamps for each item.
-// item (i) and (i+1) belongs to different groups if t[i+1]  - t[i] > delta
+// item (i) and (i+1) belongs to different groups if t[i+1]  - t[i] >= delta
 // UNIT: the unit of delta is milliseconds
 // ASSUMPTION: timeStamps is in descending order
     var groups = [], group = [];
