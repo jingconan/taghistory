@@ -1,4 +1,4 @@
-QUnit.test('groupItemsByDescendingTimestamps', function (assert) {
+QUnit.test('Util.groupItemsByDescendingTimestamps', function (assert) {
     assert.deepEqual(Util.groupItemsByDescendingTimestamps([6, 5, 2, 1], 4), 
         [[0, 1, 2, 3]], 'delta = 4');
 
@@ -16,3 +16,17 @@ QUnit.test('groupItemsByDescendingTimestamps', function (assert) {
 
 });
  
+
+QUnit.test('Util.parseURL', function (assert) {
+    assert.deepEqual(Util.parseURL('http://www.google.com/index.html'),
+        {host: 'www.google.com/', path: 'index.html'}, 'Util.parseURL www.google.com');
+
+    assert.deepEqual(Util.parseURL('https://yahoo.com/news'),
+        {host: 'yahoo.com/', path: 'news'}, 'Util.parseURL www.google.com');
+
+    assert.deepEqual(Util.parseURL('https://yahoo.com/news//'),
+        {host: 'yahoo.com/', path: 'news//'}, 'Util.parseURL www.google.com');
+
+    assert.deepEqual(Util.parseURL('https://yahoo.com/news/2015-02/'),
+        {host: 'yahoo.com/', path: 'news/2015-02/'}, 'Util.parseURL www.google.com');
+});

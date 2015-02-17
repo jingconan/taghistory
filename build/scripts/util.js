@@ -36,13 +36,15 @@ Util.groupItemsByDescendingTimestamps = function (timeStamps, delta) {
     return groups;
 };
 
-// function parseURL(url) {
+// parse URL and returns the host and path of the URL
+// ASSUMPTION: all URLs have the format
+// <protocol>://<host>/<path>/<parameter>
 Util.parseURL = function (url) {
-    var pathArray = url.split('/');
-    var host = pathArray[2] + '/';
-    var path = pathArray[3];
-
-    return {host: host, path: path};
+    var arr = url.split('/');
+    return {
+        host: arr[2] + '/', 
+        path: arr.slice(3).join('/'),
+    };
 };
 
 // function truncStr(s, len) {
