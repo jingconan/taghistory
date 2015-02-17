@@ -39,3 +39,86 @@ QUnit.test('Util.truncStr', function (assert) {
     assert.strictEqual(Util.truncStr('c', 1), 'c', 'single char no truncation');
     assert.strictEqual(Util.truncStr('c', 0), '...', 'single char no truncation');
 });
+
+QUnit.test('Util.HistoryQuery', function (assert) {
+    var messages = {
+        'extended_formal_date': {
+            'message': 'dddd, MMMM Do, YYYY',
+            'description': 'The order of a full extended date'
+        },
+        'formal_date': {
+            'message': 'MMMM Do YYYY',
+            'description': 'The order of a full date'
+        },
+        'local_time': {
+            'message': 'YYYY',
+            'description': 'local time format'
+        },
+    };
+
+    var mockChrome = {
+        history: {},
+        i18n: {
+            getMessage: function (t) {
+                return messages[t].message;
+            }
+        }
+    };
+
+    var tests = [
+        {
+            name: "normal",
+            mockResults: [
+            {lastVisitTime: 1},
+            ],
+            options: {
+                startTime: 1,
+                endTime: 100,
+            },
+            want: [
+                {
+                    adjustedTime: 1,
+                    date: new Date(1),
+                    extendedDate: "Wednesday, December 31st, 1969",
+                    lastVisitTime: 1,
+                    time: "1969",
+                },
+            ],
+        },
+        {
+            name: "invalid time",
+            mockResults: [
+            {lastVisitTime: 101},
+            ],
+            options: {
+                startTime: 2,
+                endTime: 100,
+            },
+            want: [
+                {
+                    adjustedTime: 2,
+                    date: new Date(2),
+                    extendedDate: "Wednesday, December 31st, 1969",
+                    lastVisitTime: 101,
+                    time: "1969",
+                },
+            ],
+        },
+
+
+    ];
+
+    var i = 0, query;
+    for (i = 0; i < tests.length; ++i) {
+        mockChrome.history.search = function(options, callback) {
+            callback(tests[i].mockResults);
+        };
+
+        query = new Util.HistoryQuery(mockChrome);
+        query.run(tests[i].options, (function (assert, test, results) {
+            assert.deepEqual(results, test.want, test.name);
+        }).bind(this, assert, tests[i]));
+    }
+
+    
+});
