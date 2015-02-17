@@ -57,21 +57,14 @@ Util.truncStr = function (s, len) {
 };
 
 
-Util.tformat = function (t, type) {
-    if (type === 0) {
-        return t;
-    }
-    return (new Date(t)).toLocaleString();
-};
 
-// XXX return the *date*, i.e. the visit time, for each history Item
-// function getTimeStamps(historyItems, type) {
-Util.getTimeStamps = function (historyItems, type) {
-    // Get Time information About Each Visit
-    var timeStamps = [];
-    var i;
+// getTimeStamps calculates a vector that stores the *date*, i.e., the
+// visit time, of all history Items.
+Util.getTimeStamps = function (historyItems) {
+    var timeStamps = [],
+        i;
     for (i = 0; i < historyItems.length; i += 1) {
-        timeStamps.push(Util.tformat(historyItems[i].date, type));
+        timeStamps.push(historyItems[i].date);
     }
     return timeStamps;
 };

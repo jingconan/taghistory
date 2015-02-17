@@ -199,7 +199,7 @@ Models.DayHistory = Models.History.extend({
         // };
         // var interval = this.settings.get('timeGrouping');
         var interval = Views.intervalValue();
-        var groups = Util.groupItemsByDescendingTimestamps(Util.getTimeStamps(storedInfo, 0), interval);
+        var groups = Util.groupItemsByDescendingTimestamps(Util.getTimeStamps(storedInfo), interval);
         // debugger;
         callback(Models.massage({historyItems: storedInfo, 
                                  tagList: {tagList: []},
@@ -630,7 +630,7 @@ Models.WeekHistory = Models.DayHistory.extend({
     preparse: function (storedInfo, callback) { // namely the stored infomation
         var interval = Views.intervalValue();
         // timeStamps here are in descending order
-        var timeStamps = Util.getTimeStamps(storedInfo, 0);
+        var timeStamps = Util.getTimeStamps(storedInfo);
         console.log('no. of timeStamps fetched is: ' + timeStamps.length);
         var groups = Util.groupItemsByDescendingTimestamps(timeStamps, interval);
         callback({
