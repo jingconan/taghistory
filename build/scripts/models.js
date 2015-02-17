@@ -77,13 +77,15 @@ Models.massage = function (storedInfo, groups) {
                 id: visitId,
                 tag: tag,
                 time: item.time,
-                seconds: item.lastVisitTime
+                seconds: item.adjustedTime,
             };
             visits.push(visitItem);
             // IDMap[visitId] = visitItem;
         }
 
-        firstTimeInGroup = historyItems[group[0]].lastVisitTime;
+        // XXX use adjustedTime because lastVisitTime may not be
+        // ordered.
+        firstTimeInGroup = historyItems[group[0]].adjustedTime;
         groupDate = new Date(firstTimeInGroup);
         groupID = 'i-' + i.toString();
         groupItem = {
@@ -646,8 +648,8 @@ Models.WeekHistory = Models.DayHistory.extend({
         for (i = 0; i < data.timeGroups.length; ++i) {
             timeGroup = data.timeGroups[i];
             events.add({
-                start: data.timeStamps[timeGroup[timeGroup.length - 1]],
-                end: data.timeStamps[timeGroup[0]],
+                start: new Date(data.timeStamps[timeGroup[timeGroup.length - 1]]),
+                end: new Date(data.timeStamps[timeGroup[0]]),
                 title: 'busy', //TODO need to change name according to urls later
                 description: '' //TODO need to add description later
             }, {settings: this.settings});

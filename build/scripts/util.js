@@ -3,6 +3,17 @@
 "use strict";
 var Util = TH.Util;
 var Models = TH.Models;
+
+function assert(condition, message) {
+    if (!condition) {
+        message = message || "Assertion failed";
+        if (typeof Error !== "undefined") {
+            throw new Error(message);
+        }
+        throw message; // Fallback
+    }
+}
+
 // groupItemsByDescendingTimestamps group items according the timestamps
 // for each item.  item (i) and (i+1) belongs to different groups if
 // t[i+1]  - t[i] >= delta
@@ -64,7 +75,9 @@ Util.getTimeStamps = function (historyItems) {
     var timeStamps = [],
         i;
     for (i = 0; i < historyItems.length; i += 1) {
-        timeStamps.push(historyItems[i].date);
+        // XXX Here we use date instead of lastVisitTime because
+        // lastVisitTime may not be sorted
+        timeStamps.push(historyItems[i].adjustedTime);
     }
     return timeStamps;
 };
@@ -78,31 +91,19 @@ Util.dataExport = function (info) {
 _.extend(Toolbox.Base.prototype, TH.Modules.I18n);
 
 Util.HistoryQuery = Toolbox.Base.extend({
-    constructor: function () {
-        this.chromeAPI = chrome;
+    constructor: function (chromeAPI) {
+        this.chromeAPI = chromeAPI;
     },
     // FIXME this Query function is problematic
     run: function (options, callback) {
-        // var options = {};
+        assert(options && options.startTime && options.endTime, 'invalid options!');
         this.options = options;
-        // if (this.options.text) {
-            // this.text = this.options.text;
-            // this.options.text = '';
-        // }
-        // _.extend(options, this.options);
-        // if (typeof this.options.searching !== 'undefined') {
-        //     _.extend(options, this.searchOptions);
-        // } else {
-        //     options.maxResults = 5000;
-        // }
-        // delete options.searching;
-
         this.chromeAPI.history.search(options, (function (results) {
             callback(this._prepareResults(results));
         }).bind(this));
     },
     _verifyDateRange: function (t) {
-        return (t < this.options.endTime && t > this.options.startTime);
+        return (t <= this.options.endTime && t >= this.options.startTime);
     },
     _prepareResults: function (results) {
         // XXX add date and extendedDate field to results
@@ -112,14 +113,18 @@ Util.HistoryQuery = Toolbox.Base.extend({
         // This code sanitize the results: if a visit's lastVisitTime
         // doesn't belong to the range, then we will use the time
         // of the previous item that belongs to the range.
-        var lastDate;
+        var lastTime = this.options.startTime;
         _(results).each((function (result) {
+            var time;
             if (this._verifyDateRange(result.lastVisitTime)) {
-                result.date = new Date(result.lastVisitTime);
-                lastDate = result.date;
+                time = result.lastVisitTime;
+                lastTime = time;
             } else {
-                result.date = lastDate;
+                time = lastTime;
             }
+
+            result.adjustedTime = time;
+            result.date = new Date(time);
             //Translate dates and times here for the search sanitizer
             result.extendedDate = moment(result.date).format(this.t('extended_formal_date'));
             result.time = moment(result.date).format(this.t('local_time'));
