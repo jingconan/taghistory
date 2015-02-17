@@ -69,15 +69,6 @@ Util.getTimeStamps = function (historyItems) {
     return timeStamps;
 };
 
-Util.tag_animate = function (target) {
-    var orig_style = target.style;
-    target.setAttribute('style', 'background: #8AAAED; color: white;');
-    var showTime = 200;
-    window.setInterval(function () {
-        target.setAttribute('style', orig_style);
-    }, showTime);
-};
-
 // Data exporter
 Util.dataExport = function (info) {
     var blob = new Blob([JSON.stringify(info)], {type: "text/plain;charset=utf-8"});
