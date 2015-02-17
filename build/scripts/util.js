@@ -47,7 +47,8 @@ Util.parseURL = function (url) {
     };
 };
 
-// function truncStr(s, len) {
+// truncStr truncates the input string if its length is > len 
+// and append ... to the end.
 Util.truncStr = function (s, len) {
     if (s.length > len) {
         return s.substring(0, len) + '...';
